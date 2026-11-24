@@ -131,23 +131,29 @@ export type Voicing = {
   pads: { col: number; row: number; midi: number; interval: number; optional: boolean }[]
   /** Required tones that no pad in range can play. */
   missing: number[]
+  /** True when the pads follow the isomorphic chord chart exactly. */
+  fromChart: boolean
 }
 
 /**
  * All root-position voicings of a chord on the grid, one per root pad.
- * Chromatic uses the chart shape. In-Key layouts search for the most compact
- * pads that give each tone in some octave above the root.
+ * Chromatic uses the chart shape where it fits. Otherwise, and in In-Key layouts,
+ * it searches for the most compact pads that give each tone in some octave above the root.
  */
 export function voicings(grid: Pad[][], rootPc: number, type: ChordType, layout: Layout): Voicing[] {
   const pads = grid.flat()
   const roots = pads.filter((p) => mod(p.midi, 12) === rootPc)
   const result: Voicing[] = []
   for (const root of roots) {
-    const v = layout === 'chromatic' ? chartVoicing(grid, root, type) : searchVoicing(pads, root, type)
+    // Chromatic falls back to a searched shape when the chart shape runs off the grid.
+    const v = (layout === 'chromatic' && chartVoicing(grid, root, type)) || searchVoicing(pads, root, type)
     if (v) result.push(v)
   }
-  // Complete voicings first, then the most compact.
-  return result.sort((a, b) => a.missing.length - b.missing.length || spread(a) - spread(b))
+  // Complete voicings first, then chart shapes, then the most compact.
+  return result.sort(
+    (a, b) =>
+      a.missing.length - b.missing.length || Number(b.fromChart) - Number(a.fromChart) || spread(a) - spread(b),
+  )
 }
 
 function chartVoicing(grid: Pad[][], root: Pad, type: ChordType): Voicing | null {
@@ -157,7 +163,7 @@ function chartVoicing(grid: Pad[][], root: Pad, type: ChordType): Voicing | null
     if (!pad) return null
     pads.push({ ...pad, interval: tone.interval, optional: !!tone.optional })
   }
-  return { pads, missing: [] }
+  return { pads, missing: [], fromChart: true }
 }
 
 function searchVoicing(pads: Pad[], root: Pad, type: ChordType): Voicing | null {
@@ -177,7 +183,7 @@ function searchVoicing(pads: Pad[], root: Pad, type: ChordType): Voicing | null 
     chosen.push({ ...best, interval: tone.interval, optional: !!tone.optional })
   }
   if (chosen.length === 1) return null
-  return { pads: chosen, missing }
+  return { pads: chosen, missing, fromChart: false }
 }
 
 const dist = (a: { col: number; row: number }, b: { col: number; row: number }) =>

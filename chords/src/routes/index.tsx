@@ -154,6 +154,11 @@ function App() {
     </div>
   )
 
+  const hasNotes =
+    !voicing ||
+    voicing.missing.length > 0 ||
+    (search.layout === 'chromatic' && (outOfKey.length > 0 || !voicing.fromChart))
+
   return (
     <main className="flex h-dvh flex-col overflow-hidden lg:flex-row">
       <aside className="flex shrink-0 flex-col gap-3 px-4 pt-4 lg:w-[392px] lg:gap-4 lg:overflow-y-auto lg:border-r lg:border-neutral-900 lg:px-6 lg:py-5">
@@ -230,9 +235,14 @@ function App() {
         </div>
 
         {/* Desktop: the 8×4 grid fits the smaller of the full width and twice the free height,
-            leaving 2.5rem under it for the legend. */}
+            leaving room under it for the legend and any notes. */}
         <div className="flex shrink-0 flex-col items-start gap-4 lg:min-h-0 lg:flex-1 lg:[container-type:size]">
-          <div className="grid w-full grid-cols-8 gap-[1.2cqmin] rounded-2xl bg-neutral-900 p-[1.6cqmin] ring-1 ring-neutral-800 lg:w-[min(100cqw,calc((100cqh-2.5rem)*2))]">
+          <div
+            className={[
+              'grid w-full grid-cols-8 gap-[1.2cqmin] rounded-2xl bg-neutral-900 p-[1.6cqmin] ring-1 ring-neutral-800',
+              hasNotes ? 'lg:w-[min(100cqw,calc((100cqh-4.5rem)*2))]' : 'lg:w-[min(100cqw,calc((100cqh-2.5rem)*2))]',
+            ].join(' ')}
+          >
             {[...grid].reverse().flatMap((row) =>
               row.map((pad) => {
                 const hit = voicing?.pads.find((p) => p.col === pad.col && p.row === pad.row)
@@ -275,6 +285,22 @@ function App() {
               <Swatch className="ring-1 ring-white/70 ring-inset">Optional</Swatch>
             )}
           </div>
+          {hasNotes && (
+            <p className="text-xs text-neutral-500">
+              {!voicing && <span className="text-amber-400">This chord doesn't fit on the grid. </span>}
+              {voicing && voicing.missing.length > 0 && (
+                <span className="text-amber-400">
+                  Can't play {voicing.missing.map((i) => NOTE_NAMES[mod(search.root + i, 12)]).join(', ')} in key.{' '}
+                </span>
+              )}
+              {search.layout === 'chromatic' && voicing && !voicing.fromChart && (
+                <span>Not the chart shape: the chart shape doesn't fit from this root. </span>
+              )}
+              {search.layout === 'chromatic' && outOfKey.length > 0 && (
+                <span>Outside the scale: {outOfKey.map((p) => NOTE_NAMES[p]).join(', ')}.</span>
+              )}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center justify-center gap-3 lg:hidden">
@@ -282,19 +308,6 @@ function App() {
         </div>
 
 
-        {(!voicing || voicing.missing.length > 0 || (search.layout === 'chromatic' && outOfKey.length > 0)) && (
-          <p className="text-xs text-neutral-500">
-            {!voicing && <span className="text-amber-400">This chord doesn't fit on the grid. </span>}
-            {voicing && voicing.missing.length > 0 && (
-              <span className="text-amber-400">
-                Can't play {voicing.missing.map((i) => NOTE_NAMES[mod(search.root + i, 12)]).join(', ')} in key.{' '}
-              </span>
-            )}
-            {search.layout === 'chromatic' && outOfKey.length > 0 && (
-              <span>Outside the scale: {outOfKey.map((p) => NOTE_NAMES[p]).join(', ')}.</span>
-            )}
-          </p>
-        )}
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-900 pt-3 lg:hidden">
           <Segmented options={TABS} value={tab} onChange={setTab} />

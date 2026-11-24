@@ -42,6 +42,19 @@ describe('voicings', () => {
     expect(v.pads.map((p) => p.midi % 12).sort()).toEqual([0, 4, 7])
   })
 
+  it('plays every chord from every root in chromatic, preferring the chart shape', () => {
+    const grid = padGrid('chromatic', 0, major, 9)
+    for (const type of CHORD_TYPES) {
+      for (let root = 0; root < 12; root++) {
+        const [best] = voicings(grid, root, type, 'chromatic')
+        expect(best?.missing, `${root} ${type.name}`).toEqual([])
+      }
+    }
+    // G♯ dom7 has no room for the chart shape when the bottom-left pad is A.
+    expect(voicings(grid, 8, CHORD_TYPES[2], 'chromatic')[0].fromChart).toBe(false)
+    expect(voicings(grid, 0, CHORD_TYPES[2], 'chromatic')[0].fromChart).toBe(true)
+  })
+
   it('finds every required tone in key when the chord is diatonic', () => {
     for (const layout of ['in-key-4ths', 'in-key-octaves'] as const) {
       for (const scale of SCALES.filter((s) => s.intervals.length === 7)) {
