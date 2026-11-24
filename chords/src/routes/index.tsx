@@ -266,13 +266,10 @@ function App() {
 
         {showAll ? (
           diatonic.length > 0 ? (
-            // Four rows of two cards. Each card is a label plus a 2:1 grid, so the card width
-            // is twice the row height minus the label, capped by the available width.
-            <div className="min-h-0 flex-1 [container-type:size]">
-              <div
-                className="grid grid-cols-2 gap-x-4 gap-y-3"
-                style={{ width: 'min(100cqw, calc(((100cqh - 2.25rem) / 4 - 1.75rem) * 4 + 1rem))' }}
-              >
+            // Two full-width columns. Only this area scrolls, so the header and sidebar stay put.
+            // The negative margin and padding keep the selected card's ring from being clipped.
+            <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pt-1 pb-4">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-5">
                 {diatonic.map((c) => {
                   const [best] = voicings(grid, c.rootPc, c.type, search.layout)
                   const selected = c.rootPc === search.root && c.type.id === search.chord
