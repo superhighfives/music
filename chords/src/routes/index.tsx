@@ -15,6 +15,8 @@ import {
   scaleById,
   voicings,
   type Layout,
+  type Pad,
+  type Voicing,
 } from '../lib/music'
 
 type Search = {
@@ -26,6 +28,7 @@ type Search = {
   chord: string
   v: number
   sevenths: boolean
+  all: boolean
 }
 
 const pc = (value: unknown, fallback: number) => {
@@ -45,6 +48,7 @@ export const Route = createFileRoute('/')({
     chord: CHORD_TYPES.some((x) => x.id === String(s.chord)) ? String(s.chord) : 'maj',
     v: Math.max(0, Number.parseInt(String(s.v ?? 0), 10) || 0),
     sevenths: s.sevenths === true || s.sevenths === 'true',
+    all: s.all === true || s.all === 'true',
   }),
   component: App,
 })
@@ -154,6 +158,7 @@ function App() {
     </div>
   )
 
+  const showAll = search.all
   const hasNotes =
     !voicing ||
     voicing.missing.length > 0 ||
@@ -207,116 +212,242 @@ function App() {
 
       <section className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-3 lg:gap-4 lg:px-8 lg:py-5">
         <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            {current && (
-              <div className="text-xs text-neutral-500">
-                {current.numeral}
-                {search.sevenths ? '7' : ''} in {NOTE_NAMES[search.key]} {scale.name}
+          {showAll ? (
+            <div className="min-w-0">
+              <div className="text-xs text-neutral-500">{search.sevenths ? 'Sevenths' : 'Triads'} in key</div>
+              <h2 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                {NOTE_NAMES[search.key]} {scale.name}
+              </h2>
+              <p className="text-sm text-neutral-400">Select a chord to open it.</p>
+            </div>
+          ) : (
+            <div className="min-w-0">
+              {current && (
+                <div className="text-xs text-neutral-500">
+                  {current.numeral}
+                  {search.sevenths ? '7' : ''} in {NOTE_NAMES[search.key]} {scale.name}
+                </div>
+              )}
+              <h2 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                {chordSymbol(search.root, type.id, type.name)}
+              </h2>
+              <p className="text-sm text-neutral-400">{chordPcs.map((p) => NOTE_NAMES[p]).join(' · ')}</p>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            {!showAll && (
+              <div className="hidden items-center gap-2 lg:flex">
+                <ShapeNav count={options.length} index={search.v} onChange={(v) => set({ v })} />
               </div>
             )}
-            <h2 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
-              {chordSymbol(search.root, type.id, type.name)}
-            </h2>
-            <p className="text-sm text-neutral-400">{chordPcs.map((p) => NOTE_NAMES[p]).join(' · ')}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-2 lg:flex">
-              <ShapeNav count={options.length} index={search.v} onChange={(v) => set({ v })} />
-            </div>
             <button
               type="button"
-              className="min-h-11 rounded-lg bg-led px-4 font-medium text-neutral-950 disabled:opacity-40 lg:min-h-9"
-              disabled={!voicing}
-              onClick={() => voicing && play(voicing.pads.map((p) => p.midi), true)}
+              aria-pressed={showAll}
+              onClick={() => set({ all: !showAll })}
+              className={[
+                'min-h-11 rounded-lg border px-3 text-sm lg:min-h-9',
+                showAll ? 'border-white bg-white text-neutral-950' : 'border-neutral-700 text-neutral-300 hover:border-neutral-500',
+              ].join(' ')}
             >
-              Play
+              All in key
             </button>
-          </div>
-        </div>
-
-        {/* Desktop: the 8×4 grid fits the smaller of the full width and twice the free height,
-            leaving room under it for the legend and any notes. */}
-        <div className="flex shrink-0 flex-col items-start gap-4 lg:min-h-0 lg:flex-1 lg:[container-type:size]">
-          <div
-            className={[
-              'grid w-full grid-cols-8 gap-[1.2cqmin] rounded-2xl bg-neutral-900 p-[1.6cqmin] ring-1 ring-neutral-800',
-              hasNotes ? 'lg:w-[min(100cqw,calc((100cqh-4.5rem)*2))]' : 'lg:w-[min(100cqw,calc((100cqh-2.5rem)*2))]',
-            ].join(' ')}
-          >
-            {[...grid].reverse().flatMap((row) =>
-              row.map((pad) => {
-                const hit = voicing?.pads.find((p) => p.col === pad.col && p.row === pad.row)
-                const isKeyRoot = mod(pad.midi, 12) === search.key
-                const lit = search.layout !== 'chromatic' || inScale.has(mod(pad.midi, 12))
-                return (
-                  <button
-                    key={`${pad.col}-${pad.row}`}
-                    type="button"
-                    onClick={() => play([pad.midi])}
-                    title={noteWithOctave(pad.midi)}
-                    className={[
-                      'flex aspect-square flex-col items-center justify-center rounded-[18%] text-[clamp(9px,2.4cqmin,14px)] font-medium transition-colors',
-                      hit
-                        ? hit.interval === 0
-                          ? `${chordRing} bg-led text-neutral-950 shadow-[0_0_24px_-4px_var(--color-led)]`
-                          : hit.optional
-                            ? 'bg-neutral-800 text-white outline-2 -outline-offset-2 outline-white/70 outline-dashed'
-                            : `${chordRing} bg-white text-neutral-950 shadow-[0_0_20px_-6px_white]`
-                        : isKeyRoot
-                          ? 'bg-led/25 text-led'
-                          : lit
-                            ? 'bg-neutral-700/70 text-neutral-300'
-                            : 'bg-neutral-950 text-neutral-600',
-                    ].join(' ')}
-                  >
-                    <span>{noteName(pad.midi)}</span>
-                    {hit && <span className="text-[0.75em] opacity-70">{intervalLabel(hit.interval)}</span>}
-                  </button>
-                )
-              }),
+            {!showAll && (
+              <button
+                type="button"
+                className="min-h-11 rounded-lg bg-led px-4 font-medium text-neutral-950 disabled:opacity-40 lg:min-h-9"
+                disabled={!voicing}
+                onClick={() => voicing && play(voicing.pads.map((p) => p.midi), true)}
+              >
+                Play
+              </button>
             )}
           </div>
-          <div className="hidden flex-wrap gap-x-5 gap-y-1 text-xs text-neutral-500 lg:flex">
-            <Swatch className="bg-led">Chord root</Swatch>
-            <Swatch className="bg-white">Chord tone</Swatch>
-            <Swatch className="bg-neutral-700/70">In scale</Swatch>
-            {search.layout === 'chromatic' && <Swatch className="bg-neutral-950 ring-1 ring-neutral-700">Unlit on Move</Swatch>}
-            {voicing?.pads.some((p) => p.optional) && (
-              <Swatch className="ring-1 ring-white/70 ring-inset">Optional</Swatch>
-            )}
-          </div>
-          {hasNotes && (
-            <p className="text-xs text-neutral-500">
-              {!voicing && <span className="text-amber-400">This chord doesn't fit on the grid. </span>}
-              {voicing && voicing.missing.length > 0 && (
-                <span className="text-amber-400">
-                  Can't play {voicing.missing.map((i) => NOTE_NAMES[mod(search.root + i, 12)]).join(', ')} in key.{' '}
-                </span>
-              )}
-              {search.layout === 'chromatic' && voicing && !voicing.fromChart && (
-                <span>Not the chart shape: the chart shape doesn't fit from this root. </span>
-              )}
-              {search.layout === 'chromatic' && outOfKey.length > 0 && (
-                <span>Outside the scale: {outOfKey.map((p) => NOTE_NAMES[p]).join(', ')}.</span>
-              )}
-            </p>
-          )}
         </div>
 
-        <div className="flex items-center justify-center gap-3 lg:hidden">
-          <ShapeNav count={options.length} index={search.v} onChange={(v) => set({ v })} />
-        </div>
+        {showAll ? (
+          diatonic.length > 0 ? (
+            // Four rows of two cards. Each card is a label plus a 2:1 grid, so the card width
+            // is twice the row height minus the label, capped by the available width.
+            <div className="min-h-0 flex-1 [container-type:size]">
+              <div
+                className="grid grid-cols-2 gap-x-4 gap-y-3"
+                style={{ width: 'min(100cqw, calc(((100cqh - 2.25rem) / 4 - 1.75rem) * 4 + 1rem))' }}
+              >
+                {diatonic.map((c) => {
+                  const [best] = voicings(grid, c.rootPc, c.type, search.layout)
+                  const selected = c.rootPc === search.root && c.type.id === search.chord
+                  return (
+                    <button
+                      key={c.degree}
+                      type="button"
+                      onClick={() => set({ root: c.rootPc, chord: c.type.id, all: false })}
+                      className="group flex flex-col gap-1.5 text-left [container-type:inline-size]"
+                    >
+                      <span className="flex h-5 items-baseline gap-2 text-sm">
+                        <span className="text-xs text-neutral-500">{c.numeral}</span>
+                        <span className={selected ? 'font-semibold text-led' : 'font-medium text-white'}>
+                          {chordSymbol(c.rootPc, c.type.id, c.type.name)}
+                        </span>
+                        <span className="truncate text-xs text-neutral-500">
+                          {c.type.tones.map((t) => NOTE_NAMES[mod(c.rootPc + t.interval, 12)]).join(' · ')}
+                        </span>
+                      </span>
+                      <PadGrid
+                        compact
+                        grid={grid}
+                        voicing={best}
+                        keyPc={search.key}
+                        inScale={inScale}
+                        layout={search.layout}
+                        className={[
+                          'w-full rounded-xl p-[1.5%] ring-1 transition-colors',
+                          selected ? 'ring-led' : 'ring-neutral-800 group-hover:ring-neutral-600',
+                        ].join(' ')}
+                      />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-neutral-400">In-key chords need a seven-note scale. Pick another scale.</p>
+          )
+        ) : (
+          <>
+            {/* Desktop: the 8×4 grid fits the smaller of the full width and twice the free height,
+                leaving room under it for the legend and any notes. */}
+            <div className="flex shrink-0 flex-col items-start gap-4 lg:min-h-0 lg:flex-1 lg:[container-type:size]">
+              <PadGrid
+                grid={grid}
+                voicing={voicing}
+                keyPc={search.key}
+                inScale={inScale}
+                layout={search.layout}
+                onPad={(midi) => play([midi])}
+                className={[
+                  'w-full rounded-2xl p-[1.6cqmin] ring-1 ring-neutral-800',
+                  hasNotes ? 'lg:w-[min(100cqw,calc((100cqh-4.5rem)*2))]' : 'lg:w-[min(100cqw,calc((100cqh-2.5rem)*2))]',
+                ].join(' ')}
+              />
+              <div className="hidden flex-wrap gap-x-5 gap-y-1 text-xs text-neutral-500 lg:flex">
+                <Swatch className="bg-led">Chord root</Swatch>
+                <Swatch className="bg-white">Chord tone</Swatch>
+                <Swatch className="bg-neutral-700/70">In scale</Swatch>
+                {search.layout === 'chromatic' && (
+                  <Swatch className="bg-neutral-950 ring-1 ring-neutral-700">Unlit on Move</Swatch>
+                )}
+                {voicing?.pads.some((p) => p.optional) && (
+                  <Swatch className="ring-1 ring-white/70 ring-inset">Optional</Swatch>
+                )}
+              </div>
+              {hasNotes && (
+                <p className="text-xs text-neutral-500">
+                  {!voicing && <span className="text-amber-400">This chord doesn't fit on the grid. </span>}
+                  {voicing && voicing.missing.length > 0 && (
+                    <span className="text-amber-400">
+                      Can't play {voicing.missing.map((i) => NOTE_NAMES[mod(search.root + i, 12)]).join(', ')} in
+                      key.{' '}
+                    </span>
+                  )}
+                  {search.layout === 'chromatic' && voicing && !voicing.fromChart && (
+                    <span>Not the chart shape: the chart shape doesn't fit from this root. </span>
+                  )}
+                  {search.layout === 'chromatic' && outOfKey.length > 0 && (
+                    <span>Outside the scale: {outOfKey.map((p) => NOTE_NAMES[p]).join(', ')}.</span>
+                  )}
+                </p>
+              )}
+            </div>
 
+            <div className="flex items-center justify-center gap-3 lg:hidden">
+              <ShapeNav count={options.length} index={search.v} onChange={(v) => set({ v })} />
+            </div>
 
-
-        <div className="flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-900 pt-3 lg:hidden">
-          <Segmented options={TABS} value={tab} onChange={setTab} />
-          <div className="min-h-0 overflow-y-auto">
-            {tab === 'in-key' ? inKeyPicker : tab === 'root' ? rootPicker : chordPicker}
-          </div>
-        </div>
+            <div className="flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-900 pt-3 lg:hidden">
+              <Segmented options={TABS} value={tab} onChange={setTab} />
+              <div className="min-h-0 overflow-y-auto">
+                {tab === 'in-key' ? inKeyPicker : tab === 'root' ? rootPicker : chordPicker}
+              </div>
+            </div>
+          </>
+        )}
       </section>
     </main>
+  )
+}
+
+/**
+ * The 8×4 Move pad grid with one chord shape lit. With `onPad` each pad is a button.
+ * `compact` drops interval labels and uses a thinner ring for small previews.
+ */
+function PadGrid({
+  grid,
+  voicing,
+  keyPc,
+  inScale,
+  layout,
+  compact,
+  onPad,
+  className,
+}: {
+  grid: Pad[][]
+  voicing: Voicing | undefined
+  keyPc: number
+  inScale: Set<number>
+  layout: Layout
+  compact?: boolean
+  onPad?: (midi: number) => void
+  className: string
+}) {
+  const ring = compact ? 'ring-[1.5px] ring-white ring-offset-1 ring-offset-neutral-900' : chordRing
+  return (
+    <div
+      className={`grid grid-cols-8 bg-neutral-900 ${compact ? 'gap-[1.2%]' : 'gap-[1.2cqmin]'} ${className}`}
+    >
+      {[...grid].reverse().flatMap((row) =>
+        row.map((pad) => {
+          const hit = voicing?.pads.find((p) => p.col === pad.col && p.row === pad.row)
+          const isKeyRoot = mod(pad.midi, 12) === keyPc
+          const lit = layout !== 'chromatic' || inScale.has(mod(pad.midi, 12))
+          const padClass = [
+            'flex aspect-square flex-col items-center justify-center rounded-[18%] font-medium transition-colors',
+            compact ? 'text-[clamp(6px,2.4cqw,11px)]' : 'text-[clamp(9px,2.4cqmin,14px)]',
+            hit
+              ? hit.interval === 0
+                ? `${ring} bg-led text-neutral-950 shadow-[0_0_24px_-4px_var(--color-led)]`
+                : hit.optional
+                  ? 'bg-neutral-800 text-white outline-2 -outline-offset-2 outline-white/70 outline-dashed'
+                  : `${ring} bg-white text-neutral-950 shadow-[0_0_20px_-6px_white]`
+              : isKeyRoot
+                ? 'bg-led/25 text-led'
+                : lit
+                  ? 'bg-neutral-700/70 text-neutral-300'
+                  : 'bg-neutral-950 text-neutral-600',
+          ].join(' ')
+          const label = (
+            <>
+              <span>{noteName(pad.midi)}</span>
+              {hit && !compact && <span className="text-[0.75em] opacity-70">{intervalLabel(hit.interval)}</span>}
+            </>
+          )
+          return onPad ? (
+            <button
+              key={`${pad.col}-${pad.row}`}
+              type="button"
+              onClick={() => onPad(pad.midi)}
+              title={noteWithOctave(pad.midi)}
+              className={padClass}
+            >
+              {label}
+            </button>
+          ) : (
+            <span key={`${pad.col}-${pad.row}`} className={padClass}>
+              {label}
+            </span>
+          )
+        }),
+      )}
+    </div>
   )
 }
 
