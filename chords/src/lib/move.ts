@@ -43,8 +43,8 @@ const FADE_MS = 900
 export type MoveStatus = 'idle' | 'unsupported' | 'connecting' | 'connected' | 'not-found' | 'denied'
 
 type Handlers = {
-  /** `velocity` is 0–1. */
-  onPad: (col: number, row: number, velocity: number) => void
+  /** `velocity` is 0–1. `time` is when the message arrived, on the performance.now() clock. */
+  onPad: (col: number, row: number, velocity: number, time: number) => void
   onPadUp: (col: number, row: number) => void
   onButton: (cc: number) => void
   onButtonUp?: (cc: number) => void
@@ -78,14 +78,14 @@ export function useMove(handlers: Handlers) {
       sent.current.clear()
       setHeld(new Set())
       if (!input || !output.current) return setStatus('not-found')
-      input.onmidimessage = (e) => e.data && onMessage(e.data)
+      input.onmidimessage = (e) => e.data && onMessage(e.data, e.timeStamp)
       setStatus('connected')
     }
     access.onstatechange = bind
     bind()
   }
 
-  function onMessage([statusByte, data1, data2]: Uint8Array) {
+  function onMessage([statusByte, data1, data2]: Uint8Array, time: number) {
     const type = statusByte & 0xf0
     const pad = data1 - PAD_NOTE
     if ((type === 0x90 || type === 0x80) && pad >= 0 && pad < 32) {
@@ -98,7 +98,7 @@ export function useMove(handlers: Handlers) {
         else next.delete(`${col}-${row}`)
         return next
       })
-      if (down) latest.current.onPad(col, row, data2 / 127)
+      if (down) latest.current.onPad(col, row, data2 / 127, time)
       else latest.current.onPadUp(col, row)
     } else if (type === 0xb0 && data2 === 127) {
       latest.current.onButton(data1)

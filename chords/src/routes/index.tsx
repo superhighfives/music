@@ -22,6 +22,8 @@ import {
 import { usePiano } from '../lib/piano'
 import { BUTTON, BUTTON_DIM, COLOR, STEP_NOTE, padNote, useMove, type Lights, type MoveStatus } from '../lib/move'
 import { TUTORIALS, tutorialById, type Tutorial } from '../lib/tutorials'
+import { EXERCISES, eventAllowedPcs, exerciseById, type PracticeEvent } from '../lib/practice'
+import { PracticeCard, usePractice } from '../components/practice'
 import {
   SONGS,
   chordLabel,
@@ -51,6 +53,8 @@ type Search = {
   /** Active song id and the index of the chord to play next. */
   song?: string
   p: number
+  /** Active practice exercise id. */
+  x?: string
 }
 
 const pc = (value: unknown, fallback: number) => {
@@ -92,14 +96,16 @@ function parseSearch(s: Record<string, unknown>): Search {
     // Pasted songs live in the browser's storage, so App checks that the id exists.
     song: typeof s.song === 'string' && s.song ? s.song : undefined,
     p: Math.max(0, Number.parseInt(String(s.p ?? 0), 10) || 0),
+    x: exerciseById(String(s.x)) ? String(s.x) : undefined,
   }
 }
 
-type Tab = 'learn' | 'songs' | 'play'
+type Tab = 'learn' | 'songs' | 'practice' | 'play'
 
 const TABS: { id: Tab; name: string }[] = [
   { id: 'learn', name: 'Learn' },
   { id: 'songs', name: 'Songs' },
+  { id: 'practice', name: 'Practice' },
   { id: 'play', name: 'Play' },
 ]
 
@@ -196,6 +202,13 @@ function useSidebarWidth() {
   return { width, set }
 }
 
+function notePads(grid: Pad[][], midi: number): Voicing {
+  const pads = grid.flat()
+  const exact = pads.filter((p) => p.midi === midi)
+  const shown = exact.length ? exact : pads.filter((p) => mod(p.midi, 12) === mod(midi, 12))
+  return { pads: shown.map((p) => ({ ...p, interval: 0, optional: false })), missing: [], fromChart: true }
+}
+
 const chordTones = (c: SongChord) => chordType(c.chord).tones.map((t) => mod(c.root + t.interval, 12))
 
 function App() {
@@ -208,8 +221,22 @@ function App() {
   const songPos = Math.min(raw.p, events.length)
   const songEvent: SongEvent | undefined = events[songPos]
   const songScale = song ? songKey(events, chordTones) : undefined
-  const search: Search =
-    song && songScale
+  const piano = usePiano()
+  const play = piano.play
+  // In practice, the exercise decides the key, and the next chord to play is the shown chord.
+  const exercise = exerciseById(raw.x)
+  const practice = usePractice(exercise, piano)
+  const practiceEvent: PracticeEvent | undefined = exercise?.events[practice.target]
+  const search: Search = exercise
+    ? {
+        ...raw,
+        key: exercise.key,
+        scale: exercise.scale,
+        layout: 'chromatic',
+        all: false,
+        ...(practiceEvent?.kind === 'chord' && { root: practiceEvent.root, chord: practiceEvent.chord }),
+      }
+    : song && songScale
       ? {
           ...raw,
           ...songScale,
@@ -228,14 +255,19 @@ function App() {
   const type = chordType(search.chord)
   const grid = padGrid(search.layout, search.key, scale, search.base)
   const options = voicings(grid, search.root, type, search.layout)
-  const voicing = options.length ? options[mod(search.v, options.length)] : undefined
+  // A practice note lights every pad with that pitch, or with that note name in another octave
+  // if a custom bottom-left pad moves the pitch off the grid.
+  const voicing =
+    practiceEvent?.kind === 'note'
+      ? notePads(grid, practiceEvent.midi)
+      : options.length
+        ? options[mod(search.v, options.length)]
+        : undefined
   const inScale = new Set(scale.intervals.map((i) => mod(search.key + i, 12)))
   const diatonic = diatonicChords(search.key, scale, search.sevenths)
   const current = diatonic.find((c) => c.rootPc === search.root && c.type.id === search.chord)
   const chordPcs = type.tones.map((tone) => mod(search.root + tone.interval, 12))
   const outOfKey = chordPcs.filter((p) => !inScale.has(p))
-  const piano = usePiano()
-  const play = piano.play
   // Sustain is on while the screen button is on or while Shift on Move is held, like a pedal.
   const [sustainLatched, setSustainLatched] = useState(false)
   const [pedal, setPedal] = useState(false)
@@ -267,12 +299,13 @@ function App() {
     setCompleted(null)
     setFreePlayStarted(false)
     // tutorialView sets the key, scale, layout and chord for the step.
-    set({ t: t.id, s: i, all: false, song: undefined, p: 0 })
+    set({ t: t.id, s: i, all: false, song: undefined, p: 0, x: undefined })
   }
   const goToSong = (id: string, p: number) => {
     setCompleted(null)
-    set({ song: id, p, t: undefined, s: 0, all: false })
+    set({ song: id, p, t: undefined, s: 0, all: false, x: undefined })
   }
+  const goToExercise = (id: string | undefined) => set({ x: id, t: undefined, s: 0, song: undefined, p: 0 })
   const exitSong = () => set({ song: undefined, p: 0 })
 
   // The Ultimate Guitar bookmarklet opens "/#import=<sheet>". Save the sheet, then remove it from the URL.
@@ -290,8 +323,9 @@ function App() {
   }
 
   const move = useMove({
-    onPad: (col, row, velocity) => {
+    onPad: (col, row, velocity, time) => {
       piano.noteOn(`pad-${col}-${row}`, grid[row][col].midi, velocity)
+      practice.press(grid[row][col].midi, time)
       setRinging((r) => (r.has(`${col}-${row}`) ? new Set([...r].filter((k) => k !== `${col}-${row}`)) : r))
       if (freePlay) setFreePlayStarted(true)
     },
@@ -305,6 +339,10 @@ function App() {
     // Move's arrows step through a tutorial, so you can keep your hands on the device.
     onButton: (cc) => {
       if (cc === BUTTON.shift) return setPedal(true)
+      if (exercise) {
+        if (cc === BUTTON.play) practice.running ? practice.stop() : practice.start()
+        return
+      }
       if (song) {
         if (cc === BUTTON.right) goToSong(song.id, songPos < events.length ? songPos + 1 : 0)
         if (cc === BUTTON.left && songPos > 0) goToSong(song.id, songPos - 1)
@@ -372,7 +410,11 @@ function App() {
   // A pad you let go of fades back slowly, like the note. A new chord fades in quickly.
   // Pressing a pad lights it at once.
   const lights: Lights = { notes: new Map(), ccs: new Map(), fade: new Map() }
-  const chordId = `${search.root}:${search.chord}:${search.key}:${search.scale}`
+  const chordId = `${search.root}:${search.chord}:${search.key}:${search.scale}:${practice.target}`
+  // In practice, notes of the next event and of the one just played are right, so a held chord stays green.
+  const practiceRight = exercise
+    ? new Set([practiceEvent, exercise.events[practice.lastJudged]].flatMap((e) => (e ? eventAllowedPcs(e) : [])))
+    : undefined
   const lastChord = useRef(chordId)
   const chordChanged = lastChord.current !== chordId
   useEffect(() => {
@@ -393,7 +435,9 @@ function App() {
       : search.layout !== 'chromatic' || inScale.has(pcOfPad)
         ? COLOR.dim
         : COLOR.off
-    const right = chordPcs.includes(pcOfPad) || pcOfPad === songEvent?.chord.bass
+    const right = practiceRight
+      ? practiceRight.has(pcOfPad)
+      : chordPcs.includes(pcOfPad) || pcOfPad === songEvent?.chord.bass
     const key = `${pad.col}-${pad.row}`
     if (move.held.has(key) || ringing.has(key)) color = right ? COLOR.green : COLOR.red
     if (!cue && !lit.has(key)) {
@@ -430,6 +474,14 @@ function App() {
       })
     lights.ccs.set(BUTTON.left, songPos > 0 ? BUTTON_DIM : 0)
     lights.ccs.set(BUTTON.right, arrowBlink)
+  }
+  if (exercise) {
+    // The step buttons are one bar of sixteenth notes. The playhead step is white, and each beat is dim.
+    const playhead = mod(Math.floor(practice.beat * 4), 16)
+    for (let i = 0; i < 16; i++) {
+      lights.notes.set(STEP_NOTE + i, practice.running && i === playhead ? COLOR.white : i % 4 === 0 ? COLOR.dim : COLOR.off)
+    }
+    lights.ccs.set(BUTTON.play, practice.running ? COLOR.green : COLOR.dim)
   }
   lights.ccs.set(BUTTON.shift, sustain ? 127 : BUTTON_DIM)
   useEffect(() => move.show(lights))
@@ -479,6 +531,30 @@ function App() {
           >
             <span className="block text-[13px] font-medium">{t.name}</span>
             <span className="block text-xs opacity-60">{t.summary}</span>
+          </button>
+        ))}
+      </div>
+    </Group>
+  )
+
+  const practicePicker = (
+    <Group label="Practice">
+      <div className="flex flex-col gap-1">
+        {EXERCISES.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            aria-pressed={exercise?.id === x.id}
+            onClick={() => goToExercise(x.id)}
+            className={[
+              'rounded-md px-2.5 py-1.5 text-left transition-colors',
+              exercise?.id === x.id ? 'bg-white text-neutral-950' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800',
+            ].join(' ')}
+          >
+            <span className="block text-[13px] font-medium">{x.name}</span>
+            <span className="block text-xs opacity-60">
+              {x.summary} · {x.bpm} BPM
+            </span>
           </button>
         ))}
       </div>
@@ -644,6 +720,8 @@ function App() {
             learnPicker
           ) : tab === 'songs' ? (
             songPicker
+          ) : tab === 'practice' ? (
+            practicePicker
           ) : (
             <>
               <div className="grid grid-cols-3 gap-2">
@@ -683,6 +761,7 @@ function App() {
       />
 
       <section className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-3 lg:gap-4 lg:px-8 lg:py-5">
+        {exercise && <PracticeCard exercise={exercise} practice={practice} onExit={() => goToExercise(undefined)} />}
         {tutorial && (
           <TutorialCard
             tutorial={tutorial}
@@ -709,26 +788,29 @@ function App() {
             </div>
           ) : (
             <div className="min-w-0">
-              {current && (
+              {current && practiceEvent?.kind !== 'note' && (
                 <div className="text-xs text-neutral-500">
                   {current.numeral}
                   {search.sevenths ? '7' : ''} in {NOTE_NAMES[search.key]} {scale.name}
                 </div>
               )}
               <h2 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
-                {chordSymbol(search.root, type.id, type.name)}
+                {practiceEvent?.kind === 'note' ? noteWithOctave(practiceEvent.midi) : chordSymbol(search.root, type.id, type.name)}
               </h2>
-              <p className="text-sm text-neutral-400">{chordPcs.map((p) => NOTE_NAMES[p]).join(' · ')}</p>
+              <p className="text-sm text-neutral-400">
+                {practiceEvent?.kind === 'note' ? 'Next note' : chordPcs.map((p) => NOTE_NAMES[p]).join(' · ')}
+              </p>
             </div>
           )}
           <div className="flex items-center gap-2">
-            {!showAll && (
+            {!showAll && !exercise && (
               <div className="hidden items-center gap-2 lg:flex">
                 <ShapeNav count={options.length} index={search.v} onChange={(v) => set({ v })} />
               </div>
             )}
             <button
               type="button"
+              hidden={!!exercise}
               aria-pressed={showAll}
               onClick={() => set({ all: !showAll })}
               className={[
@@ -857,7 +939,7 @@ function App() {
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-3 lg:hidden">
+            <div className={`flex items-center justify-center gap-3 lg:hidden ${exercise ? 'hidden' : ''}`}>
               <ShapeNav count={options.length} index={search.v} onChange={(v) => set({ v })} />
             </div>
 
@@ -865,7 +947,7 @@ function App() {
               <Segmented options={TABS} value={tab} onChange={setTab} />
               <div className="min-h-0 overflow-y-auto">
                 <div className="flex flex-col gap-4">
-                  {tab === 'learn' ? learnPicker : tab === 'songs' ? songPicker : (
+                  {tab === 'learn' ? learnPicker : tab === 'songs' ? songPicker : tab === 'practice' ? practicePicker : (
                     <>
                       {inKeyPicker}
                       {rootPicker}

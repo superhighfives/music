@@ -168,5 +168,30 @@ export function usePiano() {
     })
   }
 
-  return { noteOn, noteOff, setSustain, play }
+  /**
+   * The audio clock in seconds, for scheduling clicks. `latency` is the time from the clock to the speaker.
+   * Call it from a click or key press the first time, because browsers start audio only after a user action.
+   */
+  function clock() {
+    const e = (engine.current ??= createEngine())
+    if (e.ac.state === 'suspended') void e.ac.resume()
+    return { now: e.ac.currentTime, latency: e.ac.outputLatency || e.ac.baseLatency || 0 }
+  }
+
+  /** A metronome click at `at` on the audio clock. It skips the reverb, so the beat stays sharp. */
+  function click(at: number, accent: boolean) {
+    const e = engine.current
+    if (!e) return
+    const osc = e.ac.createOscillator()
+    osc.frequency.value = accent ? 1760 : 1320
+    const gain = e.ac.createGain()
+    gain.gain.setValueAtTime(accent ? 0.35 : 0.2, at)
+    gain.gain.exponentialRampToValueAtTime(0.001, at + 0.04)
+    osc.connect(gain).connect(e.ac.destination)
+    osc.start(at)
+    osc.stop(at + 0.05)
+    osc.onended = () => gain.disconnect()
+  }
+
+  return { noteOn, noteOff, setSustain, play, clock, click }
 }
