@@ -468,7 +468,7 @@ function App() {
   const activeTab: Tab = connected ? tab : 'connect'
   const tabs = TABS.map((t) => ({ ...t, disabled: !connected && t.id !== 'connect' }))
 
-  const movePanel = <MoveConnect status={move.status} onConnect={move.connect} />
+  const movePanel = <MoveConnect status={move.status} />
 
   const learnPicker = (
     <Group label="Learn">
@@ -625,6 +625,9 @@ function App() {
     !voicing ||
     voicing.missing.length > 0 ||
     (search.layout === 'chromatic' && (outOfKey.length > 0 || !voicing.fromChart))
+
+  // Until Move is connected, there is nothing to play, so the page is only the way to connect.
+  if (!connected) return <ConnectScreen status={move.status} onConnect={move.connect} />
 
   return (
     <main className="flex h-dvh flex-col overflow-hidden lg:flex-row">
@@ -984,32 +987,59 @@ const MOVE_STATUS: Record<MoveStatus, string> = {
   denied: 'MIDI access is blocked. Allow MIDI in the site settings, then try again.',
 }
 
-function MoveConnect({ status, onConnect }: { status: MoveStatus; onConnect: () => void }) {
-  const connected = status === 'connected'
+/** The Connect tab, after Move is connected. Before that, ConnectScreen fills the page. */
+function MoveConnect({ status }: { status: MoveStatus }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onConnect}
-          disabled={connected || status === 'connecting'}
-          className={[
-            'min-h-9 rounded-lg px-3 text-sm font-medium lg:min-h-8',
-            connected ? 'bg-emerald-400/15 text-emerald-300' : 'bg-led text-neutral-950 disabled:opacity-40',
-          ].join(' ')}
-        >
-          {connected ? 'Connected' : 'Connect Move'}
-        </button>
-      </div>
       <p className="text-xs text-neutral-400">{MOVE_STATUS[status]}</p>
-      {!connected && (
-        <p className="text-xs text-neutral-500">
-          For Control Live Mode: hold Shift, press Step 2, select Control Live, then press the wheel. Move then shows
-          "Connect Live via USB-C". This is correct; Live does not have to be open.
-        </p>
-      )}
-      {connected && <p className="text-xs text-neutral-500">Hold Shift on Move to sustain, like a pedal.</p>}
+      <p className="text-xs text-neutral-500">Hold Shift on Move to sustain, like a pedal.</p>
     </div>
+  )
+}
+
+/** C major in Chromatic, as the pads show it: the played root cyan, other roots dim cyan, chord tones white. */
+const ART_LIT: Record<string, string> = {
+  '3-0': 'bg-led',
+  '7-0': 'bg-white',
+  '5-1': 'bg-white',
+  '5-2': 'bg-led/40',
+  '0-3': 'bg-led/40',
+}
+
+function ConnectScreen({ status, onConnect }: { status: MoveStatus; onConnect: () => void }) {
+  const problem = status === 'unsupported' || status === 'not-found' || status === 'denied'
+  return (
+    <main className="flex min-h-dvh items-center justify-center px-6 py-12">
+      <div className="flex w-full max-w-md flex-col items-center gap-8 text-center">
+        <div aria-hidden className="grid grid-cols-8 gap-1.5">
+          {[3, 2, 1, 0].flatMap((row) =>
+            Array.from({ length: 8 }, (_, col) => (
+              <div key={`${col}-${row}`} className={`size-5 rounded ${ART_LIT[`${col}-${row}`] ?? 'bg-neutral-800'}`} />
+            )),
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-4xl font-semibold tracking-tight text-white">chords</h1>
+          <p className="text-neutral-400">Learn chords and play along with songs on Ableton Move.</p>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <button
+            type="button"
+            onClick={onConnect}
+            disabled={status === 'connecting'}
+            className="min-h-11 rounded-xl bg-led px-6 text-base font-medium text-neutral-950 disabled:opacity-40"
+          >
+            {status === 'connecting' ? 'Connecting…' : 'Connect Move'}
+          </button>
+          {problem && <p className="text-sm text-amber-300">{MOVE_STATUS[status]}</p>}
+        </div>
+        <ol className="flex list-decimal flex-col gap-1 pl-5 text-left text-sm text-neutral-500">
+          <li>Connect Move to this computer with USB-C.</li>
+          <li>On Move, hold Shift, press Step 2, select Control Live, then press the wheel.</li>
+          <li>Move shows "Connect Live via USB-C". That is correct: Live does not have to be open.</li>
+        </ol>
+      </div>
+    </main>
   )
 }
 
