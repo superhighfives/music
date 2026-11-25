@@ -153,11 +153,11 @@ function useSavedSongs() {
 
 /**
  * Bookmarklet for an Ultimate Guitar song page. It reads the chord sheet that the page already holds and
- * opens movechords with it in the URL hash. As of November 2026 the sheet is in three places, tried in order:
+ * opens this app with it in the URL hash. As of November 2026 the sheet is in three places, tried in order:
  * 1. window.UGAPP.store, after the page's scripts start.
  * 2. The "js-store" element's JSON, before they start. The scripts then remove the element.
  * 3. The shown sheet in a <pre>, as plain chords above lyrics.
- * It runs in your own browser on a page you opened, so movechords makes no requests to Ultimate Guitar.
+ * It runs in your own browser on a page you opened, so this app makes no requests to Ultimate Guitar.
  */
 const ugBookmarklet = (origin: string) =>
   'javascript:' +
@@ -172,7 +172,7 @@ const ugBookmarklet = (origin: string) =>
     text = pre?.innerText
     title = document.querySelector('h1')?.innerText.replace(/\\s+(chords|tab|ukulele)\\s*$/i, '')
   }
-  if (!text) return alert('movechords: no chord sheet on this page. Open a "Chords" page on Ultimate Guitar.')
+  if (!text) return alert('chords: no chord sheet on this page. Open a "Chords" page on Ultimate Guitar.')
   const head = (title ? '{title: ' + title + '}\\n' : '') + (artist ? '{artist: ' + artist + '}\\n' : '')
   window.open(${JSON.stringify(origin)} + '/#import=' + encodeURIComponent(head + text), '_blank')
 })()`)
@@ -518,7 +518,7 @@ function App() {
           title="Drag this to your bookmarks bar. Then open a Chords page on Ultimate Guitar and click the bookmark."
           className="cursor-grab rounded-full border border-neutral-700 px-2 py-px text-[11px] tracking-normal text-neutral-400 normal-case hover:border-neutral-500"
         >
-          Send to movechords
+          Send to chords
         </a>
       }
     >
@@ -633,7 +633,7 @@ function App() {
         className="flex shrink-0 flex-col gap-3 px-4 pt-4 lg:w-[var(--sidebar,392px)] lg:gap-4 lg:overflow-y-auto lg:px-6 lg:py-5"
       >
         <div className="flex items-center gap-2">
-          <h1 className="mr-auto text-lg font-semibold tracking-tight text-white">movechords</h1>
+          <h1 className="mr-auto text-lg font-semibold tracking-tight text-white">chords</h1>
           {/* Phone: key and scale sit beside the title to save height. */}
           <div className="flex gap-2 lg:hidden">
             <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />
@@ -1127,7 +1127,7 @@ function SongCard({
   const heldNames = [...new Set(held.map(noteName))].join(' ')
   const nextKey = connected ? 'Press → on Move' : 'Press Again'
   const prompt: { tone: string; text: string } = events.length === 0
-    ? { tone: 'text-neutral-400', text: 'This song has no chords that movechords can read.' }
+    ? { tone: 'text-neutral-400', text: 'This song has no chords that this app can read.' }
     : finished
       ? { tone: 'text-emerald-300', text: `Song finished. ${nextKey} to play it again.` }
       : !connected
@@ -1175,7 +1175,7 @@ function SongCard({
         })}
       </div>
       {unknown.length > 0 && (
-        <p className="text-xs text-neutral-500">Skipped chords that movechords cannot read: {unknown.join(', ')}.</p>
+        <p className="text-xs text-neutral-500">Skipped chords that this app cannot read: {unknown.join(', ')}.</p>
       )}
       <div
         className={`flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm ring-1 ${

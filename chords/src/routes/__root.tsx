@@ -7,7 +7,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'movechords · chord shapes for Ableton Move' },
+      { title: 'chords · chord shapes for Ableton Move' },
       { name: 'description', content: 'See chord shapes on the Ableton Move pad grid in any key, scale and layout.' },
     ],
     links: [
