@@ -95,10 +95,9 @@ function parseSearch(s: Record<string, unknown>): Search {
   }
 }
 
-type Tab = 'connect' | 'learn' | 'songs' | 'play'
+type Tab = 'learn' | 'songs' | 'play'
 
 const TABS: { id: Tab; name: string }[] = [
-  { id: 'connect', name: 'Connect' },
   { id: 'learn', name: 'Learn' },
   { id: 'songs', name: 'Songs' },
   { id: 'play', name: 'Play' },
@@ -222,9 +221,8 @@ function App() {
   const navigate = useNavigate({ from: '/' })
   const set = (patch: Partial<Search>) =>
     navigate({ search: (prev) => ({ ...prev, v: 0, ...patch }), replace: true, resetScroll: false })
-  // Phone only: the pickers share one panel. Desktop shows them all in the sidebar.
-  // Start on Connect: the app is made for plugging in Move first.
-  const [tab, setTab] = useState<Tab>('connect')
+  // The sidebar tab. It starts on Learn, because the connect screen comes before it.
+  const [tab, setTab] = useState<Tab>('learn')
 
   const scale = scaleById(search.scale)
   const type = chordType(search.chord)
@@ -463,12 +461,7 @@ function App() {
     </>
   )
 
-  // The other tabs open once Move is connected. If Move disconnects, the sidebar goes back to Connect.
   const connected = move.status === 'connected'
-  const activeTab: Tab = connected ? tab : 'connect'
-  const tabs = TABS.map((t) => ({ ...t, disabled: !connected && t.id !== 'connect' }))
-
-  const movePanel = <MoveConnect status={move.status} />
 
   const learnPicker = (
     <Group label="Learn">
@@ -646,12 +639,10 @@ function App() {
         {/* Phone: the layout stays at the top. The pickers are in tabs below the pads. */}
         <div className="flex flex-col gap-3 lg:hidden">{layoutControls}</div>
         <div className="hidden flex-col gap-4 lg:flex">
-          <Segmented options={tabs} value={activeTab} onChange={setTab} />
-          {activeTab === 'connect' ? (
-            movePanel
-          ) : activeTab === 'learn' ? (
+          <Segmented options={TABS} value={tab} onChange={setTab} />
+          {tab === 'learn' ? (
             learnPicker
-          ) : activeTab === 'songs' ? (
+          ) : tab === 'songs' ? (
             songPicker
           ) : (
             <>
@@ -871,10 +862,10 @@ function App() {
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-900 pt-3 lg:hidden">
-              <Segmented options={tabs} value={activeTab} onChange={setTab} />
+              <Segmented options={TABS} value={tab} onChange={setTab} />
               <div className="min-h-0 overflow-y-auto">
                 <div className="flex flex-col gap-4">
-                  {activeTab === 'connect' ? movePanel : activeTab === 'learn' ? learnPicker : activeTab === 'songs' ? songPicker : (
+                  {tab === 'learn' ? learnPicker : tab === 'songs' ? songPicker : (
                     <>
                       {inKeyPicker}
                       {rootPicker}
@@ -978,23 +969,11 @@ function PadGrid({
   )
 }
 
-const MOVE_STATUS: Record<MoveStatus, string> = {
-  idle: 'Connect Move to play chords here, light them on the pads and check tutorial steps.',
+/** Why connecting failed. Other statuses show no message. */
+const CONNECT_PROBLEM: Partial<Record<MoveStatus, string>> = {
   unsupported: 'This browser has no Web MIDI. Use Chrome or Edge.',
-  connecting: 'Waiting for MIDI access…',
-  connected: 'Connected. Move shows the current chord. Pads play sound here.',
   'not-found': 'Move not found. Check the USB-C cable and that Move is in Control Live Mode.',
   denied: 'MIDI access is blocked. Allow MIDI in the site settings, then try again.',
-}
-
-/** The Connect tab, after Move is connected. Before that, ConnectScreen fills the page. */
-function MoveConnect({ status }: { status: MoveStatus }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-xs text-neutral-400">{MOVE_STATUS[status]}</p>
-      <p className="text-xs text-neutral-500">Hold Shift on Move to sustain, like a pedal.</p>
-    </div>
-  )
 }
 
 /** C major in Chromatic, as the pads show it: the played root cyan, other roots dim cyan, chord tones white. */
@@ -1007,7 +986,7 @@ const ART_LIT: Record<string, string> = {
 }
 
 function ConnectScreen({ status, onConnect }: { status: MoveStatus; onConnect: () => void }) {
-  const problem = status === 'unsupported' || status === 'not-found' || status === 'denied'
+  const problem = CONNECT_PROBLEM[status]
   return (
     <main className="flex min-h-dvh items-center justify-center px-6 py-12">
       <div className="flex w-full max-w-md flex-col items-center gap-8 text-center">
@@ -1031,7 +1010,7 @@ function ConnectScreen({ status, onConnect }: { status: MoveStatus; onConnect: (
           >
             {status === 'connecting' ? 'Connecting…' : 'Connect Move'}
           </button>
-          {problem && <p className="text-sm text-amber-300">{MOVE_STATUS[status]}</p>}
+          {problem && <p className="text-sm text-amber-300">{problem}</p>}
         </div>
         <ol className="flex list-decimal flex-col gap-1 pl-5 text-left text-sm text-neutral-500">
           <li>Connect Move to this computer with USB-C.</li>
@@ -1346,7 +1325,7 @@ function Segmented<T extends string>({
   value,
   onChange,
 }: {
-  options: { id: T; name: string; disabled?: boolean }[]
+  options: { id: T; name: string }[]
   value: T
   onChange: (id: T) => void
 }) {
@@ -1357,15 +1336,10 @@ function Segmented<T extends string>({
           key={o.id}
           type="button"
           aria-pressed={value === o.id}
-          disabled={o.disabled}
           onClick={() => onChange(o.id)}
           className={[
             'min-h-9 rounded-md px-2 text-[13px] transition-colors lg:min-h-8',
-            value === o.id
-              ? 'bg-white text-neutral-950'
-              : o.disabled
-                ? 'cursor-not-allowed text-neutral-700'
-                : 'text-neutral-300 hover:text-white',
+            value === o.id ? 'bg-white text-neutral-950' : 'text-neutral-300 hover:text-white',
           ].join(' ')}
         >
           {o.name}
