@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   CHORD_FAMILIES,
   CHORD_TYPES,
   LAYOUTS,
   NOTE_NAMES,
   SCALES,
+  chordMatch,
   chordType,
   diatonicChords,
   mod,
@@ -18,6 +19,21 @@ import {
   type Pad,
   type Voicing,
 } from '../lib/music'
+import { usePiano } from '../lib/piano'
+import { BUTTON, BUTTON_DIM, COLOR, STEP_NOTE, padNote, useMove, type Lights, type MoveStatus } from '../lib/move'
+import { TUTORIALS, tutorialById, type Tutorial } from '../lib/tutorials'
+import {
+  SONGS,
+  chordLabel,
+  parseSheet,
+  songById,
+  songEvents,
+  songKey,
+  unknownChords,
+  type Song,
+  type SongChord,
+  type SongEvent,
+} from '../lib/songs'
 
 type Search = {
   key: number
@@ -29,6 +45,12 @@ type Search = {
   v: number
   sevenths: boolean
   all: boolean
+  /** Active tutorial id and step index. */
+  t?: string
+  s: number
+  /** Active song id and the index of the chord to play next. */
+  song?: string
+  p: number
 }
 
 const pc = (value: unknown, fallback: number) => {
@@ -38,7 +60,23 @@ const pc = (value: unknown, fallback: number) => {
 
 export const Route = createFileRoute('/')({
   // All state lives in the URL, so any view can be bookmarked or shared.
-  validateSearch: (s: Record<string, unknown>): Search => ({
+  validateSearch: (s: Record<string, unknown>): Search => tutorialView(parseSearch(s)),
+  component: App,
+})
+
+/** In a tutorial, the step decides the key, scale, layout and chord, so a shared link shows the same view. */
+function tutorialView(search: Search): Search {
+  const tutorial = tutorialById(search.t)
+  if (!tutorial) return search
+  // Step index steps.length is free play, where the player picks the chords.
+  // An info step shows the chord of the next chord step, so the screen never shows an old chord.
+  const shown = tutorial.steps.slice(search.s).find((s) => s.kind === 'chord')
+  const view = { ...search, key: tutorial.key, scale: tutorial.scale, layout: tutorial.layout }
+  return shown?.kind === 'chord' && search.s < tutorial.steps.length ? { ...view, root: shown.root, chord: shown.chord } : view
+}
+
+function parseSearch(s: Record<string, unknown>): Search {
+  return {
     key: pc(s.key, 0),
     scale: SCALES.some((x) => x.id === s.scale) ? String(s.scale) : 'major',
     layout: LAYOUTS.some((x) => x.id === s.layout) ? (s.layout as Layout) : 'chromatic',
@@ -49,25 +87,144 @@ export const Route = createFileRoute('/')({
     v: Math.max(0, Number.parseInt(String(s.v ?? 0), 10) || 0),
     sevenths: s.sevenths === true || s.sevenths === 'true',
     all: s.all === true || s.all === 'true',
-  }),
-  component: App,
-})
+    t: tutorialById(String(s.t)) ? String(s.t) : undefined,
+    s: Math.max(0, Number.parseInt(String(s.s ?? 0), 10) || 0),
+    // Pasted songs live in the browser's storage, so App checks that the id exists.
+    song: typeof s.song === 'string' && s.song ? s.song : undefined,
+    p: Math.max(0, Number.parseInt(String(s.p ?? 0), 10) || 0),
+  }
+}
 
-type Tab = 'in-key' | 'root' | 'chord'
+type Tab = 'connect' | 'learn' | 'songs' | 'play'
 
 const TABS: { id: Tab; name: string }[] = [
-  { id: 'in-key', name: 'In key' },
-  { id: 'root', name: 'Root' },
-  { id: 'chord', name: 'Chord type' },
+  { id: 'connect', name: 'Connect' },
+  { id: 'learn', name: 'Learn' },
+  { id: 'songs', name: 'Songs' },
+  { id: 'play', name: 'Play' },
 ]
 
+const SAVED_SONGS = 'movechords:songs'
+
+/** A pasted chord sheet. We store the text, not the parsed song, so a better parser also reads old songs. */
+type SavedSheet = { id: string; title: string; text: string }
+
+const isSavedSheet = (v: unknown): v is SavedSheet =>
+  typeof v === 'object' &&
+  v !== null &&
+  'id' in v &&
+  'title' in v &&
+  'text' in v &&
+  typeof v.id === 'string' &&
+  typeof v.title === 'string' &&
+  typeof v.text === 'string'
+
+/** Pasted songs, kept in this browser only. They load after the first render, so server and client HTML match. */
+function readSheets(): SavedSheet[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(SAVED_SONGS) ?? '[]')
+    return Array.isArray(value) ? value.filter(isSavedSheet) : []
+  } catch {
+    // Bad JSON in storage: start with no saved songs.
+    return []
+  }
+}
+
+function useSavedSongs() {
+  const [sheets, setSheets] = useState<SavedSheet[]>([])
+  useEffect(() => setSheets(readSheets()), [])
+  // Read storage again before each write, so a write during the first render cannot drop saved songs.
+  const store = (change: (current: SavedSheet[]) => SavedSheet[]) => {
+    const next = change(readSheets())
+    setSheets(next)
+    localStorage.setItem(SAVED_SONGS, JSON.stringify(next))
+  }
+  return {
+    saved: sheets.map((sheet): Song => ({ id: sheet.id, ...parseSheet(sheet.text, sheet.title) })),
+    /** Saves the sheet and returns its id. The same text saved again keeps its first id. */
+    add: (title: string, text: string) => {
+      const id = readSheets().find((s) => s.text === text)?.id ?? `my-${Date.now().toString(36)}`
+      store((current) => (current.some((s) => s.id === id) ? current : [...current, { id, title, text }]))
+      return id
+    },
+    remove: (id: string) => store((current) => current.filter((s) => s.id !== id)),
+  }
+}
+
+/**
+ * Bookmarklet for an Ultimate Guitar song page. It reads the chord sheet that the page already holds and
+ * opens movechords with it in the URL hash. As of November 2026 the sheet is in three places, tried in order:
+ * 1. window.UGAPP.store, after the page's scripts start.
+ * 2. The "js-store" element's JSON, before they start. The scripts then remove the element.
+ * 3. The shown sheet in a <pre>, as plain chords above lyrics.
+ * It runs in your own browser on a page you opened, so movechords makes no requests to Ultimate Guitar.
+ */
+const ugBookmarklet = (origin: string) =>
+  'javascript:' +
+  encodeURIComponent(`(() => {
+  let data = window.UGAPP?.store?.page?.data
+  if (!data?.tab_view) try { data = JSON.parse(document.querySelector('.js-store').dataset.content).store.page.data } catch {}
+  let text = data?.tab_view?.wiki_tab?.content
+  let title = data?.tab?.song_name
+  let artist = data?.tab?.artist_name
+  if (!text) {
+    const pre = [...document.querySelectorAll('pre')].sort((a, b) => b.innerText.length - a.innerText.length)[0]
+    text = pre?.innerText
+    title = document.querySelector('h1')?.innerText.replace(/\\s+(chords|tab|ukulele)\\s*$/i, '')
+  }
+  if (!text) return alert('movechords: no chord sheet on this page. Open a "Chords" page on Ultimate Guitar.')
+  const head = (title ? '{title: ' + title + '}\\n' : '') + (artist ? '{artist: ' + artist + '}\\n' : '')
+  window.open(${JSON.stringify(origin)} + '/#import=' + encodeURIComponent(head + text), '_blank')
+})()`)
+
+const SIDEBAR_DEFAULT = 392
+const SIDEBAR_MIN = 320
+const SIDEBAR_MAX = 720
+const SIDEBAR_KEY = 'movechords:sidebar'
+
+/** Desktop sidebar width, saved in this browser. It loads after the first render, so server and client HTML match. */
+function useSidebarWidth() {
+  const [width, setWidth] = useState(SIDEBAR_DEFAULT)
+  useEffect(() => {
+    const saved = Number(localStorage.getItem(SIDEBAR_KEY))
+    if (saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX) setWidth(saved)
+  }, [])
+  const set = (px: number) => {
+    const next = Math.round(Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, px)))
+    setWidth(next)
+    localStorage.setItem(SIDEBAR_KEY, String(next))
+  }
+  return { width, set }
+}
+
+const chordTones = (c: SongChord) => chordType(c.chord).tones.map((t) => mod(c.root + t.interval, 12))
+
 function App() {
-  const search = Route.useSearch()
+  const raw = Route.useSearch()
+  const savedSongs = useSavedSongs()
+  const sidebar = useSidebarWidth()
+  // In a song, the song decides the key and the chord, like a tutorial step does in tutorialView.
+  const song = songById(raw.song, savedSongs.saved)
+  const events = song ? songEvents(song) : []
+  const songPos = Math.min(raw.p, events.length)
+  const songEvent: SongEvent | undefined = events[songPos]
+  const songScale = song ? songKey(events, chordTones) : undefined
+  const search: Search =
+    song && songScale
+      ? {
+          ...raw,
+          ...songScale,
+          layout: 'chromatic',
+          all: false,
+          ...(songEvent && { root: songEvent.chord.root, chord: songEvent.chord.chord }),
+        }
+      : raw
   const navigate = useNavigate({ from: '/' })
   const set = (patch: Partial<Search>) =>
     navigate({ search: (prev) => ({ ...prev, v: 0, ...patch }), replace: true, resetScroll: false })
   // Phone only: the pickers share one panel. Desktop shows them all in the sidebar.
-  const [tab, setTab] = useState<Tab>('chord')
+  // Start on Connect: the app is made for plugging in Move first.
+  const [tab, setTab] = useState<Tab>('connect')
 
   const scale = scaleById(search.scale)
   const type = chordType(search.chord)
@@ -79,12 +236,317 @@ function App() {
   const current = diatonic.find((c) => c.rootPc === search.root && c.type.id === search.chord)
   const chordPcs = type.tones.map((tone) => mod(search.root + tone.interval, 12))
   const outOfKey = chordPcs.filter((p) => !inScale.has(p))
-  const play = usePlayer()
+  const piano = usePiano()
+  const play = piano.play
+  // Sustain is on while the screen button is on or while Shift on Move is held, like a pedal.
+  const [sustainLatched, setSustainLatched] = useState(false)
+  const [pedal, setPedal] = useState(false)
+  const sustain = sustainLatched || pedal
+  // Pads let go of while sustain is on keep their light while the note rings.
+  const [ringing, setRinging] = useState<Set<string>>(() => new Set())
+  const sustainRef = useRef(sustain)
+  sustainRef.current = sustain
+  useEffect(() => {
+    piano.setSustain(sustain)
+    if (!sustain) setRinging(new Set())
+  }, [sustain])
   // Roots with at least one shape that has every required tone of the current chord.
   const playableRoots = new Set(
     NOTE_NAMES.flatMap((_, i) =>
       voicings(grid, i, type, search.layout).some((v) => v.missing.length === 0) ? [i] : [],
     ),
+  )
+
+  const tutorial = tutorialById(search.t)
+  // After the last step comes free play: the tutorial's key and layout, with any chord.
+  const stepIndex = tutorial ? Math.min(search.s, tutorial.steps.length) : 0
+  const step = tutorial?.steps[stepIndex]
+  const freePlay = !!tutorial && !step
+  const nextTutorial = tutorial && TUTORIALS[TUTORIALS.indexOf(tutorial) + 1]
+  // Key of the tutorial step or song chord the player has played, e.g. "t:first-chords:2".
+  const [completed, setCompleted] = useState<string | null>(null)
+  const goTo = (t: Tutorial, i: number) => {
+    setCompleted(null)
+    setFreePlayStarted(false)
+    // tutorialView sets the key, scale, layout and chord for the step.
+    set({ t: t.id, s: i, all: false, song: undefined, p: 0 })
+  }
+  const goToSong = (id: string, p: number) => {
+    setCompleted(null)
+    set({ song: id, p, t: undefined, s: 0, all: false })
+  }
+  const exitSong = () => set({ song: undefined, p: 0 })
+
+  // The Ultimate Guitar bookmarklet opens "/#import=<sheet>". Save the sheet, then remove it from the URL.
+  useEffect(() => {
+    const m = /^#import=(.*)$/s.exec(window.location.hash)
+    if (!m) return
+    history.replaceState(null, '', window.location.pathname + window.location.search)
+    const text = decodeURIComponent(m[1])
+    goToSong(savedSongs.add(parseSheet(text).title, text), 0)
+    setTab('songs')
+  }, [])
+  const exitTutorial = () => {
+    setCompleted(null)
+    set({ t: undefined, s: 0 })
+  }
+
+  const move = useMove({
+    onPad: (col, row, velocity) => {
+      piano.noteOn(`pad-${col}-${row}`, grid[row][col].midi, velocity)
+      setRinging((r) => (r.has(`${col}-${row}`) ? new Set([...r].filter((k) => k !== `${col}-${row}`)) : r))
+      if (freePlay) setFreePlayStarted(true)
+    },
+    onPadUp: (col, row) => {
+      piano.noteOff(`pad-${col}-${row}`)
+      if (sustainRef.current) setRinging((r) => new Set(r).add(`${col}-${row}`))
+    },
+    onButtonUp: (cc) => {
+      if (cc === BUTTON.shift) setPedal(false)
+    },
+    // Move's arrows step through a tutorial, so you can keep your hands on the device.
+    onButton: (cc) => {
+      if (cc === BUTTON.shift) return setPedal(true)
+      if (song) {
+        if (cc === BUTTON.right) goToSong(song.id, songPos < events.length ? songPos + 1 : 0)
+        if (cc === BUTTON.left && songPos > 0) goToSong(song.id, songPos - 1)
+        return
+      }
+      if (!tutorial) return
+      if (cc === BUTTON.right) next()
+      if (cc === BUTTON.left && stepIndex > 0) goTo(tutorial, stepIndex - 1)
+    },
+  })
+  const heldMidi = [...move.held].map((key) => {
+    const [col, row] = key.split('-').map(Number)
+    return grid[row][col].midi
+  })
+  const match = songEvent
+    ? // A slash chord's bass note, such as the B in G/B, is also correct.
+      chordMatch(
+        heldMidi.filter((m) => mod(m, 12) !== songEvent.chord.bass),
+        songEvent.chord.root,
+        chordType(songEvent.chord.chord),
+      )
+    : step?.kind === 'chord'
+      ? chordMatch(heldMidi, step.root, chordType(step.chord))
+      : chordMatch(heldMidi, search.root, type)
+
+  // Play the chord, then let go of every pad to move on. Waiting for the release means
+  // the chord rings as long as you hold it, and a held chord can never count for the next one.
+  // Info steps and free play have no chord, so they wait for →.
+  const stepKey = song && songEvent ? `song:${song.id}:${songPos}` : tutorial && step?.kind === 'chord' ? `t:${tutorial.id}:${stepIndex}` : null
+  const played = stepKey !== null && completed === stepKey
+  const allReleased = move.held.size === 0
+  useEffect(() => {
+    if (!stepKey) return
+    if (completed !== stepKey) {
+      if (match === 'complete') setCompleted(stepKey)
+    } else if (allReleased) {
+      if (song) goToSong(song.id, songPos + 1)
+      else if (tutorial) goTo(tutorial, stepIndex + 1)
+    }
+  }, [match, allReleased, stepKey, completed])
+  const waitingForNext = !!tutorial && step?.kind === 'info'
+  function next() {
+    if (!tutorial) return
+    if (!freePlay) goTo(tutorial, stepIndex + 1)
+    else if (nextTutorial) goTo(nextTutorial, 0)
+    else exitTutorial()
+  }
+
+  // "Press →" cue: green chevrons flow to the right across the pads, and the right arrow blinks.
+  // It shows on info steps, at the end of a song, and in free play until you play a pad.
+  const [freePlayStarted, setFreePlayStarted] = useState(false)
+  const cue =
+    move.status === 'connected' &&
+    ((tutorial && (step?.kind === 'info' || (freePlay && !freePlayStarted))) || (song && !songEvent && events.length > 0))
+  const [frame, setFrame] = useState(0)
+  useEffect(() => {
+    if (!cue) return
+    const id = setInterval(() => setFrame((f) => f + 1), 150)
+    return () => clearInterval(id)
+  }, [cue])
+
+  // Mirror the screen on Move: root cyan, chord tones white, other lit pads dim.
+  // A held pad is green when it is in the chord and red when it is not.
+  // With sustain on, a pad you let go of stays lit while its note rings.
+  // A pad you let go of fades back slowly, like the note. A new chord fades in quickly.
+  // Pressing a pad lights it at once.
+  const lights: Lights = { notes: new Map(), ccs: new Map(), fade: new Map() }
+  const chordId = `${search.root}:${search.chord}:${search.key}:${search.scale}`
+  const lastChord = useRef(chordId)
+  const chordChanged = lastChord.current !== chordId
+  useEffect(() => {
+    lastChord.current = chordId
+  })
+  const lit = new Set([...move.held, ...ringing])
+  const wasLit = useRef(lit)
+  useEffect(() => {
+    wasLit.current = lit
+  })
+  for (const pad of grid.flat()) {
+    const hit = voicing?.pads.find((p) => p.col === pad.col && p.row === pad.row)
+    const pcOfPad = mod(pad.midi, 12)
+    let color: number = hit
+      ? hit.interval === 0
+        ? COLOR.cyan
+        : COLOR.white
+      : search.layout !== 'chromatic' || inScale.has(pcOfPad)
+        ? COLOR.dim
+        : COLOR.off
+    const right = chordPcs.includes(pcOfPad) || pcOfPad === songEvent?.chord.bass
+    const key = `${pad.col}-${pad.row}`
+    if (move.held.has(key) || ringing.has(key)) color = right ? COLOR.green : COLOR.red
+    if (!cue && !lit.has(key)) {
+      if (wasLit.current.has(key)) lights.fade?.set(padNote(pad.col, pad.row), 'slow')
+      else if (chordChanged) lights.fade?.set(padNote(pad.col, pad.row), 'quick')
+    }
+    if (cue) {
+      // Chevrons 4 columns apart. The middle rows are the tip, one column ahead of the outer rows.
+      const tip = pad.row === 1 || pad.row === 2 ? 0 : 1
+      color = mod(pad.col + tip - frame, 4) === 0 ? COLOR.green : COLOR.off
+    }
+    lights.notes.set(padNote(pad.col, pad.row), color)
+  }
+  const arrowBlink = cue && frame % 4 < 2 ? 127 : BUTTON_DIM
+  if (tutorial) {
+    // Step buttons show progress: done green, current white, to do dim.
+    tutorial.steps.slice(0, 16).forEach((_, i) => {
+      const done = freePlay || i < stepIndex || (i === stepIndex && played)
+      lights.notes.set(STEP_NOTE + i, done ? COLOR.green : i === stepIndex ? COLOR.white : COLOR.dim)
+    })
+    // The arrow LEDs are white only, and the value sets the brightness.
+    lights.ccs.set(BUTTON.left, stepIndex > 0 ? BUTTON_DIM : 0)
+    lights.ccs.set(BUTTON.right, arrowBlink)
+  }
+  if (song) {
+    // Step buttons show the chords of the current line: played green, current white, to come dim.
+    const line = songEvent?.line
+    events
+      .filter((e) => e.line === line)
+      .slice(0, 16)
+      .forEach((e, i) => {
+        const at = events.indexOf(e)
+        lights.notes.set(STEP_NOTE + i, at < songPos ? COLOR.green : at === songPos ? COLOR.white : COLOR.dim)
+      })
+    lights.ccs.set(BUTTON.left, songPos > 0 ? BUTTON_DIM : 0)
+    lights.ccs.set(BUTTON.right, arrowBlink)
+  }
+  lights.ccs.set(BUTTON.shift, sustain ? 127 : BUTTON_DIM)
+  useEffect(() => move.show(lights))
+
+  const pianoCredit = (
+    <p className="text-[11px] text-neutral-600">
+      Piano: <a className="underline hover:text-neutral-400" href="https://github.com/Tonejs/audio/tree/master/salamander">Salamander Grand Piano</a> by
+      Alexander Holm, <a className="underline hover:text-neutral-400" href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.
+    </p>
+  )
+  const layoutControls = (
+    <>
+      <Segmented options={LAYOUTS} value={search.layout} onChange={(layout) => set({ layout })} />
+      {search.layout === 'chromatic' && (
+        <Field label="Bottom-left pad" inline>
+          <select
+            className="rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-sm text-neutral-200"
+            value={search.base}
+            onChange={(e) => set({ base: Number(e.target.value) })}
+          >
+            {NOTE_NAMES.map((name, i) => (
+              <option key={name} value={i}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+    </>
+  )
+
+  // The other tabs open once Move is connected. If Move disconnects, the sidebar goes back to Connect.
+  const connected = move.status === 'connected'
+  const activeTab: Tab = connected ? tab : 'connect'
+  const tabs = TABS.map((t) => ({ ...t, disabled: !connected && t.id !== 'connect' }))
+
+  const movePanel = <MoveConnect status={move.status} onConnect={move.connect} />
+
+  const learnPicker = (
+    <Group label="Learn">
+      <div className="flex flex-col gap-1">
+        {TUTORIALS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            aria-pressed={tutorial?.id === t.id}
+            onClick={() => goTo(t, 0)}
+            className={[
+              'rounded-md px-2.5 py-1.5 text-left transition-colors',
+              tutorial?.id === t.id ? 'bg-white text-neutral-950' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800',
+            ].join(' ')}
+          >
+            <span className="block text-[13px] font-medium">{t.name}</span>
+            <span className="block text-xs opacity-60">{t.summary}</span>
+          </button>
+        ))}
+      </div>
+    </Group>
+  )
+
+  // While a song plays, the Songs tab shows the player. "All songs" goes back to the list.
+  const songPicker = song ? (
+    <SongCard
+      song={song}
+      events={events}
+      pos={songPos}
+      played={played}
+      connected={move.status === 'connected'}
+      match={match}
+      held={heldMidi}
+      onBack={() => goToSong(song.id, songPos - 1)}
+      onNext={() => goToSong(song.id, songEvent ? songPos + 1 : 0)}
+      onJump={(p) => goToSong(song.id, p)}
+      onExit={exitSong}
+    />
+  ) : (
+    <Group
+      label="Songs"
+      action={
+        <a
+          // React blocks javascript: URLs in props, so set the bookmarklet after render, in the browser only.
+          ref={(el) => el?.setAttribute('href', ugBookmarklet(window.location.origin))}
+          onClick={(e) => e.preventDefault()}
+          title="Drag this to your bookmarks bar. Then open a Chords page on Ultimate Guitar and click the bookmark."
+          className="cursor-grab rounded-full border border-neutral-700 px-2 py-px text-[11px] tracking-normal text-neutral-400 normal-case hover:border-neutral-500"
+        >
+          Send to movechords
+        </a>
+      }
+    >
+      <div className="flex flex-col gap-1">
+        {[...SONGS, ...savedSongs.saved].map((s) => (
+          <div key={s.id} className="flex items-stretch gap-1">
+            <button
+              type="button"
+              onClick={() => goToSong(s.id, 0)}
+              className="min-w-0 flex-1 rounded-md bg-neutral-900 px-2.5 py-1.5 text-left text-neutral-300 transition-colors hover:bg-neutral-800"
+            >
+              <span className="block truncate text-[13px] font-medium">{s.title}</span>
+              {s.artist && <span className="block truncate text-xs opacity-60">{s.artist}</span>}
+            </button>
+            {!SONGS.includes(s) && (
+              <button
+                type="button"
+                aria-label={`Delete ${s.title}`}
+                onClick={() => savedSongs.remove(s.id)}
+                className="rounded-md bg-neutral-900 px-2 text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </Group>
   )
 
   const inKeyPicker =
@@ -166,7 +628,10 @@ function App() {
 
   return (
     <main className="flex h-dvh flex-col overflow-hidden lg:flex-row">
-      <aside className="flex shrink-0 flex-col gap-3 px-4 pt-4 lg:w-[392px] lg:gap-4 lg:overflow-y-auto lg:border-r lg:border-neutral-900 lg:px-6 lg:py-5">
+      <aside
+        ref={(el) => el?.style.setProperty('--sidebar', `${sidebar.width}px`)}
+        className="flex shrink-0 flex-col gap-3 px-4 pt-4 lg:w-[var(--sidebar,392px)] lg:gap-4 lg:overflow-y-auto lg:px-6 lg:py-5"
+      >
         <div className="flex items-center gap-2">
           <h1 className="mr-auto text-lg font-semibold tracking-tight text-white">movechords</h1>
           {/* Phone: key and scale sit beside the title to save height. */}
@@ -175,42 +640,70 @@ function App() {
             <ScaleSelect value={scale.id} onChange={(id) => set({ scale: id })} />
           </div>
         </div>
-        <div className="hidden grid-cols-3 gap-2 lg:grid">
-          <Field label="Key">
-            <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />
-          </Field>
-          <Field label="Scale" className="col-span-2">
-            <ScaleSelect value={scale.id} onChange={(id) => set({ scale: id })} />
-          </Field>
-        </div>
-        <Segmented
-          options={LAYOUTS}
-          value={search.layout}
-          onChange={(layout) => set({ layout })}
-        />
-        {search.layout === 'chromatic' && (
-          <Field label="Bottom-left pad" inline>
-            <select
-              className="rounded-md border border-neutral-800 bg-neutral-900 px-2 py-1 text-sm text-neutral-200"
-              value={search.base}
-              onChange={(e) => set({ base: Number(e.target.value) })}
-            >
-              {NOTE_NAMES.map((name, i) => (
-                <option key={name} value={i}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
+        {/* Phone: the layout stays at the top. The pickers are in tabs below the pads. */}
+        <div className="flex flex-col gap-3 lg:hidden">{layoutControls}</div>
         <div className="hidden flex-col gap-4 lg:flex">
-          {inKeyPicker}
-          {rootPicker}
-          {chordPicker}
+          <Segmented options={tabs} value={activeTab} onChange={setTab} />
+          {activeTab === 'connect' ? (
+            movePanel
+          ) : activeTab === 'learn' ? (
+            learnPicker
+          ) : activeTab === 'songs' ? (
+            songPicker
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Key">
+                  <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />
+                </Field>
+                <Field label="Scale" className="col-span-2">
+                  <ScaleSelect value={scale.id} onChange={(id) => set({ scale: id })} />
+                </Field>
+              </div>
+              {layoutControls}
+              {inKeyPicker}
+              {rootPicker}
+              {chordPicker}
+            </>
+          )}
+          {pianoCredit}
         </div>
       </aside>
+      {/* Desktop: drag this edge to resize the sidebar. Arrow keys work too, and a double-click resets it. */}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Sidebar width"
+        aria-valuenow={sidebar.width}
+        aria-valuemin={SIDEBAR_MIN}
+        aria-valuemax={SIDEBAR_MAX}
+        tabIndex={0}
+        onPointerDown={(e) => e.currentTarget.setPointerCapture(e.pointerId)}
+        onPointerMove={(e) => e.currentTarget.hasPointerCapture(e.pointerId) && sidebar.set(e.clientX)}
+        onDoubleClick={() => sidebar.set(SIDEBAR_DEFAULT)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft') sidebar.set(sidebar.width - 16)
+          if (e.key === 'ArrowRight') sidebar.set(sidebar.width + 16)
+        }}
+        className="hidden w-1 shrink-0 cursor-col-resize bg-neutral-900 transition-colors hover:bg-neutral-600 focus-visible:bg-led focus-visible:outline-none lg:block"
+      />
 
       <section className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-3 lg:gap-4 lg:px-8 lg:py-5">
+        {tutorial && (
+          <TutorialCard
+            tutorial={tutorial}
+            nextTutorial={nextTutorial}
+            index={stepIndex}
+            connected={move.status === 'connected'}
+            done={played}
+            waitingForNext={waitingForNext || freePlay}
+            match={match}
+            held={heldMidi}
+            onBack={() => goTo(tutorial, stepIndex - 1)}
+            onNext={next}
+            onExit={exitTutorial}
+          />
+        )}
         <div className="flex items-end justify-between gap-3">
           {showAll ? (
             <div className="min-w-0">
@@ -250,6 +743,18 @@ function App() {
               ].join(' ')}
             >
               All in key
+            </button>
+            <button
+              type="button"
+              aria-pressed={sustain}
+              title="Hold Shift on Move to sustain while you hold it."
+              onClick={() => setSustainLatched(!sustainLatched)}
+              className={[
+                'min-h-11 rounded-lg border px-3 text-sm lg:min-h-9',
+                sustain ? 'border-white bg-white text-neutral-950' : 'border-neutral-700 text-neutral-300 hover:border-neutral-500',
+              ].join(' ')}
+            >
+              Sustain
             </button>
             {!showAll && (
               <button
@@ -320,6 +825,8 @@ function App() {
                 keyPc={search.key}
                 inScale={inScale}
                 layout={search.layout}
+                held={move.held}
+                chordPcs={chordPcs}
                 onPad={(midi) => play([midi])}
                 className={[
                   'w-full rounded-2xl p-[1.6cqmin] ring-1 ring-neutral-800',
@@ -361,9 +868,18 @@ function App() {
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-900 pt-3 lg:hidden">
-              <Segmented options={TABS} value={tab} onChange={setTab} />
+              <Segmented options={tabs} value={activeTab} onChange={setTab} />
               <div className="min-h-0 overflow-y-auto">
-                {tab === 'in-key' ? inKeyPicker : tab === 'root' ? rootPicker : chordPicker}
+                <div className="flex flex-col gap-4">
+                  {activeTab === 'connect' ? movePanel : activeTab === 'learn' ? learnPicker : activeTab === 'songs' ? songPicker : (
+                    <>
+                      {inKeyPicker}
+                      {rootPicker}
+                      {chordPicker}
+                    </>
+                  )}
+                  {pianoCredit}
+                </div>
               </div>
             </div>
           </>
@@ -384,6 +900,8 @@ function PadGrid({
   inScale,
   layout,
   compact,
+  held,
+  chordPcs,
   onPad,
   className,
 }: {
@@ -393,6 +911,9 @@ function PadGrid({
   inScale: Set<number>
   layout: Layout
   compact?: boolean
+  /** Pads held on Move, as "col-row" keys. They get a green outline in the chord and red outside it. */
+  held?: Set<string>
+  chordPcs?: number[]
   onPad?: (midi: number) => void
   className: string
 }) {
@@ -420,7 +941,13 @@ function PadGrid({
                 : lit
                   ? 'bg-neutral-700/70 text-neutral-300'
                   : 'bg-neutral-950 text-neutral-600',
-          ].join(' ')
+            held?.has(`${pad.col}-${pad.row}`) &&
+              (chordPcs?.includes(mod(pad.midi, 12))
+                ? 'outline-4 outline-offset-0 outline-solid outline-emerald-400'
+                : 'outline-4 outline-offset-0 outline-solid outline-red-500'),
+          ]
+            .filter(Boolean)
+            .join(' ')
           const label = (
             <>
               <span>{noteName(pad.midi)}</span>
@@ -444,6 +971,319 @@ function PadGrid({
           )
         }),
       )}
+    </div>
+  )
+}
+
+const MOVE_STATUS: Record<MoveStatus, string> = {
+  idle: 'Connect Move to play chords here, light them on the pads and check tutorial steps.',
+  unsupported: 'This browser has no Web MIDI. Use Chrome or Edge.',
+  connecting: 'Waiting for MIDI access…',
+  connected: 'Connected. Move shows the current chord. Pads play sound here.',
+  'not-found': 'Move not found. Check the USB-C cable and that Move is in Control Live Mode.',
+  denied: 'MIDI access is blocked. Allow MIDI in the site settings, then try again.',
+}
+
+function MoveConnect({ status, onConnect }: { status: MoveStatus; onConnect: () => void }) {
+  const connected = status === 'connected'
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onConnect}
+          disabled={connected || status === 'connecting'}
+          className={[
+            'min-h-9 rounded-lg px-3 text-sm font-medium lg:min-h-8',
+            connected ? 'bg-emerald-400/15 text-emerald-300' : 'bg-led text-neutral-950 disabled:opacity-40',
+          ].join(' ')}
+        >
+          {connected ? 'Connected' : 'Connect Move'}
+        </button>
+      </div>
+      <p className="text-xs text-neutral-400">{MOVE_STATUS[status]}</p>
+      {!connected && (
+        <p className="text-xs text-neutral-500">
+          For Control Live Mode: hold Shift, press Step 2, select Control Live, then press the wheel. Move then shows
+          "Connect Live via USB-C". This is correct; Live does not have to be open.
+        </p>
+      )}
+      {connected && <p className="text-xs text-neutral-500">Hold Shift on Move to sustain, like a pedal.</p>}
+    </div>
+  )
+}
+
+function TutorialCard({
+  tutorial,
+  nextTutorial,
+  index,
+  connected,
+  done,
+  waitingForNext,
+  match,
+  held,
+  onBack,
+  onNext,
+  onExit,
+}: {
+  tutorial: Tutorial
+  nextTutorial: Tutorial | undefined
+  index: number
+  connected: boolean
+  done: boolean
+  waitingForNext: boolean
+  match: ReturnType<typeof chordMatch>
+  held: number[]
+  onBack: () => void
+  onNext: () => void
+  onExit: () => void
+}) {
+  const step = tutorial.steps.at(index)
+  const last = index === tutorial.steps.length - 1
+  const heldNames = [...new Set(held.map(noteName))].join(' ')
+  const nextKey = connected ? 'Press → on Move' : 'Press Next'
+  // The prompt says what the player does now. It is the hand-over from the tutorial to the player.
+  const prompt: { tone: string; text: string } = !step
+    ? {
+        tone: 'text-white',
+        text: nextTutorial ? `${nextKey} for the next lesson: ${nextTutorial.name}.` : `${nextKey} to finish.`,
+      }
+    : step.kind === 'info'
+      ? { tone: 'text-white', text: `${nextKey} to continue.` }
+      : done
+        ? { tone: 'text-emerald-300', text: last ? 'Correct. Let go for free play.' : 'Correct. Let go for the next step.' }
+        : !connected
+          ? { tone: 'text-neutral-400', text: 'Connect Move to check your playing, or press Next.' }
+          : match === 'wrong'
+            ? { tone: 'text-red-400', text: `${heldNames}: one or more notes are not in this chord.` }
+            : match === 'partial'
+              ? { tone: 'text-white', text: `${heldNames}: keep going.` }
+              : { tone: 'text-white', text: 'Play the chord on Move.' }
+  return (
+    <div className="flex flex-col gap-2 rounded-xl bg-neutral-900 px-4 py-3 ring-1 ring-neutral-800">
+      <div className="flex items-center gap-2 text-xs text-neutral-500">
+        <span className="font-medium text-neutral-300">{tutorial.name}</span>
+        <span>{step ? `Step ${index + 1} of ${tutorial.steps.length}` : 'Free play'}</span>
+        <button type="button" onClick={onExit} className="ml-auto hover:text-neutral-300">
+          Exit
+        </button>
+      </div>
+      <p className="text-sm text-neutral-300">
+        {step
+          ? step.text
+          : 'You finished this lesson. Play anything you like. When you play a pad, the arrows on Move give way to the chord you pick in the sidebar.'}
+      </p>
+      <div className="flex items-center gap-2 text-sm">
+        <div
+          className={`mr-auto flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 ring-1 ${
+            waitingForNext ? 'bg-emerald-950/60 ring-emerald-700' : 'bg-neutral-800/60 ring-neutral-700'
+          }`}
+        >
+          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Your turn</span>
+          <span className={prompt.tone}>{prompt.text}</span>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <Chip label="Previous step" disabled={index === 0} onClick={onBack}>
+            Back
+          </Chip>
+          <Chip label={!step ? (nextTutorial ? 'Next lesson' : 'Finish') : 'Next step'} onClick={onNext}>
+            {!step ? (nextTutorial ? 'Next lesson' : 'Finish') : 'Next'}
+          </Chip>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SongCard({
+  song,
+  events,
+  pos,
+  played,
+  connected,
+  match,
+  held,
+  onBack,
+  onNext,
+  onJump,
+  onExit,
+}: {
+  song: Song
+  events: SongEvent[]
+  pos: number
+  played: boolean
+  connected: boolean
+  match: ReturnType<typeof chordMatch>
+  held: number[]
+  onBack: () => void
+  onNext: () => void
+  /** Goes to the chord at this index in `events`. */
+  onJump: (pos: number) => void
+  onExit: () => void
+}) {
+  const event = events.at(pos)
+  const finished = !event
+  const unknown = unknownChords(song)
+  const heldNames = [...new Set(held.map(noteName))].join(' ')
+  const nextKey = connected ? 'Press → on Move' : 'Press Again'
+  const prompt: { tone: string; text: string } = events.length === 0
+    ? { tone: 'text-neutral-400', text: 'This song has no chords that movechords can read.' }
+    : finished
+      ? { tone: 'text-emerald-300', text: `Song finished. ${nextKey} to play it again.` }
+      : !connected
+        ? { tone: 'text-neutral-400', text: `Connect Move to play along, or press Skip. Next chord: ${chordLabel(event.chord)}.` }
+        : played
+          ? { tone: 'text-emerald-300', text: 'Correct. Let go to move on.' }
+          : match === 'wrong'
+          ? { tone: 'text-red-400', text: `${heldNames}: one or more notes are not in ${chordLabel(event.chord)}.` }
+          : match === 'partial'
+            ? { tone: 'text-white', text: `${heldNames}: keep going.` }
+            : { tone: 'text-white', text: `Play ${chordLabel(event.chord)} on Move.` }
+  const line = event?.line ?? song.lines.length
+  const upNext = events.slice(pos + 1, pos + 5)
+  // This card fills the Songs tab while a song plays, so it stacks for a narrow sidebar.
+  return (
+    <div className="flex flex-col gap-3">
+      <button type="button" onClick={onExit} className="self-start text-xs text-neutral-400 hover:text-white">
+        ← All songs
+      </button>
+      <div className="min-w-0">
+        <div className="truncate font-medium text-white">{song.title}</div>
+        <div className="flex gap-2 text-xs text-neutral-500">
+          {song.artist && <span className="truncate">{song.artist}</span>}
+          <span className="shrink-0 tabular-nums">
+            Chord {Math.min(pos + 1, events.length)} of {events.length}
+          </span>
+        </div>
+      </div>
+      {/* The whole song scrolls here, with the current line kept in the middle. Click a line to jump to it. */}
+      <div className="relative flex max-h-[45vh] flex-col gap-1 overflow-y-auto rounded-xl bg-neutral-900 px-1.5 py-2 ring-1 ring-neutral-800">
+        {song.lines.map((l, i) => {
+          const first = events.findIndex((e) => e.line === i)
+          const current = i === line
+          return (
+            <LyricLine
+              key={i}
+              line={l}
+              current={current}
+              onJump={first >= 0 && !current ? () => onJump(first) : undefined}
+              state={(j) =>
+                i < line || (current && j < (event?.index ?? 0)) ? 'done' : current && j === event?.index ? 'now' : 'later'
+              }
+            />
+          )
+        })}
+      </div>
+      {unknown.length > 0 && (
+        <p className="text-xs text-neutral-500">Skipped chords that movechords cannot read: {unknown.join(', ')}.</p>
+      )}
+      <div
+        className={`flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm ring-1 ${
+          finished ? 'bg-emerald-950/60 ring-emerald-700' : 'bg-neutral-800/60 ring-neutral-700'
+        }`}
+      >
+        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Your turn</span>
+        <span className={prompt.tone}>{prompt.text}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {upNext.length > 0 && (
+          <div className="mr-auto flex flex-wrap items-center gap-1.5 text-xs text-neutral-500">
+            Then
+            {upNext.map((e, i) => (
+              <span key={i} className="rounded bg-neutral-800 px-1.5 py-0.5 font-medium text-neutral-300">
+                {chordLabel(e.chord)}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="ml-auto flex shrink-0 gap-2 text-sm">
+          <Chip label="Start the song again" disabled={pos === 0} onClick={() => onJump(0)}>
+            Start again
+          </Chip>
+          <Chip label="Previous chord" disabled={pos === 0} onClick={onBack}>
+            Previous
+          </Chip>
+          <Chip label={finished ? 'Play again' : 'Skip chord'} onClick={onNext}>
+            {finished ? 'Again' : 'Skip'}
+          </Chip>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A lyric line with each chord name above the syllable where it starts.
+ * The current line is large and scrolls to the middle of its box. Other lines are small, and a click jumps to them.
+ */
+function LyricLine({
+  line,
+  state,
+  current,
+  onJump,
+}: {
+  line: Song['lines'][number]
+  state: (index: number) => 'done' | 'now' | 'later'
+  current: boolean
+  onJump?: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    const box = el?.parentElement
+    if (!current || !el || !box) return
+    // Scroll only the lyrics box, not the sidebar or the page.
+    box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2, behavior: 'smooth' })
+  }, [current])
+  const first = line.chords[0]?.at ?? line.lyric.length
+  const hasChords = line.chords.length > 0
+  // Each word is its own box, so a narrow sidebar wraps between words. A chord sits on the first word of its part.
+  const word = (text: string, key: string, chord?: React.ReactNode) => (
+    <span key={key} className="inline-flex flex-col">
+      {hasChords && <span className="h-5 self-start">{chord}</span>}
+      <span className="whitespace-pre">{text || ' '}</span>
+    </span>
+  )
+  const split = (text: string) => text.match(/\S*\s*/g)?.filter(Boolean) ?? []
+  const words = (
+    <>
+      {split(line.lyric.slice(0, first)).map((w, k) => word(w, `lead-${k}`))}
+      {line.chords.map((c, j) => {
+        const text = line.lyric.slice(c.at, line.chords[j + 1]?.at ?? line.lyric.length)
+        const st = state(j)
+        const chordClass = !c.parsed
+          ? 'text-neutral-600 line-through'
+          : !current
+            ? st === 'done'
+              ? 'text-neutral-600'
+              : 'text-led/60'
+            : st === 'now'
+              ? 'rounded bg-led px-1 text-neutral-950'
+              : st === 'done'
+                ? 'text-emerald-400'
+                : 'text-led'
+        const label = (
+          <span className={`mr-2 text-sm font-semibold ${chordClass}`}>{c.parsed ? chordLabel(c.parsed) : c.name}</span>
+        )
+        const parts = split(text)
+        return parts.length === 0
+          ? word('', `c${j}`, label)
+          : parts.map((w, k) => word(w, `c${j}-${k}`, k === 0 ? label : undefined))
+      })}
+    </>
+  )
+  const lineClass = `flex flex-wrap items-end rounded-lg px-1.5 py-1 text-left ${
+    current ? 'bg-neutral-800/70 text-lg text-white' : 'text-sm text-neutral-500'
+  }`
+  return onJump ? (
+    <div ref={ref}>
+      <button type="button" onClick={onJump} title="Jump to this line" className={`${lineClass} w-full hover:bg-neutral-800 hover:text-neutral-300`}>
+        {words}
+      </button>
+    </div>
+  ) : (
+    <div ref={ref} className={lineClass}>
+      {words}
     </div>
   )
 }
@@ -476,7 +1316,7 @@ function Segmented<T extends string>({
   value,
   onChange,
 }: {
-  options: { id: T; name: string }[]
+  options: { id: T; name: string; disabled?: boolean }[]
   value: T
   onChange: (id: T) => void
 }) {
@@ -487,10 +1327,15 @@ function Segmented<T extends string>({
           key={o.id}
           type="button"
           aria-pressed={value === o.id}
+          disabled={o.disabled}
           onClick={() => onChange(o.id)}
           className={[
             'min-h-9 rounded-md px-2 text-[13px] transition-colors lg:min-h-8',
-            value === o.id ? 'bg-white text-neutral-950' : 'text-neutral-300 hover:text-white',
+            value === o.id
+              ? 'bg-white text-neutral-950'
+              : o.disabled
+                ? 'cursor-not-allowed text-neutral-700'
+                : 'text-neutral-300 hover:text-white',
           ].join(' ')}
         >
           {o.name}
@@ -621,27 +1466,4 @@ function Chip({
       {children}
     </button>
   )
-}
-
-/** A small Web Audio synth. The AudioContext starts on the first click, as browsers require. */
-function usePlayer() {
-  const ctx = useRef<AudioContext | null>(null)
-  return (notes: number[], strum = false) => {
-    ctx.current ??= new AudioContext()
-    const ac = ctx.current
-    const sorted = [...notes].sort((a, b) => a - b)
-    sorted.forEach((midi, i) => {
-      const start = ac.currentTime + (strum ? i * 0.035 : 0)
-      const osc = ac.createOscillator()
-      const gain = ac.createGain()
-      osc.type = 'triangle'
-      osc.frequency.value = 440 * 2 ** ((midi - 69) / 12)
-      gain.gain.setValueAtTime(0, start)
-      gain.gain.linearRampToValueAtTime(0.18 / Math.sqrt(sorted.length), start + 0.01)
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 1.4)
-      osc.connect(gain).connect(ac.destination)
-      osc.start(start)
-      osc.stop(start + 1.5)
-    })
-  }
 }

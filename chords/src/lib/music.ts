@@ -220,5 +220,18 @@ export function diatonicChords(key: number, scale: Scale, sevenths: boolean): Di
   })
 }
 
+/**
+ * Checks held notes against a chord in any voicing or octave.
+ * `wrong`: a held note is not in the chord. `complete`: every required tone is held.
+ */
+export function chordMatch(held: number[], rootPc: number, type: ChordType): 'empty' | 'partial' | 'wrong' | 'complete' {
+  if (held.length === 0) return 'empty'
+  const chordPcs = new Set(type.tones.map((t) => mod(rootPc + t.interval, 12)))
+  const heldPcs = new Set(held.map((m) => mod(m, 12)))
+  if ([...heldPcs].some((p) => !chordPcs.has(p))) return 'wrong'
+  const required = type.tones.filter((t) => !t.optional).map((t) => mod(rootPc + t.interval, 12))
+  return required.every((p) => heldPcs.has(p)) ? 'complete' : 'partial'
+}
+
 export const noteName = (midi: number) => NOTE_NAMES[mod(midi, 12)]
 export const noteWithOctave = (midi: number) => `${noteName(midi)}${Math.floor(midi / 12) - 2}`
