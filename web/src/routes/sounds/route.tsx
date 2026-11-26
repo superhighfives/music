@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { AccountButton } from "~/account/AccountButton";
+import { dark } from "@clerk/ui/themes";
+import { AccountButton, useDarkPage } from "~/account/AccountButton";
 import { Logo } from "~/sounds/components/ui";
 import { MODES, type ModeId, SHARP, FLAT } from "~/sounds/lib/music";
 import { StoreProvider, useStore } from "~/sounds/lib/store";
@@ -46,6 +47,9 @@ function Root() {
 function Masthead() {
   const { settings, setSettings } = useStore();
   const setBpm = (v: number) => setSettings({ bpm: Math.min(200, Math.max(40, Math.round(v) || 70)) });
+  // Clerk's dialog and menu follow the course's light or dark theme, in its type.
+  const isDark = useDarkPage();
+  const clerkAppearance = { theme: isDark ? dark : undefined, variables: { fontFamily: "var(--sans)" } };
   return (
     <header className="mast">
       <Link className="brand" to="/sounds">
@@ -89,7 +93,7 @@ function Masthead() {
         </div>
       </div>
       <ThemeToggle />
-      <AccountButton className="btn" />
+      <AccountButton className="btn" appearance={clerkAppearance} />
     </header>
   );
 }
