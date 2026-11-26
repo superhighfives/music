@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({ component: Home });
 
 /** Edition log, newest first. Add a line when a theme or recipe lands. */
 const LOG: [string, string, string][] = [
-  ["2026-11-25", "Edition 3.", "Moves to sounds.charliegleason.com, built from the ableton repo and deployed on every push to main."],
+  ["2026-11-25", "Edition 3.", "Moves to sounds.charliegleason.com, built from the music repo and deployed on every push to main."],
   ["2026-11-25", "Edition 2.", "A course: six themes and recipes. The Sound quality theme, the “The Peace” vocoder recipe, and the in-this-key panel."],
   ["2026-11-24", "Edition 1.", "Fog & Pulse handbook: map, drums, textures, low end, space, arrangement, live rig."],
 ];
