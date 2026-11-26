@@ -52,17 +52,6 @@ GitHub (tags `ableton/<extension>-<version>`), so the page never needs a version
 bump. To add an extension, add it to `src/extensions.ts`; its `id` must match
 its release tags.
 
-## Old addresses
-
-chords and sounds used to be separate apps at chords.charliegleason.com and
-sounds.charliegleason.com. Both domains now point at this Worker, and
-`src/server.ts` answers them with a page from `src/moved.ts`: it copies that
-address's localStorage into the new URL's hash, then goes to the same path under
-`/chords` or `/sounds`. `HANDOVER_SCRIPT`, in the root route's head, writes it
-back without replacing anything already saved here, and only for chords' and
-sounds' own keys, since anyone can make a `#handover=` link. The "Send to chords"
-bookmarklet's `#import=` survives the trip.
-
 ## Develop
 
 ```sh
