@@ -8,6 +8,7 @@ on:
   push:
     branches: [main]
     paths: ["chords/**", ".github/workflows/chords.yml"]
+  workflow_dispatch:
 
 concurrency:
   group: chords-${{ github.ref }}
@@ -37,7 +38,7 @@ jobs:
       - run: pnpm test
       - run: pnpm exec cf build
       - run: pnpm exec cf deploy --prebuilt --dry-run
-      - if: github.event_name == 'push'
+      - if: github.event_name != 'pull_request'
         run: pnpm exec cf deploy --prebuilt
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
