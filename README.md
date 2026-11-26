@@ -8,6 +8,13 @@ own `package.json` and lockfile; nothing is shared between them.
 | [`chords/`](chords/) | Chord shapes on the Ableton Move pad grid | [chords.charliegleason.com](https://chords.charliegleason.com) |
 | [`sounds/`](sounds/) | Fog & Pulse, a step-by-step course in music production with Ableton Live 12 | [sounds.charliegleason.com](https://sounds.charliegleason.com) |
 | [`ableton/`](ableton/) | Ableton Live 12 Extensions, plus a Stable Audio texture generator | [Releases](https://github.com/superhighfives/music/releases) |
+| [`setup/`](setup/) | The Mac Mini studio setup: tools, Claude driving Live, plugins and licences, plus the AI-in-Ableton guide | [`setup/README.md`](setup/README.md) |
+
+## Claude and Live
+
+[`.mcp.json`](.mcp.json) adds the AbletonMCP server (telemetry and dataset
+sharing off) whenever Claude Code runs in this repo, so it can drive Live. See
+[`setup/README.md`](setup/README.md) for the Live side.
 
 ## Working in a folder
 
