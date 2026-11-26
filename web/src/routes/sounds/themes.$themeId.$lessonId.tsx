@@ -10,7 +10,7 @@ export const Route = createFileRoute("/sounds/themes/$themeId/$lessonId")({
   head: ({ params }) => {
     const theme = findTheme(params.themeId);
     const lesson = theme?.lessons.find((l) => l.id === params.lessonId);
-    return { meta: [{ title: `${lesson?.title ?? "Lesson"} · ${theme?.name ?? ""} · Fog & Pulse` }] };
+    return { meta: [{ title: `${lesson?.title ?? "Lesson"} · ${theme?.name ?? ""} · sounds` }] };
   },
   component: Lesson,
 });

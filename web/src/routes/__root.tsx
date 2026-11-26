@@ -10,7 +10,7 @@ export const Route = createRootRoute({
 })
 
 function Shell() {
-  // One Clerk session across every section, so signing in once covers chords and Fog & Pulse.
+  // One Clerk session across every section, so signing in once covers chords and sounds.
   return (
     <ClerkProvider>
       <html lang="en">

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { dark } from "@clerk/ui/themes";
+import { SiteFooter } from "~/SiteFooter";
 import { AccountButton, type ClerkAppearance, useDarkPage } from "~/account/AccountButton";
 import { Logo } from "~/sounds/components/ui";
 import { MODES, type ModeId, SHARP, FLAT } from "~/sounds/lib/music";
@@ -9,11 +10,11 @@ import appCss from "~/sounds/styles/app.css?url";
 // Applies a saved light/dark choice before first paint, so there's no flash.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("sounds.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
-// Fog & Pulse, the course. Its styles, fonts and theme load only under /sounds.
+// sounds, the course. Its styles, fonts and theme load only under /sounds.
 export const Route = createFileRoute("/sounds")({
   head: () => ({
     meta: [
-      { title: "Fog & Pulse" },
+      { title: "sounds" },
       {
         name: "description",
         content: "A step-by-step course in music production with Ableton Live 12: sound quality, soundscapes, melody, songwriting, drums and mixing.",
@@ -39,6 +40,7 @@ function Root() {
       <div className="page">
         <Masthead />
         <Outlet />
+        <SiteFooter current="sounds" />
       </div>
     </StoreProvider>
   );
@@ -56,7 +58,7 @@ function Masthead() {
     <header className="mast">
       <Link className="brand" to="/sounds">
         <Logo />
-        Fog &amp; Pulse
+        sounds
       </Link>
       <div className="ctrls">
         <label className="ctrl">

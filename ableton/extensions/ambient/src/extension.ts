@@ -830,7 +830,7 @@ const TEMPLATE_SENDS: Record<string, [number, number]> = {
 };
 
 /**
- * Template: build a Fog & Pulse starting set in the current key. Beds (audio),
+ * Template: build a sounds starting set in the current key. Beds (audio),
  * Pad (Simpler), Drums (a 16-pad rack with the kick tuned to the root), Bass
  * (Operator sine, mono lows) and an armed Play track; the first two returns
  * become Space and Echo, every track gets sends, and the scenes are named for

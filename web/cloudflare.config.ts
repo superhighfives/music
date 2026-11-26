@@ -1,4 +1,4 @@
-import { bindings, defineConfig } from "cf/config";
+import { bindings, defineConfig, triggers } from "cf/config";
 
 export default defineConfig({
 	worker: {
@@ -14,7 +14,11 @@ export default defineConfig({
 			// Clerk's keys: .dev.vars locally, Worker secrets in production.
 			CLERK_SECRET_KEY: bindings.secret(),
 			CLERK_PUBLISHABLE_KEY: bindings.secret(),
+			// The theory book's daily email (src/theory/email/). charliegleason.com must be onboarded to Email Service.
+			EMAIL: bindings.sendEmail({ allowedSenderAddresses: ["theory@charliegleason.com"] }),
 		},
+		// The theory book's daily email goes out at 07:00 UTC.
+		triggers: [triggers.scheduled({ schedule: "0 7 * * *" })],
 		observability: {
 			enabled: true,
 		},

@@ -23,6 +23,7 @@ import { AccountButton, DARK_APPEARANCE } from '~/account/AccountButton'
 import { useAccountSync } from '~/account/sync'
 import { usePiano } from '~/chords/lib/piano'
 import { mergeSheets, parseSheets, type SavedSheet } from '~/chords/lib/sheets'
+import { SiteFooter } from '~/SiteFooter'
 import css from '~/chords/styles.css?url'
 import { BUTTON, BUTTON_DIM, COLOR, STEP_NOTE, padNote, useMove, type Lights, type MoveStatus } from '~/chords/lib/move'
 import { TUTORIALS, tutorialById, type Tutorial } from '~/chords/lib/tutorials'
@@ -770,6 +771,7 @@ function App() {
             </>
           )}
           {pianoCredit}
+                  <SiteFooter current="chords" className="chordsfoot" />
         </div>
       </aside>
       {/* Desktop: drag this edge to resize the sidebar. Arrow keys work too, and a double-click resets it. */}
@@ -986,6 +988,7 @@ function App() {
                     </>
                   )}
                   {pianoCredit}
+                  <SiteFooter current="chords" className="chordsfoot" />
                 </div>
               </div>
             </div>
@@ -1145,6 +1148,7 @@ function ConnectScreen({
           <li>On Move, hold Shift, press Step 2, select Control Live, then press the wheel.</li>
           <li>Move shows "Connect Live via USB-C". That is correct: Live does not have to be open.</li>
         </ol>
+        <SiteFooter current="chords" className="chordsfoot centred w-full" />
       </div>
     </main>
   )

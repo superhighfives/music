@@ -8,6 +8,7 @@ export const Route = createFileRoute("/sounds/")({ component: Home });
 
 /** Edition log, newest first. Add a line when a theme or recipe lands. */
 const LOG: [string, string, string][] = [
+  ["2026-11-26", "Edition 5.", "Fog & Pulse is now just sounds, with the same footer as the rest of music."],
   ["2026-11-25", "Edition 4.", "Moves to music.charliegleason.com/sounds, beside chords and the Ableton Extensions."],
   ["2026-11-25", "Edition 3.", "Moves to sounds.charliegleason.com, built from the music repo and deployed on every push to main."],
   ["2026-11-25", "Edition 2.", "A course: six themes and recipes. The Sound quality theme, the “The Peace” vocoder recipe, and the in-this-key panel."],
@@ -21,7 +22,7 @@ function Home() {
     <>
       <section className="hero">
         <Logo big />
-        <h1>Fog &amp; Pulse</h1>
+        <h1>sounds</h1>
         <p className="lede">
           A step-by-step course in music production with Ableton Live 12: high-quality audio, soundscapes, melody and pop songwriting. Big themes you work through in order, and short recipes that rebuild one sound from a real record.
         </p>

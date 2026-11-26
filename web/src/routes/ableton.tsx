@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { EXTENSIONS } from '../extensions'
+import { SiteFooter } from '../SiteFooter'
 import css from '../site.css?url'
 
 export const Route = createFileRoute('/ableton')({
@@ -56,6 +57,7 @@ function Ableton() {
         Source, older versions and release notes are on{' '}
         <a href="https://github.com/superhighfives/music/releases">GitHub</a>.
       </p>
+      <SiteFooter current="ableton" />
     </main>
   )
 }
