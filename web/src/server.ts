@@ -1,5 +1,6 @@
 import { createServerEntry, createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
 import { moved } from './moved'
+import { newestAblx } from './releases'
 
 const handler = createStartHandler(defaultStreamHandler)
 
@@ -23,34 +24,29 @@ export default createServerEntry({
   },
 })
 
-type Release = {
-  tag_name: string
-  draft: boolean
-  prerelease: boolean
-  assets: { name: string; browser_download_url: string }[]
-}
-
 /**
  * Redirects to the newest .ablx for an extension, so /ableton links never need a version bump.
  * Releases are tagged ableton/<name>-<version>. If GitHub can't be reached, it falls back to the
  * release list filtered to that extension.
  */
 async function latestRelease(name: string): Promise<Response> {
-  const prefix = `ableton/${name}-`
-  const fallback = `${RELEASES}?q=${encodeURIComponent(prefix)}`
+  const fallback = `${RELEASES}?q=${encodeURIComponent(`ableton/${name}-`)}`
   try {
     const res = await fetch('https://api.github.com/repos/superhighfives/music/releases?per_page=100', {
       headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'music.charliegleason.com' },
       // GitHub allows 60 unauthenticated requests an hour, so keep its answer for 10 minutes.
       cf: { cacheTtl: 600, cacheEverything: true },
+      // `cf` is a Workers-only fetch option that the DOM RequestInit type doesn't know.
     } as RequestInit)
-    if (!res.ok) return Response.redirect(fallback, 302)
-    // GitHub lists the newest release first.
-    const releases: Release[] = await res.json()
-    const release = releases.find((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(prefix))
-    const asset = release?.assets.find((a) => a.name.endsWith('.ablx'))
-    return Response.redirect(asset?.browser_download_url ?? fallback, 302)
-  } catch {
+    if (!res.ok) {
+      console.warn(`ableton/${name}.ablx: GitHub answered ${res.status}, sending the release list`)
+      return Response.redirect(fallback, 302)
+    }
+    const url = newestAblx(await res.json(), name)
+    if (!url) console.warn(`ableton/${name}.ablx: no release with an .ablx, sending the release list`)
+    return Response.redirect(url ?? fallback, 302)
+  } catch (e) {
+    console.warn(`ableton/${name}.ablx: ${e}, sending the release list`)
     return Response.redirect(fallback, 302)
   }
 }
