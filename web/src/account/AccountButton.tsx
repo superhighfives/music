@@ -40,6 +40,9 @@ export function AccountButton({ className, appearance }: { className: string; ap
   )
 }
 
+/** An explicit data-theme on <html> wins; without one, the system setting decides. */
+export const isDarkPage = (dataTheme: string | null, systemDark: boolean) => (dataTheme ? dataTheme === 'dark' : systemDark)
+
 /**
  * Whether the page is dark right now: an explicit data-theme on <html> (Fog & Pulse's toggle sets one),
  * or else the system setting. Follows both as they change. False until mounted, like the server render.
@@ -49,8 +52,7 @@ export function useDarkPage() {
   useEffect(() => {
     const media = matchMedia('(prefers-color-scheme: dark)')
     const read = () => {
-      const set = document.documentElement.getAttribute('data-theme')
-      setDark(set ? set === 'dark' : media.matches)
+      setDark(isDarkPage(document.documentElement.getAttribute('data-theme'), media.matches))
     }
     read()
     const observer = new MutationObserver(read)
