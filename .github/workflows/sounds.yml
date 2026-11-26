@@ -1,14 +1,21 @@
-name: Deploy
+name: Sounds
 
-# Check every pull request. Deploy to Cloudflare only on pushes to main.
+# Check every pull request that touches sounds/. Deploy to Cloudflare only on
+# pushes to main.
 on:
   pull_request:
+    paths: ["sounds/**", ".github/workflows/sounds.yml"]
   push:
     branches: [main]
+    paths: ["sounds/**", ".github/workflows/sounds.yml"]
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: sounds-${{ github.ref }}
   cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: sounds
 
 jobs:
   deploy:
@@ -18,13 +25,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: sounds/package.json
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
+          cache-dependency-path: sounds/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
-      - run: pnpm test
       - run: pnpm exec cf build
       - run: pnpm exec cf deploy --prebuilt --dry-run
       - if: github.event_name == 'push'

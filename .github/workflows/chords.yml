@@ -1,0 +1,44 @@
+name: Chords
+
+# Check every pull request that touches chords/. Deploy to Cloudflare only on
+# pushes to main.
+on:
+  pull_request:
+    paths: ["chords/**", ".github/workflows/chords.yml"]
+  push:
+    branches: [main]
+    paths: ["chords/**", ".github/workflows/chords.yml"]
+
+concurrency:
+  group: chords-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: chords
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CF_SEND_TELEMETRY: "false"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: chords/package.json
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: chords/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm exec cf build
+      - run: pnpm exec cf deploy --prebuilt --dry-run
+      - if: github.event_name == 'push'
+        run: pnpm exec cf deploy --prebuilt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

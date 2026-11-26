@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Dependencies and build output, in any folder
+node_modules/
+dist/
+.cloudflare/
+.wrangler/
+*.tsbuildinfo

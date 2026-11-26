@@ -8,6 +8,10 @@ Extensions read and rewrite a Live Set — tracks, clips, MIDI, scenes, devices,
 tempo and more — and are triggered from right-click menus inside Live. They run
 on **Live 12.4.5 Suite (public beta)** or later.
 
+
+This folder is part of the [`music`](../README.md) repo; commands below run from
+`ableton/`.
+
 ---
 
 ## Extensions
@@ -29,8 +33,10 @@ You don't need Node, the SDK, or Developer Mode to *use* an extension — only t
 develop one. To install a packaged `.ablx`:
 
 1. **Download the `.ablx`** for the extension you want from the
-   [Releases page](https://github.com/superhighfives/ableton/releases)
-   (e.g. `progressive-1.0.0.ablx`).
+   [Releases page](https://github.com/superhighfives/music/releases)
+   (e.g. `progressive-1.0.0.ablx`). Releases from before the move to `music`,
+   including progressive and reverse-midi 1.0.0, are on the archived
+   [ableton repo's releases](https://github.com/superhighfives/ableton/releases).
 2. In Live, open **Settings → Extensions** (Live 12.4.5 Suite beta or later).
 3. **Drag the `.ablx` onto the Extensions page** (or use its install control).
 4. Enable the extension in the list. Restart Live if prompted.
@@ -185,8 +191,9 @@ project. The existing extensions here are also good starting templates.
 Each extension is released **independently**, with its own tag and a `.ablx`
 attached as a downloadable asset:
 
-- Tags are named `<extension>-<version>`, e.g. `progressive-1.0.0`,
-  `reverse-midi-1.0.0`.
+- Tags are named `ableton/<extension>-<version>`, e.g.
+  `ableton/progressive-1.0.0`, `ableton/reverse-midi-1.0.0`. The prefix keeps
+  them apart from anything else in the `music` repo.
 - The version matches the extension's `manifest.json` / `package.json`.
 
 To cut a release for an extension:
@@ -194,7 +201,7 @@ To cut a release for an extension:
 ```sh
 cd <extension>
 pnpm package                                   # writes build/<extension>-<version>.ablx
-gh release create <extension>-<version> \
+gh release create ableton/<extension>-<version> \
   build/<extension>-<version>.ablx \
   --title "<extension> <version>" \
   --notes "…"
