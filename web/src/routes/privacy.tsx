@@ -1,0 +1,54 @@
+import { createFileRoute } from '@tanstack/react-router'
+import css from '../site.css?url'
+
+export const Route = createFileRoute('/privacy')({
+  head: () => ({
+    meta: [
+      { title: 'Privacy · music' },
+      { name: 'description', content: 'What music.charliegleason.com stores, and why.' },
+    ],
+    links: [
+      { rel: 'stylesheet', href: css },
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  }),
+  component: Privacy,
+})
+
+function Privacy() {
+  return (
+    <main>
+      <a className="back" href="/">
+        ← music
+      </a>
+      <h1>Privacy</h1>
+      <p>Last updated 26 November 2026.</p>
+
+      <h2>Without an account</h2>
+      <p>
+        chords and Fog &amp; Pulse save your settings, pasted chord sheets and course progress in your browser's own
+        storage. They never leave your device. Clearing your browser's data for this site removes them.
+      </p>
+
+      <h2>With an account</h2>
+      <p>
+        Signing in is optional. Sign-in is handled by <a href="https://clerk.com/privacy">Clerk</a>, which keeps your
+        email address and, if you sign in with Google, your name and profile picture from Google. This site asks Google
+        only for your email address and basic profile, nothing else.
+      </p>
+      <p>
+        Signed in, the same things your browser saves are also kept with your account, so they follow you to other
+        devices: your pasted chord sheets, and Fog &amp; Pulse's key, mode, tempo and lessons done. They're stored on{' '}
+        <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, which runs this site, and only you can read
+        or change them through this site.
+      </p>
+      <p>Nothing is sold, shared for advertising, or used to track you. There are no analytics or ad cookies.</p>
+
+      <h2>Deleting your data</h2>
+      <p>
+        To delete your account and everything saved with it, email{' '}
+        <a href="mailto:hi@charliegleason.com">hi@charliegleason.com</a>.
+      </p>
+    </main>
+  )
+}

@@ -19,7 +19,10 @@ import {
   type Pad,
   type Voicing,
 } from '~/chords/lib/music'
+import { AccountButton } from '~/account/AccountButton'
+import { useAccountSync } from '~/account/sync'
 import { usePiano } from '~/chords/lib/piano'
+import { mergeSheets, parseSheets, type SavedSheet } from '~/chords/lib/sheets'
 import css from '~/chords/styles.css?url'
 import { BUTTON, BUTTON_DIM, COLOR, STEP_NOTE, padNote, useMove, type Lights, type MoveStatus } from '~/chords/lib/move'
 import { TUTORIALS, tutorialById, type Tutorial } from '~/chords/lib/tutorials'
@@ -127,24 +130,10 @@ const TABS: { id: Tab; name: string }[] = [
 
 const SAVED_SONGS = 'movechords:songs'
 
-/** A pasted chord sheet. We store the text, not the parsed song, so a better parser also reads old songs. */
-type SavedSheet = { id: string; title: string; text: string }
-
-const isSavedSheet = (v: unknown): v is SavedSheet =>
-  typeof v === 'object' &&
-  v !== null &&
-  'id' in v &&
-  'title' in v &&
-  'text' in v &&
-  typeof v.id === 'string' &&
-  typeof v.title === 'string' &&
-  typeof v.text === 'string'
-
-/** Pasted songs, kept in this browser only. They load after the first render, so server and client HTML match. */
+/** Pasted songs, kept in this browser. They load after the first render, so server and client HTML match. */
 function readSheets(): SavedSheet[] {
   try {
-    const value: unknown = JSON.parse(localStorage.getItem(SAVED_SONGS) ?? '[]')
-    return Array.isArray(value) ? value.filter(isSavedSheet) : []
+    return parseSheets(JSON.parse(localStorage.getItem(SAVED_SONGS) ?? '[]')) ?? []
   } catch {
     // Bad JSON in storage: start with no saved songs.
     return []
@@ -153,13 +142,19 @@ function readSheets(): SavedSheet[] {
 
 function useSavedSongs() {
   const [sheets, setSheets] = useState<SavedSheet[]>([])
-  useEffect(() => setSheets(readSheets()), [])
-  // Read storage again before each write, so a write during the first render cannot drop saved songs.
-  const store = (change: (current: SavedSheet[]) => SavedSheet[]) => {
-    const next = change(readSheets())
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    setSheets(readSheets())
+    setReady(true)
+  }, [])
+  const keep = (next: SavedSheet[]) => {
     setSheets(next)
     localStorage.setItem(SAVED_SONGS, JSON.stringify(next))
   }
+  // Read storage again before each write, so a write during the first render cannot drop saved songs.
+  const store = (change: (current: SavedSheet[]) => SavedSheet[]) => keep(change(readSheets()))
+  // Signed in, the songs also live in the account, so they follow you to other devices.
+  useAccountSync({ key: 'chords.songs', value: sheets, ready, parse: parseSheets, merge: mergeSheets, apply: keep })
   return {
     saved: sheets.map((sheet): Song => ({ id: sheet.id, ...parseSheet(sheet.text, sheet.title) })),
     /** Saves the sheet and returns its id. The same text saved again keeps its first id. */
@@ -741,6 +736,7 @@ function App() {
       >
         <div className="flex items-center gap-2">
           <h1 className="mr-auto text-lg font-semibold tracking-tight text-white">chords</h1>
+          <AccountButton className="min-h-9 rounded-md border border-neutral-700 px-2.5 text-sm text-neutral-300 hover:border-neutral-500" />
           {/* Phone: key and scale sit beside the title to save height. */}
           <div className="flex gap-2 lg:hidden">
             <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />

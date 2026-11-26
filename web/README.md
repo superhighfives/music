@@ -19,7 +19,7 @@ share `src/site.css`. The root route is a bare shell. Links between sections are
 plain `<a>`s, so each one is a full page load with only its own styles.
 
 Settings, saved songs and course progress live in each visitor's browser
-(localStorage); there's no backend.
+(localStorage). Signing in also keeps them in an account (see Accounts).
 
 ### chords
 
@@ -52,6 +52,34 @@ GitHub (tags `ableton/<extension>-<version>`), so the page never needs a version
 bump. To add an extension, add it to `src/extensions.ts`; its `id` must match
 its release tags.
 
+## Accounts
+
+Sign-in is [Clerk](https://dashboard.clerk.com), application "music". The root
+route wraps every section in one `ClerkProvider`, and `src/start.ts` runs
+`clerkMiddleware()` on every request so server functions can call `auth()`.
+Each section has a Sign in button (`src/account/AccountButton.tsx`).
+
+Signed in, chords' pasted songs (`chords.songs`) and Fog & Pulse's settings and
+progress (`sounds.course`) are also kept in the D1 database `music`, one JSON
+value per person and key (`migrations/0001_saved.sql`). `src/account/saved.ts`
+has the two server functions, which only ever touch the signed-in person's rows.
+`useAccountSync` (`src/account/sync.ts`) merges this browser's copy into the
+account's once per sign-in, then saves every change:
+
+- Songs: both lists, nothing dropped; the same sheet pasted twice is one song.
+- Course: every lesson done on either side; the account's key, mode and tempo;
+  this browser's last lesson.
+
+Signed out, nothing changes: everything stays in the browser, as before.
+
+Clerk's keys are Worker secrets, `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
+Locally they go in `.dev.vars` (git-ignored), using the development instance's
+keys. Development has "Challenge suspicious sign-ups" turned off under Protect,
+because its check fails on localhost.
+
+To add a synced value, add its key to `SYNC_KEYS` and call `useAccountSync` where
+the section keeps it.
+
 ## Develop
 
 ```sh
@@ -60,6 +88,13 @@ pnpm dev        # cf dev: the app in the local Workers runtime
 pnpm typecheck
 pnpm test
 pnpm build      # cf build, into .cloudflare/
+```
+
+Before the first `pnpm dev`, put Clerk's development keys in `.dev.vars` and
+create the local database:
+
+```sh
+pnpm exec cf d1 migrations apply 517b7f2f-2e66-4d48-938a-ed41db5eb64c --local
 ```
 
 ## Deploy

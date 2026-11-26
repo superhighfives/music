@@ -38,6 +38,12 @@ jobs:
       - run: pnpm test
       - run: pnpm exec cf build
       - run: pnpm exec cf deploy --prebuilt --dry-run
+      # Migrations go first, so the new code never runs against an old schema.
+      - if: github.event_name != 'pull_request'
+        run: pnpm exec cf d1 migrations apply 517b7f2f-2e66-4d48-938a-ed41db5eb64c
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - if: github.event_name != 'pull_request'
         run: pnpm exec cf deploy --prebuilt
         env:
