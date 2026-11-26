@@ -19,7 +19,7 @@ import {
   type Pad,
   type Voicing,
 } from '~/chords/lib/music'
-import { AccountButton } from '~/account/AccountButton'
+import { AccountButton, DARK_APPEARANCE } from '~/account/AccountButton'
 import { useAccountSync } from '~/account/sync'
 import { usePiano } from '~/chords/lib/piano'
 import { mergeSheets, parseSheets, type SavedSheet } from '~/chords/lib/sheets'
@@ -736,7 +736,7 @@ function App() {
       >
         <div className="flex items-center gap-2">
           <h1 className="mr-auto text-lg font-semibold tracking-tight text-white">chords</h1>
-          <AccountButton className="min-h-9 rounded-md border border-neutral-700 px-2.5 text-sm text-neutral-300 hover:border-neutral-500" />
+          <AccountButton appearance={DARK_APPEARANCE} className="min-h-9 rounded-md border border-neutral-700 px-2.5 text-sm text-neutral-300 hover:border-neutral-500" />
           {/* Phone: key and scale sit beside the title to save height. */}
           <div className="flex gap-2 lg:hidden">
             <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />

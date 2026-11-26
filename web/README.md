@@ -14,8 +14,11 @@ app on Cloudflare Workers, deployed with the `cf` CLI.
 
 Each section brings its own styles in its route's `head`, so they never meet:
 chords uses Tailwind (`src/chords/styles.css`, which scans only chords' files),
-sounds uses its own CSS (`src/sounds/styles/app.css`), and home and `/ableton`
-share `src/site.css`. The root route is a bare shell. Links between sections are
+sounds uses its own CSS (`src/sounds/styles/app.css`), and home, `/ableton` and
+`/privacy` share `src/site.css`. chords is always dark, like Move. Fog & Pulse has
+a light/dark toggle, and the other pages follow the system setting. Clerk's
+sign-in dialog and account menu follow each section (`appearance` on
+`AccountButton`). The root route is a bare shell. Links between sections are
 plain `<a>`s, so each one is a full page load with only its own styles.
 
 Settings, saved songs and course progress live in each visitor's browser
