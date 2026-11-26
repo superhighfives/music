@@ -2,7 +2,7 @@
 
 What you own, what to add, and how the AI tools fit together for making ambient
 soundscapes and vignettes in Live. The step-by-step learning side lives in
-[Fog & Pulse](https://sounds.charliegleason.com); this guide is about tools.
+[Fog & Pulse](https://music.charliegleason.com/sounds); this guide is about tools.
 
 First written 15 November 2026 as a claude.ai doc; moved here and updated
 26 November 2026.
@@ -136,5 +136,5 @@ Control chat.
 
 One finished 2 to 3 minute piece from AI texture, one real recording and a
 generated chord bed. The steps now live in Fog & Pulse as the
-[vignette lesson](https://sounds.charliegleason.com/themes/songs/vignette).
+[vignette lesson](https://music.charliegleason.com/sounds/themes/songs/vignette).
 Done means one bounced WAV you'd play for someone.
