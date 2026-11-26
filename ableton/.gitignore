@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+
+# Stray sandbox test artifacts (safe to delete: rm -rf .__probe .__probedir)
+.__probe
+.__probedir/
+
+# Dependencies & build output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# The repo root only holds orchestration scripts (no deps), so pnpm shouldn't
+# leave a lockfile here. Anchored to root so each extension's own tracked
+# pnpm-lock.yaml is unaffected.
+/pnpm-lock.yaml
+
+# Packaged extensions
+*.ablx
+
+# Logs
+*.log
+
+# Machine-specific environment (host paths, secrets)
+.env
+
+# Ableton Extensions SDK — licensed/confidential beta, do NOT redistribute.
+# Each developer downloads it themselves from Centercode into sdks/.
+# Ignore everything in sdks/ but keep the folder itself (.gitkeep) tracked.
+/sdks/*
+!/sdks/.gitkeep

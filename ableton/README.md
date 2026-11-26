@@ -1,0 +1,222 @@
+# Ableton Live Extensions
+
+A workspace for **building and sharing Ableton Live 12 Extensions** — custom
+JavaScript/TypeScript tools that extend Live using the
+[Ableton Extensions SDK](https://ableton.github.io/extensions-sdk).
+
+Extensions read and rewrite a Live Set — tracks, clips, MIDI, scenes, devices,
+tempo and more — and are triggered from right-click menus inside Live. They run
+on **Live 12.4.5 Suite (public beta)** or later.
+
+---
+
+## Extensions
+
+| Extension | What it does | How you trigger it |
+| --- | --- | --- |
+| [**chords**](extensions/chords/) | Shows every diatonic chord in a key as a grid (degrees I–VII × variations like 7th/sus/add9), lets you click out and save named sections, then writes the selected one onto the track's Arrangement timeline as a MIDI clip — adjacent repeats extend a chord's span. | Right-click a **MIDI track** → **Map Chords…** |
+| [**progressive**](extensions/progressive/) | Generates famous chord progressions (I–V–vi–IV, ii–V–I, 12-bar blues…) in any key/mode as MIDI chord clips, for songwriting. | Right-click a **MIDI track** → **Generate Progressions…** |
+| [**ambient**](extensions/ambient/) | Generates ambient soundscapes as looping MIDI clips: **Drift** (coprime phasing loops), **Bloom** (an evolving chord progression), **Aleatoric** (a probability shimmer), **Rhythm** (drum patterns on a Drum Rack), **Bass** (a bass loop that follows the chords), **Play** (an armed, ready-to-play instrument), and **Perform** (a Push-ready rig composing them all), with tuned reverb/delay chains. | Right-click a **MIDI track** → **Generate Ambient…** |
+| [**reverse-midi**](extensions/reverse-midi/) | Reverses the timing of every note in a MIDI clip, within the span of the existing notes, as one undo step. | Right-click a **MIDI clip** → **Reverse Notes** |
+
+Each extension folder has its own README with full detail.
+
+---
+
+## Install a released extension (for users)
+
+You don't need Node, the SDK, or Developer Mode to *use* an extension — only to
+develop one. To install a packaged `.ablx`:
+
+1. **Download the `.ablx`** for the extension you want from the
+   [Releases page](https://github.com/superhighfives/ableton/releases)
+   (e.g. `progressive-1.0.0.ablx`).
+2. In Live, open **Settings → Extensions** (Live 12.4.5 Suite beta or later).
+3. **Drag the `.ablx` onto the Extensions page** (or use its install control).
+4. Enable the extension in the list. Restart Live if prompted.
+
+### Then initialize it in a Set
+
+Extensions surface as **right-click actions** — there's no separate window to
+open. Once installed and enabled:
+
+- **chords** — create or select a **MIDI track**, right-click it → **Map
+  Chords…**. Pick a key and mode to see every diatonic chord as a grid (degrees
+  I–VII across, variations like 7th/sus/add9 down), click chords into one or more
+  named sections, then **Generate** the selected section onto the track's
+  Arrangement timeline as one continuous MIDI clip (adjacent repeats extend a
+  chord's span; 4/4). Your sections are remembered between opens. See
+  [extensions/chords/README.md](extensions/chords/README.md).
+- **progressive** — create or select a **MIDI track**, right-click its title
+  bar (or an empty clip slot on it) → **Generate Progressions…**. Pick a key,
+  mode, progression, voicing and output, then **Generate**. It writes the chords
+  as Session clips (launchable and MIDI-mappable via Live's **MIDI Map mode**,
+  ⌘M) or as an Arrangement row. See [extensions/progressive/README.md](extensions/progressive/README.md).
+- **ambient** — create or select a **MIDI track**, right-click it → **Generate
+  Ambient…**. Pick a key/mode and a generator — **Drift** (phasing pads),
+  **Bloom** (a chord progression), **Aleatoric** (a probability shimmer),
+  **Rhythm** (drum patterns on a Drum Rack), **Bass** (a bass loop that follows
+  the chords), **Play** (an armed, ready-to-play instrument), or **Perform** (a
+  Push-ready rig composing them all) — then **Generate**. It
+  builds the tracks, scenes, clips and an optional reverb/delay chain; switch to
+  Session view (Tab) to launch them. See [extensions/ambient/README.md](extensions/ambient/README.md).
+- **reverse-midi** — right-click any **MIDI clip** → **Reverse Notes**. See
+  [extensions/reverse-midi/README.md](extensions/reverse-midi/README.md).
+
+---
+
+## Develop the extensions
+
+### Requirements
+
+- **Ableton Live 12.4.5 Suite Beta** — Extensions are Suite + beta only.
+- **Node.js ≥ 22.11** (the SDK suggests the v24 LTS).
+- **pnpm** — `npm i -g pnpm`, or `corepack enable pnpm`.
+- **The Extensions SDK** — not included in this repo (see below).
+
+### Download the SDK
+
+Ableton's license forbids redistributing the SDK, so the contents of `sdks/` are
+**gitignored** and you download it yourself. The projects reference its `.tgz`
+packages via relative paths.
+
+1. Join the Ableton Beta program at <https://www.ableton.com/en/beta/> and sign
+   in to the Centercode portal you're invited to.
+2. From the SDK release page, download:
+   - **Ableton Live 12.4.5 Beta** (Suite) and install it.
+   - **`extensions-sdk-<version>.zip`** — the SDK distribution.
+3. Extract the zip into `sdks/` so `sdks/extensions-sdk-1.0.0-beta.0/` sits next
+   to the `.gitkeep`. It holds the `.tgz` packages (SDK,
+   CLI, project creator), docs, API reference, and official examples.
+
+Start with `sdks/extensions-sdk-1.0.0-beta.0/docs/` or the online docs at
+<https://ableton.github.io/extensions-sdk>.
+
+### Run an extension in Live
+
+In Live, enable **Settings → Extensions → Developer Mode** first (without it the
+CLI can't connect). Then, from an extension folder:
+
+```sh
+pnpm install    # pulls the SDK + CLI from the local .tgz files, plus build tools
+pnpm start      # builds and loads the extension into Live's Extension Host
+```
+
+`pnpm start` keeps running and streams the extension's `console.log` output to
+your terminal — handy for debugging. The host path comes from a per-machine
+`.env` (`EXTENSION_HOST_PATH`); it's gitignored, so set yours.
+
+### Control every extension from the root
+
+The extension folders are self-contained packages (each with its own
+`node_modules`), so this repo isn't a pnpm workspace. Instead a small
+zero-dependency script ([`scripts/extensions.mjs`](scripts/extensions.mjs))
+discovers every folder in `extensions/` with a `manifest.json` and fans a
+command out to each:
+
+```sh
+node scripts/extensions.mjs list   # list extensions (name + version + scripts)
+pnpm build          # dev-build every extension
+pnpm build:prod     # production-build every extension
+pnpm test           # test every extension (skips ones without a test script)
+pnpm package        # write a .ablx for every extension
+pnpm install:all    # pnpm install in every extension
+pnpm start ambient  # build + load ONE extension into Live's dev host
+
+# scope to specific extensions by folder name:
+pnpm test ambient progressive
+pnpm package ambient
+```
+
+(Use `node scripts/extensions.mjs list` for the listing — `pnpm list` is pnpm's
+own command. The root `pnpm` scripts need no install of their own.)
+
+**Running one in Live.** The dev Extension Host loads one extension at a time, so
+`start` takes the extension name:
+
+```sh
+pnpm start ambient                        # builds + loads ambient into Live
+node scripts/extensions.mjs run ambient   # the same thing
+```
+
+(`pnpm start` with no name lists the extensions; each extension's own `pnpm
+start` still works from inside its folder.)
+
+To have *every* extension live in Live together, don't dev-run them — **package
+and install** them: `pnpm package` writes a `build/<name>-<version>.ablx` for
+each, then drag those onto **Settings → Extensions**. Installed extensions all
+run together, with no terminal open.
+
+### Common scripts
+
+Run these from an extension folder. Not every extension defines every script —
+check its `package.json`.
+
+| Script | Does |
+| --- | --- |
+| `pnpm start` | Build (dev) and load into Live's Extension Host. |
+| `pnpm build:dev` | Type-check and bundle with sourcemaps. |
+| `pnpm build` | Production build (minified, no sourcemaps). |
+| `pnpm test` | Run the extension's unit tests, where present (e.g. progressive's chord maths). |
+| `pnpm package` | Build, then write a shareable `.ablx` to `build/`. |
+
+---
+
+## Create a new extension
+
+Scaffold a fresh project inside `extensions/` with the SDK's project creator:
+
+```sh
+mkdir extensions/my-extension && cd extensions/my-extension
+pnpm dlx file:../../sdks/extensions-sdk-1.0.0-beta.0/ableton-create-extension-1.0.0-beta.0.tgz
+```
+
+It asks for a name, author, and your Live install, then writes a ready-to-run
+project. The existing extensions here are also good starting templates.
+
+> The scaffolder writes npm-style scripts. If you run them with pnpm, add a
+> `pnpm-workspace.yaml` with `allowBuilds: { esbuild: true }` so pnpm runs
+> esbuild's postinstall (see any extension folder for an example).
+
+---
+
+## Releases
+
+Each extension is released **independently**, with its own tag and a `.ablx`
+attached as a downloadable asset:
+
+- Tags are named `<extension>-<version>`, e.g. `progressive-1.0.0`,
+  `reverse-midi-1.0.0`.
+- The version matches the extension's `manifest.json` / `package.json`.
+
+To cut a release for an extension:
+
+```sh
+cd <extension>
+pnpm package                                   # writes build/<extension>-<version>.ablx
+gh release create <extension>-<version> \
+  build/<extension>-<version>.ablx \
+  --title "<extension> <version>" \
+  --notes "…"
+```
+
+---
+
+## Repo layout & notes
+
+```
+ableton/
+├── extensions/                  # the extensions, one self-contained package each
+│   ├── ambient/                 # ambient-soundscape generator extension
+│   ├── progressive/             # chord-progression generator extension
+│   └── reverse-midi/            # MIDI-clip note reverser extension
+├── scripts/extensions.mjs       # fans pnpm commands across every extension
+└── sdks/                        # SDK (downloaded separately, gitignored)
+    └── extensions-sdk-1.0.0-beta.0/
+```
+
+- **`.env`** holds the machine-specific path to Live's Extension Host and is
+  gitignored — set yours per machine.
+- **`node_modules/`**, **`dist/`**, and **`build/`** are build artifacts and are
+  not tracked. The esbuild binary is platform-specific, so run `pnpm install` on
+  each machine.
