@@ -1,15 +1,8 @@
 import { createServerEntry, createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
-import { moved } from './moved'
 import { EXTENSIONS } from './extensions'
 import { newestAblx } from './releases'
 
 const handler = createStartHandler(defaultStreamHandler)
-
-/** The old addresses, and the section of music.charliegleason.com each one moved to. */
-const OLD_HOSTS: Record<string, string> = {
-  'chords.charliegleason.com': 'chords',
-  'sounds.charliegleason.com': 'sounds',
-}
 
 const RELEASES = 'https://github.com/superhighfives/music/releases'
 const EXTENSION_IDS = new Set(EXTENSIONS.map((x) => x.id))
@@ -17,8 +10,6 @@ const EXTENSION_IDS = new Set(EXTENSIONS.map((x) => x.id))
 export default createServerEntry({
   fetch(request) {
     const url = new URL(request.url)
-    const section = OLD_HOSTS[url.hostname]
-    if (section) return moved(url, section)
     const ablx = /^\/ableton\/([a-z-]+)\.ablx$/.exec(url.pathname)
     if (ablx && EXTENSION_IDS.has(ablx[1])) return latestRelease(ablx[1])
     return handler(request)

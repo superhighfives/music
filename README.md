@@ -37,7 +37,7 @@ tags prefixed `ableton/` (see its README).
 `superhighfives/ableton`, now archived. Their full histories were moved into
 these folders, so `git log --follow` on a chords file goes back to the first
 commit. chords and sounds were separate apps at chords.charliegleason.com and
-sounds.charliegleason.com until they moved into `web/`; those addresses now
-redirect. Ableton's
+sounds.charliegleason.com until they moved into `web/`; those addresses are
+gone. Ableton's
 earlier release tags are `ableton/progressive-1.0.0` and
 `ableton/reverse-midi-1.0.0`.
