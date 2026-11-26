@@ -21,13 +21,14 @@ jobs:
     uses: superhighfives/control-room/.github/workflows/review.yml@main
     with:
       # Only web/ has a toolchain to check. The commands run from the repo
-      # root, so they point pnpm at web/.
+      # root, so each one cds into web/, where corepack (enabled by the shared
+      # workflow) finds the pnpm version in package.json.
       runtime: node
       node_version: '24'
-      setup_command: npm install -g pnpm@10 && pnpm -C web install --frozen-lockfile
+      setup_command: cd web && pnpm install --frozen-lockfile
       verify_commands: |
-        pnpm -C web typecheck
-        pnpm -C web test
+        cd web && pnpm typecheck
+        cd web && pnpm test
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
