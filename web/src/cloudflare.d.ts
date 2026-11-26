@@ -10,5 +10,5 @@ interface D1Database {
 interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement
   first<T>(): Promise<T | null>
-  run(): Promise<unknown>
+  run(): Promise<{ meta: { changes: number } }>
 }

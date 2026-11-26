@@ -7,18 +7,26 @@ export interface Saved {
 }
 
 /** Reads saved settings and progress, from this browser or an account, keeping only valid values. */
-export function parseSaved(raw: any): Saved | null {
+export function parseSaved(raw: unknown): Saved | null {
   if (!raw || typeof raw !== "object") return null;
-  const s = raw.settings ?? {};
+  const { settings, done, last } = raw as Record<string, unknown>;
+  const s = (settings && typeof settings === "object" ? settings : {}) as Record<string, unknown>;
+  const root = Number(s.root);
+  const bpm = Number(s.bpm);
+  const mode = MODES.find((m) => m.id === s.mode)?.id;
   return {
-      settings: {
-        root: Number.isInteger(s.root) && s.root >= 0 && s.root < 12 ? s.root : DEFAULT_SETTINGS.root,
-        mode: MODES.some((m) => m.id === s.mode) ? s.mode : DEFAULT_SETTINGS.mode,
-        bpm: Number.isFinite(s.bpm) && s.bpm >= 40 && s.bpm <= 200 ? s.bpm : DEFAULT_SETTINGS.bpm,
-      },
-      done: raw.done && typeof raw.done === "object" ? raw.done : {},
-      last: typeof raw.last === "string" ? raw.last : null,
-    };
+    settings: {
+      root: typeof s.root === "number" && Number.isInteger(root) && root >= 0 && root < 12 ? root : DEFAULT_SETTINGS.root,
+      mode: mode ?? DEFAULT_SETTINGS.mode,
+      bpm: typeof s.bpm === "number" && Number.isFinite(bpm) && bpm >= 40 && bpm <= 200 ? bpm : DEFAULT_SETTINGS.bpm,
+    },
+    // Only lesson keys marked true count as done.
+    done:
+      done && typeof done === "object"
+        ? Object.fromEntries(Object.entries(done).filter(([, v]) => v === true).map(([k]) => [k, true as const]))
+        : {},
+    last: typeof last === "string" ? last : null,
+  };
 }
 
 /**

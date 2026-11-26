@@ -26,3 +26,9 @@ describe('parseSaved', () => {
     expect(parseSaved('text')).toBeNull()
   })
 })
+
+describe('parseSaved done', () => {
+  it('only counts lessons marked true', () => {
+    expect(parseSaved({ done: { a: true, b: 'yes', c: false } })?.done).toEqual({ a: true })
+  })
+})
