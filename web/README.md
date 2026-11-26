@@ -49,8 +49,8 @@ When a theme or recipe lands, add a line to the edition log in
 
 `/ableton/<extension>.ablx` redirects to that extension's newest release on
 GitHub (tags `ableton/<extension>-<version>`), so the page never needs a version
-bump. A new extension needs a card in `src/routes/ableton.tsx` and its name in
-`EXTENSIONS` in `src/server.ts`.
+bump. To add an extension, add it to `src/extensions.ts`; its `id` must match
+its release tags.
 
 ## Old addresses
 
