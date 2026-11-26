@@ -1,6 +1,6 @@
 {
   "name": "ambient",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "main": "dist/extension.js",
   "engines": {
     "node": ">=22.11.0"
