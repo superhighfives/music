@@ -1,0 +1,150 @@
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0a;
+  --card: #171717;
+  --line: #262626;
+  --text: #e5e5e5;
+  --muted: #a3a3a3;
+  --dim: #737373;
+  --led: oklch(0.78 0.16 195);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 4rem 1rem 5rem;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: white;
+}
+
+h2 {
+  margin: 2.5rem 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+a {
+  color: var(--led);
+  text-underline-offset: 3px;
+}
+
+code,
+kbd {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.9em;
+  color: var(--text);
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--text);
+}
+
+.cards {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: block;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--line);
+  border-radius: 0.875rem;
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+
+a.card:hover,
+a.card:focus-visible {
+  border-color: #525252;
+}
+
+.card h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.card h3 span {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--dim);
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.card .how {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--dim);
+}
+
+.download {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  margin-top: 0.75rem;
+  padding: 0 0.875rem;
+  border-radius: 0.5rem;
+  background: var(--led);
+  color: #0a0a0a;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+ol {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  color: var(--muted);
+}
+
+li + li {
+  margin-top: 0.25rem;
+}
