@@ -250,6 +250,8 @@ function App() {
     navigate({ search: (prev) => ({ ...prev, v: 0, ...patch }), replace: true, resetScroll: false })
   // The sidebar tab. It starts on Learn, because the connect screen comes before it.
   const [tab, setTab] = useState<Tab>('learn')
+  // Without Move, the page is only Play: the chord lookup, with pads you click to hear.
+  const [browsing, setBrowsing] = useState(false)
 
   const scale = scaleById(search.scale)
   const type = chordType(search.chord)
@@ -695,8 +697,25 @@ function App() {
     voicing.missing.length > 0 ||
     (search.layout === 'chromatic' && (outOfKey.length > 0 || !voicing.fromChart))
 
-  // Until Move is connected, there is nothing to play, so the page is only the way to connect.
-  if (!connected) return <ConnectScreen status={move.status} onConnect={move.connect} />
+  // Until Move is connected, the page is the way to connect, or to look up chords without it.
+  // Learn, Songs and Practice check what you play on Move, so looking up chords leaves them.
+  if (!connected && !browsing)
+    return (
+      <ConnectScreen
+        status={move.status}
+        onConnect={move.connect}
+        onBrowse={() => {
+          setBrowsing(true)
+          setTab('play')
+          set({ t: undefined, s: 0, song: undefined, p: 0, x: undefined })
+        }}
+      />
+    )
+  const tabs = connected ? (
+    <Segmented options={TABS} value={tab} onChange={setTab} />
+  ) : (
+    <OfflineBar status={move.status} onConnect={move.connect} />
+  )
 
   return (
     <main className="flex h-dvh flex-col overflow-hidden lg:flex-row">
@@ -715,7 +734,7 @@ function App() {
         {/* Phone: the layout stays at the top. The pickers are in tabs below the pads. */}
         <div className="flex flex-col gap-3 lg:hidden">{layoutControls}</div>
         <div className="hidden flex-col gap-4 lg:flex">
-          <Segmented options={TABS} value={tab} onChange={setTab} />
+          {tabs}
           {tab === 'learn' ? (
             learnPicker
           ) : tab === 'songs' ? (
@@ -944,7 +963,7 @@ function App() {
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-900 pt-3 lg:hidden">
-              <Segmented options={TABS} value={tab} onChange={setTab} />
+              {tabs}
               <div className="min-h-0 overflow-y-auto">
                 <div className="flex flex-col gap-4">
                   {tab === 'learn' ? learnPicker : tab === 'songs' ? songPicker : tab === 'practice' ? practicePicker : (
@@ -1067,7 +1086,15 @@ const ART_LIT: Record<string, string> = {
   '0-3': 'bg-led/40',
 }
 
-function ConnectScreen({ status, onConnect }: { status: MoveStatus; onConnect: () => void }) {
+function ConnectScreen({
+  status,
+  onConnect,
+  onBrowse,
+}: {
+  status: MoveStatus
+  onConnect: () => void
+  onBrowse: () => void
+}) {
   const problem = CONNECT_PROBLEM[status]
   return (
     <main className="flex min-h-dvh items-center justify-center px-6 py-12">
@@ -1093,6 +1120,13 @@ function ConnectScreen({ status, onConnect }: { status: MoveStatus; onConnect: (
             {status === 'connecting' ? 'Connecting…' : 'Connect Move'}
           </button>
           {problem && <p className="text-sm text-amber-300">{problem}</p>}
+          <button
+            type="button"
+            onClick={onBrowse}
+            className="min-h-11 text-sm text-neutral-400 underline-offset-4 hover:text-neutral-200 hover:underline"
+          >
+            Look up chords without Move
+          </button>
         </div>
         <ol className="flex list-decimal flex-col gap-1 pl-5 text-left text-sm text-neutral-500">
           <li>Connect Move to this computer with USB-C.</li>
@@ -1101,6 +1135,27 @@ function ConnectScreen({ status, onConnect }: { status: MoveStatus; onConnect: (
         </ol>
       </div>
     </main>
+  )
+}
+
+/** In place of the tabs while Move is not connected. Only Play works without it. */
+function OfflineBar({ status, onConnect }: { status: MoveStatus; onConnect: () => void }) {
+  const problem = CONNECT_PROBLEM[status]
+  return (
+    <div className="flex flex-col gap-1.5 rounded-lg border border-neutral-800 px-3 py-2">
+      <div className="flex items-center gap-3">
+        <p className="mr-auto text-xs text-neutral-400">Connect Move for Learn, Songs and Practice.</p>
+        <button
+          type="button"
+          onClick={onConnect}
+          disabled={status === 'connecting'}
+          className="min-h-9 shrink-0 rounded-md bg-led px-3 text-sm font-medium text-neutral-950 disabled:opacity-40"
+        >
+          {status === 'connecting' ? 'Connecting…' : 'Connect Move'}
+        </button>
+      </div>
+      {problem && <p className="text-xs text-amber-300">{problem}</p>}
+    </div>
   )
 }
 
