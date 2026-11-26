@@ -21,8 +21,8 @@ First written 15 November 2026 as a claude.ai doc; moved here and updated
 | Ableton Move and EP-133 K.O. II | Sketching ideas away from the Mini |
 | Your own Live Extensions: ambient, chords, progressive, reverse-midi | In [`ableton/`](../ableton/); ambient's Template tab builds a starting set |
 
-Worth checking: whether older Sonic Charge emails about Echobode, Permut8 and
-Microtonic mean you own those too. The Sonic Charge Authenticator shows it.
+The Sonic Charge Authenticator lists only Synplant 2 and Synplant v1, so
+Bitspeek, Echobode, Permut8 and Microtonic aren't owned.
 
 ## Recommended setup
 
