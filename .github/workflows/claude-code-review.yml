@@ -1,0 +1,34 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+# A called workflow can only narrow the caller's permissions, never widen them,
+# and this repo's default workflow token is read-only. Without this block the
+# run fails at startup before any job is created.
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  review:
+    # Standard lives in superhighfives/control-room so every repo
+    # reviews the same way. Repo-specific rules go in CLAUDE.md.
+    uses: superhighfives/control-room/.github/workflows/review.yml@main
+    with:
+      # Only web/ has a toolchain to check. The commands run from the repo
+      # root, so each one cds into web/, where corepack (enabled by the shared
+      # workflow) finds the pnpm version in package.json.
+      runtime: node
+      node_version: '24'
+      setup_command: cd web && pnpm install --frozen-lockfile
+      verify_commands: |
+        cd web && pnpm typecheck
+        cd web && pnpm test
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
