@@ -101,7 +101,7 @@ SuperPlate or EchoBoy on the returns if you want them.
 You don't need Node or the SDK just to use it:
 
 1. Download `ambient-<version>.ablx` from the
-   [Releases page](https://github.com/superhighfives/ableton/releases).
+   [Releases page](https://github.com/superhighfives/music/releases).
 2. In Live, open **Settings → Extensions** and drag the `.ablx` onto the page.
 3. Enable it; restart Live if prompted.
 

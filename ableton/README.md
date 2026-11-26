@@ -34,9 +34,7 @@ develop one. To install a packaged `.ablx`:
 
 1. **Download the `.ablx`** for the extension you want from the
    [Releases page](https://github.com/superhighfives/music/releases)
-   (e.g. `progressive-1.0.0.ablx`). Releases from before the move to `music`,
-   including progressive and reverse-midi 1.0.0, are on the archived
-   [ableton repo's releases](https://github.com/superhighfives/ableton/releases).
+   (e.g. `progressive-1.0.0.ablx`).
 2. In Live, open **Settings → Extensions** (Live 12.4.5 Suite beta or later).
 3. **Drag the `.ablx` onto the Extensions page** (or use its install control).
 4. Enable the extension in the list. Restart Live if prompted.
