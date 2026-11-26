@@ -80,10 +80,13 @@ Progress (chapters read, checks passed, where you were) syncs to an account as
 #### The daily email
 
 Signed in, the book's home page has a switch for one card a day by email. A cron
-(`0 7 * * *`, in `cloudflare.config.ts`) runs `sendDaily` in
+(`0 7-23 * * *`, in `cloudflare.config.ts`) runs `sendDaily` in
 `src/theory/email/daily.ts`: each subscriber gets the first card in reading order
 they haven't had, so cards from new chapters join the queue wherever they fall;
 once they've had every card, the one sent longest ago comes round as review.
+The 07:00 UTC run sends; later runs that day only retry anyone a failure skipped,
+since each person's last send day is recorded. "Send one now" sends a preview
+that doesn't count, at most once every ten minutes.
 Subscribers and what they've been sent are in D1 (`migrations/0002_theory_email.sql`).
 Each email has a one-click unsubscribe link, `/theory/unsubscribe?t=<token>`,
 served by `src/server.ts`.
@@ -96,7 +99,7 @@ binding. To run the cron locally:
 
 ```sh
 curl -X POST 'http://localhost:5173/cdn-cgi/local/explorer/api/local/scheduled?worker=music' \
-  -H 'Content-Type: application/json' -d '{"cron":"0 7 * * *"}'
+  -H 'Content-Type: application/json' -d '{"cron":"0 7-23 * * *"}'
 ```
 
 ### Ableton Extensions

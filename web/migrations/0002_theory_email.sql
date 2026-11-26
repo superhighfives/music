@@ -6,8 +6,11 @@ CREATE TABLE theory_email (
   token TEXT NOT NULL UNIQUE,
   active INTEGER NOT NULL,
   created_at INTEGER NOT NULL,
-  -- The UTC day (YYYY-MM-DD) of the last email, so a retried cron never sends twice in a day.
-  last_sent_on TEXT
+  -- The UTC day (YYYY-MM-DD) of the last email. The cron runs hourly to retry failures, and this keeps
+  -- it to one email a day.
+  last_sent_on TEXT,
+  -- When they last asked for a preview ("Send one now"), so previews can't be sent in a loop.
+  last_preview_at INTEGER
 );
 
 -- Which cards each person has been sent, and when. New cards go out first; once every card has

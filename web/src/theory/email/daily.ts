@@ -19,6 +19,8 @@ export async function sendCard(env: DailyEnv, sub: Subscriber, now: Date, record
   if (!picked) return null
   const url = unsubscribeUrl(sub.token)
   const email = renderEmail(picked.card, { unsubscribeUrl: url, review: picked.review })
+  // Sent before it's recorded, on purpose: if a write fails afterwards, the worst case is the same card
+  // again tomorrow. Recording first would risk the opposite, a card counted as sent that never arrived.
   await env.EMAIL.send({
     to: sub.email,
     from: FROM,
@@ -39,8 +41,12 @@ export async function sendCard(env: DailyEnv, sub: Subscriber, now: Date, record
 }
 
 /**
- * The cron's job: everyone subscribed who hasn't had today's email gets one. A failure for one person
- * is logged and skipped, and since they're not marked sent, a later run today tries them again.
+ * The cron's job: everyone subscribed who hasn't had today's email gets one. The cron runs hourly
+ * through the day (cloudflare.config.ts); the first run sends, and later ones only pick up anyone a
+ * failure skipped, since a failed send isn't marked sent.
+ *
+ * It sends one person at a time, about four subrequests each, which suits a small list. Workers cap
+ * subrequests per run, so a much larger list would need batching or a queue.
  */
 export async function sendDaily(env: DailyEnv, now = new Date()) {
   const today = utcDay(now)

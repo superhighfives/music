@@ -145,8 +145,10 @@ function DailyEmail() {
   const preview = async () => {
     setBusy(true)
     try {
-      const { title } = await sendPreview()
-      setNote(title ? `Sent “${title}”. It doesn't count as today's.` : 'Nothing to send yet.')
+      const result = await sendPreview()
+      if ('waitMinutes' in result)
+        setNote(`You just sent one. Try again in ${result.waitMinutes} ${result.waitMinutes === 1 ? 'minute' : 'minutes'}.`)
+      else setNote(result.title ? `Sent “${result.title}”. It doesn't count as today's.` : 'Nothing to send yet.')
     } catch {
       setNote("Couldn't send it. The email service may not be set up yet.")
     } finally {

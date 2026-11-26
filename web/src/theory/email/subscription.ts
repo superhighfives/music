@@ -3,6 +3,9 @@ import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
 import { sendCard } from './daily'
 
+/** How long someone waits between previews, so "Send one now" can't send in a loop. */
+const PREVIEW_COOLDOWN = 10 * 60_000
+
 export type EmailStatus = { signedIn: false } | { signedIn: true; subscribed: boolean; email: string | null }
 
 /** The signed-in person's verified primary email, from Clerk rather than the browser. */
@@ -46,14 +49,27 @@ export const setDailyEmail = createServerFn({ method: 'POST' })
     return { signedIn: true, subscribed: true, email }
   })
 
-/** Sends the signed-in subscriber their next card now, as a preview: it doesn't count as sent. */
-export const sendPreview = createServerFn({ method: 'POST' }).handler(async () => {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Not signed in')
-  const sub = await env.DB.prepare('SELECT user_id, email, token FROM theory_email WHERE user_id = ? AND active = 1')
-    .bind(userId)
-    .first<{ user_id: string; email: string; token: string }>()
-  if (!sub) throw new Error('Turn on the daily email first')
-  const card = await sendCard(env, sub, new Date(), false)
-  return { title: card?.title ?? null }
-})
+/**
+ * Sends the signed-in subscriber their next card now, as a preview: it doesn't count as sent. One every
+ * ten minutes at most; sooner, it says how long to wait instead of sending.
+ */
+export const sendPreview = createServerFn({ method: 'POST' }).handler(
+  async (): Promise<{ title: string | null } | { waitMinutes: number }> => {
+    const { userId } = await auth()
+    if (!userId) throw new Error('Not signed in')
+    const now = Date.now()
+    // Claims the preview before sending: only a row whose last preview is old enough updates.
+    const { meta } = await env.DB.prepare(
+      'UPDATE theory_email SET last_preview_at = ? WHERE user_id = ? AND active = 1 AND (last_preview_at IS NULL OR last_preview_at <= ?)',
+    )
+      .bind(now, userId, now - PREVIEW_COOLDOWN)
+      .run()
+    const sub = await env.DB.prepare('SELECT user_id, email, token, last_preview_at FROM theory_email WHERE user_id = ? AND active = 1')
+      .bind(userId)
+      .first<{ user_id: string; email: string; token: string; last_preview_at: number | null }>()
+    if (!sub) throw new Error('Turn on the daily email first')
+    if (meta.changes === 0) return { waitMinutes: Math.max(1, Math.ceil(((sub.last_preview_at ?? 0) + PREVIEW_COOLDOWN - now) / 60_000)) }
+    const card = await sendCard(env, sub, new Date(now), false)
+    return { title: card?.title ?? null }
+  },
+)
