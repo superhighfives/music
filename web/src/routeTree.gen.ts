@@ -13,8 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AbletonRouteImport } from './routes/ableton'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SoundsRouteRouteImport } from './routes/sounds/route'
+import { Route as TheoryRouteRouteImport } from './routes/theory/route'
 import { Route as ChordsIndexRouteImport } from './routes/chords/index'
 import { Route as SoundsIndexRouteImport } from './routes/sounds/index'
+import { Route as TheoryIndexRouteImport } from './routes/theory/index'
+import { Route as TheoryChapterIdRouteImport } from './routes/theory/$chapterId'
 import { Route as SoundsRecipesRecipeIdRouteImport } from './routes/sounds/recipes.$recipeId'
 import { Route as SoundsThemesThemeIdIndexRouteImport } from './routes/sounds/themes.$themeId.index'
 import { Route as SoundsThemesThemeIdLessonIdRouteImport } from './routes/sounds/themes.$themeId.$lessonId'
@@ -39,6 +42,11 @@ const SoundsRouteRoute = SoundsRouteRouteImport.update({
   path: '/sounds',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TheoryRouteRoute = TheoryRouteRouteImport.update({
+  id: '/theory',
+  path: '/theory',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChordsIndexRoute = ChordsIndexRouteImport.update({
   id: '/chords/',
   path: '/chords/',
@@ -48,6 +56,16 @@ const SoundsIndexRoute = SoundsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SoundsRouteRoute,
+} as any)
+const TheoryIndexRoute = TheoryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TheoryRouteRoute,
+} as any)
+const TheoryChapterIdRoute = TheoryChapterIdRouteImport.update({
+  id: '/$chapterId',
+  path: '/$chapterId',
+  getParentRoute: () => TheoryRouteRoute,
 } as any)
 const SoundsRecipesRecipeIdRoute = SoundsRecipesRecipeIdRouteImport.update({
   id: '/recipes/$recipeId',
@@ -70,10 +88,13 @@ const SoundsThemesThemeIdLessonIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sounds': typeof SoundsRouteRouteWithChildren
+  '/theory': typeof TheoryRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
+  '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords/': typeof ChordsIndexRoute
   '/sounds/': typeof SoundsIndexRoute
+  '/theory/': typeof TheoryIndexRoute
   '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
   '/sounds/themes/$themeId/$lessonId': typeof SoundsThemesThemeIdLessonIdRoute
   '/sounds/themes/$themeId/': typeof SoundsThemesThemeIdIndexRoute
@@ -82,8 +103,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
+  '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords': typeof ChordsIndexRoute
   '/sounds': typeof SoundsIndexRoute
+  '/theory': typeof TheoryIndexRoute
   '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
   '/sounds/themes/$themeId/$lessonId': typeof SoundsThemesThemeIdLessonIdRoute
   '/sounds/themes/$themeId': typeof SoundsThemesThemeIdIndexRoute
@@ -92,10 +115,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sounds': typeof SoundsRouteRouteWithChildren
+  '/theory': typeof TheoryRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
+  '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords/': typeof ChordsIndexRoute
   '/sounds/': typeof SoundsIndexRoute
+  '/theory/': typeof TheoryIndexRoute
   '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
   '/sounds/themes/$themeId/$lessonId': typeof SoundsThemesThemeIdLessonIdRoute
   '/sounds/themes/$themeId/': typeof SoundsThemesThemeIdIndexRoute
@@ -105,10 +131,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sounds'
+    | '/theory'
     | '/ableton'
     | '/privacy'
+    | '/theory/$chapterId'
     | '/chords/'
     | '/sounds/'
+    | '/theory/'
     | '/sounds/recipes/$recipeId'
     | '/sounds/themes/$themeId/$lessonId'
     | '/sounds/themes/$themeId/'
@@ -117,8 +146,10 @@ export interface FileRouteTypes {
     | '/'
     | '/ableton'
     | '/privacy'
+    | '/theory/$chapterId'
     | '/chords'
     | '/sounds'
+    | '/theory'
     | '/sounds/recipes/$recipeId'
     | '/sounds/themes/$themeId/$lessonId'
     | '/sounds/themes/$themeId'
@@ -126,10 +157,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/sounds'
+    | '/theory'
     | '/ableton'
     | '/privacy'
+    | '/theory/$chapterId'
     | '/chords/'
     | '/sounds/'
+    | '/theory/'
     | '/sounds/recipes/$recipeId'
     | '/sounds/themes/$themeId/$lessonId'
     | '/sounds/themes/$themeId/'
@@ -138,6 +172,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SoundsRouteRoute: typeof SoundsRouteRouteWithChildren
+  TheoryRouteRoute: typeof TheoryRouteRouteWithChildren
   AbletonRoute: typeof AbletonRoute
   PrivacyRoute: typeof PrivacyRoute
   ChordsIndexRoute: typeof ChordsIndexRoute
@@ -173,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SoundsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/theory': {
+      id: '/theory'
+      path: '/theory'
+      fullPath: '/theory'
+      preLoaderRoute: typeof TheoryRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chords/': {
       id: '/chords/'
       path: '/chords'
@@ -186,6 +228,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/sounds/'
       preLoaderRoute: typeof SoundsIndexRouteImport
       parentRoute: typeof SoundsRouteRoute
+    }
+    '/theory/': {
+      id: '/theory/'
+      path: '/'
+      fullPath: '/theory/'
+      preLoaderRoute: typeof TheoryIndexRouteImport
+      parentRoute: typeof TheoryRouteRoute
+    }
+    '/theory/$chapterId': {
+      id: '/theory/$chapterId'
+      path: '/$chapterId'
+      fullPath: '/theory/$chapterId'
+      preLoaderRoute: typeof TheoryChapterIdRouteImport
+      parentRoute: typeof TheoryRouteRoute
     }
     '/sounds/recipes/$recipeId': {
       id: '/sounds/recipes/$recipeId'
@@ -229,9 +285,24 @@ const SoundsRouteRouteWithChildren = SoundsRouteRoute._addFileChildren(
   SoundsRouteRouteChildren,
 )
 
+interface TheoryRouteRouteChildren {
+  TheoryChapterIdRoute: typeof TheoryChapterIdRoute
+  TheoryIndexRoute: typeof TheoryIndexRoute
+}
+
+const TheoryRouteRouteChildren: TheoryRouteRouteChildren = {
+  TheoryChapterIdRoute: TheoryChapterIdRoute,
+  TheoryIndexRoute: TheoryIndexRoute,
+}
+
+const TheoryRouteRouteWithChildren = TheoryRouteRoute._addFileChildren(
+  TheoryRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SoundsRouteRoute: SoundsRouteRouteWithChildren,
+  TheoryRouteRoute: TheoryRouteRouteWithChildren,
   AbletonRoute: AbletonRoute,
   PrivacyRoute: PrivacyRoute,
   ChordsIndexRoute: ChordsIndexRoute,

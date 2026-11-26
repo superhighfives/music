@@ -6,7 +6,7 @@ export const Route = createFileRoute("/sounds/themes/$themeId/")({
   loader: ({ params }) => {
     if (!findTheme(params.themeId)) throw notFound();
   },
-  head: ({ params }) => ({ meta: [{ title: `${findTheme(params.themeId)?.name ?? "Theme"} · Fog & Pulse` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${findTheme(params.themeId)?.name ?? "Theme"} · sounds` }] }),
   component: ThemeIndex,
 });
 

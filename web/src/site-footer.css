@@ -1,0 +1,44 @@
+/* The footer every section shares (SiteFooter.tsx). Colours come from the surrounding text, so it suits
+   each section's palette without knowing it. */
+.sitefoot {
+  margin-top: 4rem;
+  padding: 1.25rem 0 0.5rem;
+  border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  font: 400 0.8125rem/1.4 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.sitefoot nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.sitefoot a {
+  color: inherit;
+  opacity: 0.6;
+  text-decoration: none;
+  transition: opacity 120ms ease;
+}
+
+.sitefoot a:hover,
+.sitefoot a:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sitefoot a[aria-current='page'] {
+  opacity: 1;
+  font-weight: 600;
+}
+
+/* chords is a full-height app: its footer closes the sidebar, so it sits closer. */
+.sitefoot.chordsfoot {
+  margin-top: 0.5rem;
+  padding-bottom: 0;
+}
+
+/* On a centred page, like chords' connect screen. */
+.sitefoot.centred nav {
+  justify-content: center;
+}

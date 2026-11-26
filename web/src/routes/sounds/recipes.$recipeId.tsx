@@ -7,7 +7,7 @@ export const Route = createFileRoute("/sounds/recipes/$recipeId")({
   loader: ({ params }) => {
     if (!findRecipe(params.recipeId)) throw notFound();
   },
-  head: ({ params }) => ({ meta: [{ title: `${findRecipe(params.recipeId)?.title ?? "Recipe"} · Fog & Pulse` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${findRecipe(params.recipeId)?.title ?? "Recipe"} · sounds` }] }),
   component: RecipePage,
 });
 

@@ -124,7 +124,7 @@ export const CHORDS_URL = "/chords";
 export function Crumbs({ section }: { section: ReactNode }) {
   return (
     <nav className="crumbs">
-      <Link to="/sounds">Fog &amp; Pulse</Link>
+      <Link to="/sounds">sounds</Link>
       <span>/</span>
       <span>{section}</span>
     </nav>

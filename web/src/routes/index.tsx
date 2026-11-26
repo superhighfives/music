@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AccountButton, useSiteAppearance } from '../account/AccountButton'
+import { SiteFooter } from '../SiteFooter'
 import css from '../site.css?url'
 
 export const Route = createFileRoute('/')({
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/')({
       { title: 'music · Charlie Gleason' },
       {
         name: 'description',
-        content: 'Music tools: chord shapes for Ableton Move, a production course for Live 12, and Live Extensions.',
+        content: 'Music tools: chord shapes for Ableton Move, a production course for Live 12, an illustrated theory book, and Live Extensions.',
       },
     ],
     links: [
@@ -41,10 +42,19 @@ function Home() {
         </li>
         <li>
           <a className="card" href="/sounds">
-            <h3>Fog &amp; Pulse</h3>
+            <h3>sounds</h3>
             <p>
               A step-by-step course in music production with Ableton Live 12: sound, soundscapes, melody, songwriting,
               drums and mixing.
+            </p>
+          </a>
+        </li>
+        <li>
+          <a className="card" href="/theory">
+            <h3>Theory</h3>
+            <p>
+              An illustrated music theory book you can play, from the first note to advanced harmony: reading music, scales,
+              chords and theory for songwriting. One idea a day by email, if you like.
             </p>
           </a>
         </li>
@@ -55,9 +65,7 @@ function Home() {
           </a>
         </li>
       </ul>
-      <p className="footer">
-        <a href="/privacy">Privacy</a>
-      </p>
+      <SiteFooter current="home" />
     </main>
   )
 }
