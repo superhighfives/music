@@ -66,11 +66,11 @@ signature (`pkgutil --check-signature <pkg>`), then install with
 | FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | 2.13, 3.10, 3.10, 3.09 | fabfilter.com account; enter each key on first open. Upgraded Nov 2026 |
 | FabFilter Saturn, Timeless 2, Twin 2, Volcano 2 | 1.31, 2.41 (legacy) | Same licence; still installed for older sets. fabfilter.com/support/downloads |
 | Synplant 2 + PhenoType | 2.0.2 | soniccharge.com account; authorise in Sonic Charge Authenticator. Install with [`scripts/install-synplant.sh`](scripts/install-synplant.sh) |
-| Magenta RealTime 2 (AU + standalone) | 0.0.1 | Free, from Google Magenta ([magenta.withgoogle.com/mrt2](https://magenta.withgoogle.com/mrt2)). `MRT2 (AU).app` and `MRT2.app` in /Applications; opening the AU app once registers the plugin. The Mini's base M4 runs the small model; first launch downloads its weights (about 450 MB) |
+| Magenta RealTime 2 (AU + standalone) | 0.0.1 | Free, from Google Magenta ([magenta.withgoogle.com/mrt2](https://magenta.withgoogle.com/mrt2)). Move `MRT2 (AU).app`, `MRT2 - Collider.app` and `MRT2 - Jam.app` to /Applications before first open; opening the AU app once registers the plugin. The Mini's base M4 runs the small model; first launch downloads its weights (about 450 MB) |
 | iZotope Ozone 12 Elements | 12.2.0 | Bought Nov 2026. Installed (AU + VST3); authorise through your iZotope / Native Instruments account (Native Access) |
 | ClyphX Pro | 1.3.1 | Isotonik account (order #487061, 2019). Copy `Remote Scripts/*` to User Library → Remote Scripts and `Factory Packs (Lessons)/*` to Factory Packs |
 | Chord-O-Mat 3 | 3.3 | user.soundmanufacture.net (order Jun 2023). `.amxd` files in User Library → Presets → MIDI Effects → Max MIDI Effect |
-| Circle of Fifth | 1.0.2 | Same Max MIDI Effect folder |
+| Circle of Fifth | 1.0.2 | user.soundmanufacture.net (same account as Chord-O-Mat). Same Max MIDI Effect folder. The zip holds 1.0.0 and 1.0.1; if the circle draws offset, try the other |
 | Own extensions: ambient, chords, progressive, reverse-midi | 1.0.0 | [Releases](https://github.com/superhighfives/music/releases); drag the `.ablx` onto Settings → Extensions |
 
 ### Gotchas
