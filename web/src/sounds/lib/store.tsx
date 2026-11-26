@@ -1,5 +1,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { DEFAULT_SETTINGS, type Derived, derived, MODES, type Settings } from "./music";
+import { useAccountSync } from "~/account/sync";
+import { type Derived, derived, DEFAULT_SETTINGS, type Settings } from "./music";
+import { mergeSaved, parseSaved, type Saved } from "./saved";
 
 /**
  * Settings (key, mode, tempo) and progress live in this browser's localStorage.
@@ -7,11 +9,6 @@ import { DEFAULT_SETTINGS, type Derived, derived, MODES, type Settings } from ".
  */
 const KEY = "sounds.v1";
 
-interface Saved {
-  settings: Settings;
-  done: Record<string, true>;
-  last: string | null;
-}
 
 interface Store extends Saved {
   values: Derived;
@@ -25,18 +22,7 @@ const StoreContext = createContext<Store | null>(null);
 
 function load(): Saved | null {
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? "null");
-    if (!raw || typeof raw !== "object") return null;
-    const s = raw.settings ?? {};
-    return {
-      settings: {
-        root: Number.isInteger(s.root) && s.root >= 0 && s.root < 12 ? s.root : DEFAULT_SETTINGS.root,
-        mode: MODES.some((m) => m.id === s.mode) ? s.mode : DEFAULT_SETTINGS.mode,
-        bpm: Number.isFinite(s.bpm) && s.bpm >= 40 && s.bpm <= 200 ? s.bpm : DEFAULT_SETTINGS.bpm,
-      },
-      done: raw.done && typeof raw.done === "object" ? raw.done : {},
-      last: typeof raw.last === "string" ? raw.last : null,
-    };
+    return parseSaved(JSON.parse(localStorage.getItem(KEY) ?? "null"));
   } catch {
     return null;
   }
@@ -51,6 +37,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (s) setSaved(s);
     setReady(true);
   }, []);
+
+  // Signed in, progress and settings also live in the account, so they follow you to other devices.
+  useAccountSync({ key: "sounds.course", value: saved, ready, parse: parseSaved, merge: mergeSaved, apply: setSaved });
 
   useEffect(() => {
     if (!ready) return;

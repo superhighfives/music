@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { AccountButton } from "~/account/AccountButton";
 import { Logo } from "~/sounds/components/ui";
 import { MODES, type ModeId, SHARP, FLAT } from "~/sounds/lib/music";
 import { StoreProvider, useStore } from "~/sounds/lib/store";
@@ -88,6 +89,7 @@ function Masthead() {
         </div>
       </div>
       <ThemeToggle />
+      <AccountButton className="btn" />
     </header>
   );
 }

@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 
 // The shell is bare on purpose. Each section (home, chords, sounds) brings its own styles in its route's head.
@@ -9,15 +10,18 @@ export const Route = createRootRoute({
 })
 
 function Shell() {
+  // One Clerk session across every section, so signing in once covers chords and Fog & Pulse.
   return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <Outlet />
-        <Scripts />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          <Outlet />
+          <Scripts />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

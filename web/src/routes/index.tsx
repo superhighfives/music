@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { AccountButton } from '../account/AccountButton'
 import css from '../site.css?url'
 
 export const Route = createFileRoute('/')({
@@ -22,6 +23,9 @@ export const Route = createFileRoute('/')({
 function Home() {
   return (
     <main>
+      <div className="account">
+        <AccountButton className="signin" />
+      </div>
       <h1>music</h1>
       <p>Tools for making music with Ableton Live and Move.</p>
       <ul className="cards">
