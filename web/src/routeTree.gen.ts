@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AbletonRouteImport } from './routes/ableton'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SoundsRouteRouteImport } from './routes/sounds/route'
 import { Route as ChordsIndexRouteImport } from './routes/chords/index'
 import { Route as SoundsIndexRouteImport } from './routes/sounds/index'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AbletonRoute = AbletonRouteImport.update({
   id: '/ableton',
   path: '/ableton',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SoundsRouteRoute = SoundsRouteRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sounds': typeof SoundsRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
+  '/privacy': typeof PrivacyRoute
   '/chords/': typeof ChordsIndexRoute
   '/sounds/': typeof SoundsIndexRoute
   '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ableton': typeof AbletonRoute
+  '/privacy': typeof PrivacyRoute
   '/chords': typeof ChordsIndexRoute
   '/sounds': typeof SoundsIndexRoute
   '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/sounds': typeof SoundsRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
+  '/privacy': typeof PrivacyRoute
   '/chords/': typeof ChordsIndexRoute
   '/sounds/': typeof SoundsIndexRoute
   '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/sounds'
     | '/ableton'
+    | '/privacy'
     | '/chords/'
     | '/sounds/'
     | '/sounds/recipes/$recipeId'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/ableton'
+    | '/privacy'
     | '/chords'
     | '/sounds'
     | '/sounds/recipes/$recipeId'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/sounds'
     | '/ableton'
+    | '/privacy'
     | '/chords/'
     | '/sounds/'
     | '/sounds/recipes/$recipeId'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SoundsRouteRoute: typeof SoundsRouteRouteWithChildren
   AbletonRoute: typeof AbletonRoute
+  PrivacyRoute: typeof PrivacyRoute
   ChordsIndexRoute: typeof ChordsIndexRoute
 }
 
@@ -144,6 +157,13 @@ declare module '@tanstack/react-router' {
       path: '/ableton'
       fullPath: '/ableton'
       preLoaderRoute: typeof AbletonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sounds': {
@@ -213,6 +233,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SoundsRouteRoute: SoundsRouteRouteWithChildren,
   AbletonRoute: AbletonRoute,
+  PrivacyRoute: PrivacyRoute,
   ChordsIndexRoute: ChordsIndexRoute,
 }
 export const routeTree = rootRouteImport

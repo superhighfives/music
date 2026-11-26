@@ -54,6 +54,9 @@ function Home() {
           </a>
         </li>
       </ul>
+      <p className="footer">
+        <a href="/privacy">Privacy</a>
+      </p>
     </main>
   )
 }

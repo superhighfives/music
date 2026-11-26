@@ -171,3 +171,12 @@ li + li {
 .signin:hover {
   border-color: #525252;
 }
+
+.footer {
+  margin-top: 3rem;
+  font-size: 0.875rem;
+}
+
+.footer a {
+  color: var(--dim);
+}
