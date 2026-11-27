@@ -170,6 +170,15 @@ request closes. Every push to `main` deploys `prod`. New migrations in
 `migrations/` apply on deploy. Deploy state is in the account's
 `alchemy-state-store` Worker, so CI and every machine share it.
 
+`prod` took over the resources `cf` created (the Worker `music`, its domain and
+cron, and the D1 database `music`, `517b7f2f-2e66-4d48-938a-ed41db5eb64c`) on
+27 November 2026 with a one-time `alchemy deploy --stage prod --adopt`. The
+database kept its data, and its `d1_migrations` history was copied into
+`__alchemy_migrations`. Without `--adopt`, Alchemy refuses to touch a resource it
+doesn't own (`OwnedBySomeoneElse`), so a deploy can't replace the live database
+by accident. If the state store is ever lost, run the same command again to take
+the resources back over.
+
 CI uses the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
 `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY` and their `_DEV` versions.
 
