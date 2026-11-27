@@ -44,7 +44,7 @@ export function AccountButton({ className, appearance }: { className: string; ap
 export const isDarkPage = (dataTheme: string | null, systemDark: boolean) => (dataTheme ? dataTheme === 'dark' : systemDark)
 
 /**
- * Whether the page is dark right now: an explicit data-theme on <html> (sounds' toggle sets one),
+ * Whether the page is dark right now: an explicit data-theme on <html> (Production's toggle sets one),
  * or else the system setting. Follows both as they change. False until mounted, like the server render.
  */
 export function useDarkPage() {

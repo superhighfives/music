@@ -1,12 +1,12 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { ThemeView } from "~/sounds/components/ThemeView";
-import { findTheme } from "~/sounds/content/themes";
+import { ThemeView } from "~/production/components/ThemeView";
+import { findTheme } from "~/production/content/themes";
 
-export const Route = createFileRoute("/sounds/themes/$themeId/")({
+export const Route = createFileRoute("/production/themes/$themeId/")({
   loader: ({ params }) => {
     if (!findTheme(params.themeId)) throw notFound();
   },
-  head: ({ params }) => ({ meta: [{ title: `${findTheme(params.themeId)?.name ?? "Theme"} · sounds` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${findTheme(params.themeId)?.name ?? "Theme"} · Production` }] }),
   component: ThemeIndex,
 });
 

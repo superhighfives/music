@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { lessonKey, type Theme } from "~/sounds/content/themes";
-import { useStore } from "~/sounds/lib/store";
-import { Crumbs } from "~/sounds/components/ui";
+import { lessonKey, type Theme } from "~/production/content/themes";
+import { useStore } from "~/production/lib/store";
+import { Crumbs } from "~/production/components/ui";
 
 /** A theme: the lesson rail beside one lesson, or the planned outline. */
 export function ThemeView({ theme, lessonId }: { theme: Theme; lessonId?: string }) {
@@ -39,7 +39,7 @@ export function ThemeView({ theme, lessonId }: { theme: Theme; lessonId?: string
             return (
               <Link
                 key={l.id}
-                to="/sounds/themes/$themeId/$lessonId"
+                to="/production/themes/$themeId/$lessonId"
                 params={{ themeId: theme.id, lessonId: l.id }}
                 className={isDone ? "done" : undefined}
                 aria-current={i === index ? "page" : undefined}
@@ -71,12 +71,12 @@ export function ThemeView({ theme, lessonId }: { theme: Theme; lessonId?: string
               </button>
               <div className="navbtns">
                 {prev ? (
-                  <Link className="btn" to="/sounds/themes/$themeId/$lessonId" params={{ themeId: theme.id, lessonId: prev.id }}>
+                  <Link className="btn" to="/production/themes/$themeId/$lessonId" params={{ themeId: theme.id, lessonId: prev.id }}>
                     ← {prev.title}
                   </Link>
                 ) : null}
                 {next ? (
-                  <Link className="btn" to="/sounds/themes/$themeId/$lessonId" params={{ themeId: theme.id, lessonId: next.id }}>
+                  <Link className="btn" to="/production/themes/$themeId/$lessonId" params={{ themeId: theme.id, lessonId: next.id }}>
                     {next.title} →
                   </Link>
                 ) : null}

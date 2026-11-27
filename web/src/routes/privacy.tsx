@@ -27,7 +27,7 @@ function Privacy() {
 
       <h2>Without an account</h2>
       <p>
-        chords, sounds and Theory save your settings, pasted chord sheets, course progress and chapters read in
+        Chords, Production and Theory save your settings, pasted chord sheets, course progress and chapters read in
         your browser's own storage. They never leave your device. Clearing your browser's data for this site removes them.
       </p>
 
@@ -39,7 +39,7 @@ function Privacy() {
       </p>
       <p>
         Signed in, the same things your browser saves are also kept with your account, so they follow you to other
-        devices: your pasted chord sheets, sounds' key, mode, tempo and lessons done, and the Theory chapters
+        devices: your pasted chord sheets, Production's key, mode, tempo and lessons done, and the Theory chapters
         you've read and checks you've passed. They're stored on{' '}
         <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, which runs this site, and only you can read
         or change them through this site.

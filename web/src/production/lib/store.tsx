@@ -7,7 +7,7 @@ import { mergeSaved, parseSaved, type Saved } from "./saved";
  * Settings (key, mode, tempo) and progress live in this browser's localStorage.
  * The server always renders the defaults; saved values load after hydration.
  */
-const KEY = "sounds.v1";
+const KEY = "production.v1";
 
 
 interface Store extends Saved {
@@ -39,7 +39,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Signed in, progress and settings also live in the account, so they follow you to other devices.
-  useAccountSync({ key: "sounds.course", value: saved, ready, parse: parseSaved, merge: mergeSaved, apply: setSaved });
+  useAccountSync({ key: "production.course", value: saved, ready, parse: parseSaved, merge: mergeSaved, apply: setSaved });
 
   useEffect(() => {
     if (!ready) return;

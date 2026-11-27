@@ -3,4 +3,5 @@ dist
 .wrangler
 .tanstack
 .dev.vars*
+!.dev.vars.example
 .cloudflare

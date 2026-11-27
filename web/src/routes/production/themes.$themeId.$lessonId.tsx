@@ -1,8 +1,8 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { ThemeView } from "~/sounds/components/ThemeView";
-import { findTheme } from "~/sounds/content/themes";
+import { ThemeView } from "~/production/components/ThemeView";
+import { findTheme } from "~/production/content/themes";
 
-export const Route = createFileRoute("/sounds/themes/$themeId/$lessonId")({
+export const Route = createFileRoute("/production/themes/$themeId/$lessonId")({
   loader: ({ params }) => {
     const theme = findTheme(params.themeId);
     if (!theme?.lessons.some((l) => l.id === params.lessonId)) throw notFound();
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/sounds/themes/$themeId/$lessonId")({
   head: ({ params }) => {
     const theme = findTheme(params.themeId);
     const lesson = theme?.lessons.find((l) => l.id === params.lessonId);
-    return { meta: [{ title: `${lesson?.title ?? "Lesson"} · ${theme?.name ?? ""} · sounds` }] };
+    return { meta: [{ title: `${lesson?.title ?? "Lesson"} · ${theme?.name ?? ""} · Production` }] };
   },
   component: Lesson,
 });

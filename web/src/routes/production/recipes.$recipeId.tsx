@@ -1,13 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { findRecipe, RECIPES } from "~/sounds/content/recipes";
-import { useStore } from "~/sounds/lib/store";
-import { Crumbs } from "~/sounds/components/ui";
+import { findRecipe, RECIPES } from "~/production/content/recipes";
+import { useStore } from "~/production/lib/store";
+import { Crumbs } from "~/production/components/ui";
 
-export const Route = createFileRoute("/sounds/recipes/$recipeId")({
+export const Route = createFileRoute("/production/recipes/$recipeId")({
   loader: ({ params }) => {
     if (!findRecipe(params.recipeId)) throw notFound();
   },
-  head: ({ params }) => ({ meta: [{ title: `${findRecipe(params.recipeId)?.title ?? "Recipe"} · sounds` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${findRecipe(params.recipeId)?.title ?? "Recipe"} · Production` }] }),
   component: RecipePage,
 });
 
@@ -30,7 +30,7 @@ function RecipePage() {
       <div className="reader">
         <nav className="rail" aria-label="Recipes">
           {RECIPES.map((r) => (
-            <Link key={r.id} to="/sounds/recipes/$recipeId" params={{ recipeId: r.id }} aria-current={r.id === recipe.id ? "page" : undefined}>
+            <Link key={r.id} to="/production/recipes/$recipeId" params={{ recipeId: r.id }} aria-current={r.id === recipe.id ? "page" : undefined}>
               <span className="n">{done[`recipe.${r.id}`] ? "✓" : "··"}</span>
               <span>{r.title}</span>
             </Link>
@@ -42,7 +42,7 @@ function RecipePage() {
             <button type="button" className={done[key] ? "btn isdone" : "btn primary"} onClick={() => toggleDone(key)}>
               {done[key] ? "✓ Done" : "Mark recipe done"}
             </button>
-            <Link className="btn" to="/sounds">
+            <Link className="btn" to="/production">
               All themes and recipes
             </Link>
           </div>

@@ -2,19 +2,19 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { dark } from "@clerk/ui/themes";
 import { SiteFooter } from "~/SiteFooter";
 import { AccountButton, type ClerkAppearance, useDarkPage } from "~/account/AccountButton";
-import { Logo } from "~/sounds/components/ui";
-import { MODES, type ModeId, SHARP, FLAT } from "~/sounds/lib/music";
-import { StoreProvider, useStore } from "~/sounds/lib/store";
-import appCss from "~/sounds/styles/app.css?url";
+import { Logo } from "~/production/components/ui";
+import { MODES, type ModeId, SHARP, FLAT } from "~/production/lib/music";
+import { StoreProvider, useStore } from "~/production/lib/store";
+import appCss from "~/production/styles/app.css?url";
 
 // Applies a saved light/dark choice before first paint, so there's no flash.
-const THEME_SCRIPT = `try{var t=localStorage.getItem("sounds.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
+const THEME_SCRIPT = `try{var t=localStorage.getItem("production.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
-// sounds, the course. Its styles, fonts and theme load only under /sounds.
-export const Route = createFileRoute("/sounds")({
+// Production, the course. Its styles, fonts and theme load only under /production.
+export const Route = createFileRoute("/production")({
   head: () => ({
     meta: [
-      { title: "sounds" },
+      { title: "Production" },
       {
         name: "description",
         content: "A step-by-step course in music production with Ableton Live 12: sound quality, soundscapes, melody, songwriting, drums and mixing.",
@@ -40,7 +40,7 @@ function Root() {
       <div className="page">
         <Masthead />
         <Outlet />
-        <SiteFooter current="sounds" />
+        <SiteFooter current="production" />
       </div>
     </StoreProvider>
   );
@@ -56,9 +56,9 @@ function Masthead() {
   const clerkAppearance = useDarkPage() ? CLERK_DARK : CLERK_LIGHT;
   return (
     <header className="mast">
-      <Link className="brand" to="/sounds">
+      <Link className="brand" to="/production">
         <Logo />
-        sounds
+        Production
       </Link>
       <div className="ctrls">
         <label className="ctrl">
@@ -109,7 +109,7 @@ function ThemeToggle() {
     const next = current === "dark" ? "light" : "dark";
     root.setAttribute("data-theme", next);
     try {
-      localStorage.setItem("sounds.theme", next);
+      localStorage.setItem("production.theme", next);
     } catch {
       // Not remembered, but the switch still applies.
     }
