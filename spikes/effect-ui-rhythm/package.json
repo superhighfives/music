@@ -1,0 +1,23 @@
+{
+  "name": "effect-ui-rhythm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "@effect/ui": "https://pkg.pr.new/Effect-TS/ui/@effect/ui@22128c6",
+    "@effect/ui-kit": "https://pkg.pr.new/Effect-TS/ui/@effect/ui-kit@22128c6",
+    "effect": "4.1.7"
+  },
+  "devDependencies": {
+    "@effect/vitest": "4.1.7",
+    "happy-dom": "^21.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.4.0",
+    "vitest": "^5.1.2"
+  }
+}
