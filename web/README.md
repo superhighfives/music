@@ -7,7 +7,7 @@ app on Cloudflare Workers, deployed with the `cf` CLI.
 | --- | --- | --- |
 | `/` | Home | `src/routes/index.tsx` |
 | `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/routes/chords/`, `src/chords/` |
-| `/sounds` | sounds: a step-by-step course in music production with Ableton Live 12 | `src/routes/sounds/`, `src/sounds/` |
+| `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/routes/production/`, `src/production/` |
 | `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/routes/theory/`, `src/theory/` |
 | `/ableton` | The Ableton Live Extensions, with downloads | `src/routes/ableton.tsx` |
 
@@ -15,9 +15,9 @@ app on Cloudflare Workers, deployed with the `cf` CLI.
 
 Each section brings its own styles in its route's `head`, so they never meet:
 chords uses Tailwind (`src/chords/styles.css`, which scans only chords' files),
-sounds uses its own CSS (`src/sounds/styles/app.css`), theory uses its own
+Production uses its own CSS (`src/production/styles/app.css`), theory uses its own
 (`src/theory/styles/theory.css`), and home, `/ableton` and
-`/privacy` share `src/site.css`. chords is always dark, like Move. sounds and Theory have
+`/privacy` share `src/site.css`. chords is always dark, like Move. Production and Theory have
 a light/dark toggle, and the other pages follow the system setting. Clerk's
 sign-in dialog and account menu follow each section (`appearance` on
 `AccountButton`). The root route is a bare shell. Links between sections are
@@ -32,9 +32,9 @@ All of a view's state is in the URL, so any view can be bookmarked or shared.
 Without Move connected, only the chord lookup (Play) works; Learn, Songs and
 Practice check what you play on Move.
 
-### sounds
+### Production
 
-The course is plain data in `src/sounds/content/`:
+The course is plain data in `src/production/content/`:
 
 - **`themes.tsx`**: six themes, each a list of `lessons` plus `planned` titles
   still to write. A lesson is an `id`, a `title` and a `Body` component. To add
@@ -42,13 +42,13 @@ The course is plain data in `src/sounds/content/`:
 - **`recipes.tsx`**: short tutorials that rebuild one sound from a real record.
   Cite where any claim about the record comes from.
 
-Lessons build from the components in `src/sounds/components/ui.tsx` (`Sheet`,
+Lessons build from the components in `src/production/components/ui.tsx` (`Sheet`,
 `Row`, `Cell`, `Steps`, `Task`, `Note`, `KeyBox`) and the diagrams in
-`src/sounds/components/diagrams.tsx`. Anything that depends on the key or tempo
+`src/production/components/diagrams.tsx`. Anything that depends on the key or tempo
 reads `useValues()`, so it follows the controls in the header.
 
 When a theme or recipe lands, add a line to the edition log in
-`src/routes/sounds/index.tsx`.
+`src/routes/production/index.tsx`.
 
 ### Theory
 
@@ -116,8 +116,8 @@ route wraps every section in one `ClerkProvider`, and `src/start.ts` runs
 `clerkMiddleware()` on every request so server functions can call `auth()`.
 Each section has a Sign in button (`src/account/AccountButton.tsx`).
 
-Signed in, chords' pasted songs (`chords.songs`), sounds' settings and
-progress (`sounds.course`) and Theory's progress (`theory.book`) are also kept in the D1 database `music`, one JSON
+Signed in, chords' pasted songs (`chords.songs`), Production's settings and
+progress (`production.course`) and Theory's progress (`theory.book`) are also kept in the D1 database `music`, one JSON
 value per person and key (`migrations/0001_saved.sql`). `src/account/saved.ts`
 has the two server functions, which only ever touch the signed-in person's rows.
 `useAccountSync` (`src/account/sync.ts`) merges this browser's copy into the
@@ -147,7 +147,7 @@ pnpm test
 pnpm build      # cf build, into .cloudflare/
 ```
 
-Before the first `pnpm dev`, put Clerk's development keys in `.dev.vars` and
+Before the first `pnpm dev`, copy `.dev.vars.example` to `.dev.vars`, fill in Clerk's development keys, and
 create the local database:
 
 ```sh

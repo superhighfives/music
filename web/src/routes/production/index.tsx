@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CHORDS_URL, KeyBox, Logo } from "~/sounds/components/ui";
-import { RECIPES } from "~/sounds/content/recipes";
-import { lessonKey, THEMES, type Theme } from "~/sounds/content/themes";
-import { useStore } from "~/sounds/lib/store";
+import { CHORDS_URL, KeyBox, Logo } from "~/production/components/ui";
+import { RECIPES } from "~/production/content/recipes";
+import { lessonKey, THEMES, type Theme } from "~/production/content/themes";
+import { useStore } from "~/production/lib/store";
 
-export const Route = createFileRoute("/sounds/")({ component: Home });
+export const Route = createFileRoute("/production/")({ component: Home });
 
 /** Edition log, newest first. Add a line when a theme or recipe lands. */
 const LOG: [string, string, string][] = [
+  ["2026-11-26", "Edition 6.", "sounds is now Production, at music.charliegleason.com/production."],
   ["2026-11-26", "Edition 5.", "Fog & Pulse is now just sounds, with the same footer as the rest of music."],
   ["2026-11-25", "Edition 4.", "Moves to music.charliegleason.com/sounds, beside chords and the Ableton Extensions."],
   ["2026-11-25", "Edition 3.", "Moves to sounds.charliegleason.com, built from the music repo and deployed on every push to main."],
@@ -22,14 +23,14 @@ function Home() {
     <>
       <section className="hero">
         <Logo big />
-        <h1>sounds</h1>
+        <h1>Production</h1>
         <p className="lede">
           A step-by-step course in music production with Ableton Live 12: high-quality audio, soundscapes, melody and pop songwriting. Big themes you work through in order, and short recipes that rebuild one sound from a real record.
         </p>
       </section>
       <div className="home">
         {resume ? (
-          <Link className="continue" to="/sounds/themes/$themeId/$lessonId" params={{ themeId: resume.theme.id, lessonId: resume.lesson.id }}>
+          <Link className="continue" to="/production/themes/$themeId/$lessonId" params={{ themeId: resume.theme.id, lessonId: resume.lesson.id }}>
             <span className="lab">Continue</span>
             <b>
               {resume.theme.name} · {resume.lesson.title}
@@ -53,7 +54,7 @@ function Home() {
           </h2>
           <div className="list">
             {RECIPES.map((r) => (
-              <Link key={r.id} to="/sounds/recipes/$recipeId" params={{ recipeId: r.id }}>
+              <Link key={r.id} to="/production/recipes/$recipeId" params={{ recipeId: r.id }}>
                 <span className="t">{r.title}</span>
                 <span className={done[`recipe.${r.id}`] ? "chip lit" : "chip cool"}>{done[`recipe.${r.id}`] ? "Done" : "Recipe"}</span>
                 <span className="s">
@@ -95,7 +96,7 @@ function ThemeCard({ theme, index, done }: { theme: Theme; index: number; done: 
   const complete = theme.lessons.filter((l) => done[lessonKey(theme, l)]).length;
   const status = total === 0 ? <span className="chip">Planned</span> : complete === total ? <span className="chip lit">Done</span> : <span className="chip">{total} {total === 1 ? "lesson" : "lessons"}</span>;
   return (
-    <Link className="card" to="/sounds/themes/$themeId" params={{ themeId: theme.id }}>
+    <Link className="card" to="/production/themes/$themeId" params={{ themeId: theme.id }}>
       <div className="top">
         <span className="num">{String(index + 1).padStart(2, "0")}</span>
         {status}

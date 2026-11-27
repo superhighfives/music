@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
 
 /** What an account saves. Each is one JSON value, owned by the section that writes it. */
-export const SYNC_KEYS = ['chords.songs', 'sounds.course', 'theory.book'] as const
+export const SYNC_KEYS = ['chords.songs', 'production.course', 'theory.book'] as const
 export type SyncKey = (typeof SYNC_KEYS)[number]
 
 /** An account's copy of one value, and its version. */

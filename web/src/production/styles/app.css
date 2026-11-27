@@ -1,4 +1,4 @@
-/* sounds. Layout: a quiet course reader. Home is a grid of themes and a list of recipes; a theme is a lesson rail beside one lesson at a time. Techniques are spec-sheet grids of labelled cells. One lit pad of yellow, everything else greyscale. */
+/* Production. Layout: a quiet course reader. Home is a grid of themes and a list of recipes; a theme is a lesson rail beside one lesson at a time. Techniques are spec-sheet grids of labelled cells. One lit pad of yellow, everything else greyscale. */
 html { -webkit-text-size-adjust: 100%; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 body { margin: 0; }
 img { max-width: 100%; }

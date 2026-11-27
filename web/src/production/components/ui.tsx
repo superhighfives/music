@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Children, isValidElement, type ReactNode } from "react";
-import { useStore } from "~/sounds/lib/store";
-import { diatonicChords, keyName, scaleNotes } from "~/sounds/lib/music";
+import { useStore } from "~/production/lib/store";
+import { diatonicChords, keyName, scaleNotes } from "~/production/lib/music";
 
 /** A spec sheet: a headed grid of labelled cells. */
 export function Sheet({ head, sub, children }: { head: ReactNode; sub?: ReactNode; children: ReactNode }) {
@@ -124,7 +124,7 @@ export const CHORDS_URL = "/chords";
 export function Crumbs({ section }: { section: ReactNode }) {
   return (
     <nav className="crumbs">
-      <Link to="/sounds">sounds</Link>
+      <Link to="/production">Production</Link>
       <span>/</span>
       <span>{section}</span>
     </nav>

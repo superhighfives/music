@@ -118,6 +118,22 @@ a.card:focus-visible {
   border-color: var(--line-strong);
 }
 
+.art-card {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  align-items: start;
+  gap: 1rem;
+}
+
+/* A square of shader art. Its own colours, so it reads the same in light and dark. */
+.art {
+  aspect-ratio: 1;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+}
+
 .card h3 {
   display: flex;
   align-items: baseline;

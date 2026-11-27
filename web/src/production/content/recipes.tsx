@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
-import { VocoderFlow } from "~/sounds/components/diagrams";
-import { CHORDS_URL, Cell, KeyBox, Row, Sheet, Steps, Task } from "~/sounds/components/ui";
+import { VocoderFlow } from "~/production/components/diagrams";
+import { CHORDS_URL, Cell, KeyBox, Row, Sheet, Steps, Task } from "~/production/components/ui";
 
 export interface Recipe {
   id: string;

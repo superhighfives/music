@@ -1,13 +1,13 @@
 import css from './site-footer.css?url'
 
-export type Section = 'home' | 'chords' | 'sounds' | 'theory' | 'ableton' | 'privacy'
+export type Section = 'home' | 'chords' | 'production' | 'theory' | 'ableton' | 'privacy'
 
 const LINKS: { id: Section; href: string; label: string }[] = [
   { id: 'home', href: '/', label: 'music' },
-  { id: 'chords', href: '/chords', label: 'chords' },
-  { id: 'sounds', href: '/sounds', label: 'sounds' },
+  { id: 'chords', href: '/chords', label: 'Chords' },
+  { id: 'production', href: '/production', label: 'Production' },
   { id: 'theory', href: '/theory', label: 'Theory' },
-  { id: 'ableton', href: '/ableton', label: 'Ableton Extensions' },
+  { id: 'ableton', href: '/ableton', label: 'Extensions' },
   { id: 'privacy', href: '/privacy', label: 'Privacy' },
 ]
 

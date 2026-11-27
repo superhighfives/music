@@ -12,15 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AbletonRouteImport } from './routes/ableton'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as SoundsRouteRouteImport } from './routes/sounds/route'
+import { Route as ProductionRouteRouteImport } from './routes/production/route'
 import { Route as TheoryRouteRouteImport } from './routes/theory/route'
 import { Route as ChordsIndexRouteImport } from './routes/chords/index'
-import { Route as SoundsIndexRouteImport } from './routes/sounds/index'
+import { Route as ProductionIndexRouteImport } from './routes/production/index'
 import { Route as TheoryIndexRouteImport } from './routes/theory/index'
 import { Route as TheoryChapterIdRouteImport } from './routes/theory/$chapterId'
-import { Route as SoundsRecipesRecipeIdRouteImport } from './routes/sounds/recipes.$recipeId'
-import { Route as SoundsThemesThemeIdIndexRouteImport } from './routes/sounds/themes.$themeId.index'
-import { Route as SoundsThemesThemeIdLessonIdRouteImport } from './routes/sounds/themes.$themeId.$lessonId'
+import { Route as ProductionRecipesRecipeIdRouteImport } from './routes/production/recipes.$recipeId'
+import { Route as ProductionThemesThemeIdIndexRouteImport } from './routes/production/themes.$themeId.index'
+import { Route as ProductionThemesThemeIdLessonIdRouteImport } from './routes/production/themes.$themeId.$lessonId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,9 +37,9 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SoundsRouteRoute = SoundsRouteRouteImport.update({
-  id: '/sounds',
-  path: '/sounds',
+const ProductionRouteRoute = ProductionRouteRouteImport.update({
+  id: '/production',
+  path: '/production',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TheoryRouteRoute = TheoryRouteRouteImport.update({
@@ -52,10 +52,10 @@ const ChordsIndexRoute = ChordsIndexRouteImport.update({
   path: '/chords/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SoundsIndexRoute = SoundsIndexRouteImport.update({
+const ProductionIndexRoute = ProductionIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => SoundsRouteRoute,
+  getParentRoute: () => ProductionRouteRoute,
 } as any)
 const TheoryIndexRoute = TheoryIndexRouteImport.update({
   id: '/',
@@ -67,37 +67,38 @@ const TheoryChapterIdRoute = TheoryChapterIdRouteImport.update({
   path: '/$chapterId',
   getParentRoute: () => TheoryRouteRoute,
 } as any)
-const SoundsRecipesRecipeIdRoute = SoundsRecipesRecipeIdRouteImport.update({
-  id: '/recipes/$recipeId',
-  path: '/recipes/$recipeId',
-  getParentRoute: () => SoundsRouteRoute,
-} as any)
-const SoundsThemesThemeIdIndexRoute =
-  SoundsThemesThemeIdIndexRouteImport.update({
+const ProductionRecipesRecipeIdRoute =
+  ProductionRecipesRecipeIdRouteImport.update({
+    id: '/recipes/$recipeId',
+    path: '/recipes/$recipeId',
+    getParentRoute: () => ProductionRouteRoute,
+  } as any)
+const ProductionThemesThemeIdIndexRoute =
+  ProductionThemesThemeIdIndexRouteImport.update({
     id: '/themes/$themeId/',
     path: '/themes/$themeId/',
-    getParentRoute: () => SoundsRouteRoute,
+    getParentRoute: () => ProductionRouteRoute,
   } as any)
-const SoundsThemesThemeIdLessonIdRoute =
-  SoundsThemesThemeIdLessonIdRouteImport.update({
+const ProductionThemesThemeIdLessonIdRoute =
+  ProductionThemesThemeIdLessonIdRouteImport.update({
     id: '/themes/$themeId/$lessonId',
     path: '/themes/$themeId/$lessonId',
-    getParentRoute: () => SoundsRouteRoute,
+    getParentRoute: () => ProductionRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/sounds': typeof SoundsRouteRouteWithChildren
+  '/production': typeof ProductionRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords/': typeof ChordsIndexRoute
-  '/sounds/': typeof SoundsIndexRoute
+  '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
-  '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
-  '/sounds/themes/$themeId/$lessonId': typeof SoundsThemesThemeIdLessonIdRoute
-  '/sounds/themes/$themeId/': typeof SoundsThemesThemeIdIndexRoute
+  '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
+  '/production/themes/$themeId/$lessonId': typeof ProductionThemesThemeIdLessonIdRoute
+  '/production/themes/$themeId/': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -105,42 +106,42 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords': typeof ChordsIndexRoute
-  '/sounds': typeof SoundsIndexRoute
+  '/production': typeof ProductionIndexRoute
   '/theory': typeof TheoryIndexRoute
-  '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
-  '/sounds/themes/$themeId/$lessonId': typeof SoundsThemesThemeIdLessonIdRoute
-  '/sounds/themes/$themeId': typeof SoundsThemesThemeIdIndexRoute
+  '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
+  '/production/themes/$themeId/$lessonId': typeof ProductionThemesThemeIdLessonIdRoute
+  '/production/themes/$themeId': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/sounds': typeof SoundsRouteRouteWithChildren
+  '/production': typeof ProductionRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords/': typeof ChordsIndexRoute
-  '/sounds/': typeof SoundsIndexRoute
+  '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
-  '/sounds/recipes/$recipeId': typeof SoundsRecipesRecipeIdRoute
-  '/sounds/themes/$themeId/$lessonId': typeof SoundsThemesThemeIdLessonIdRoute
-  '/sounds/themes/$themeId/': typeof SoundsThemesThemeIdIndexRoute
+  '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
+  '/production/themes/$themeId/$lessonId': typeof ProductionThemesThemeIdLessonIdRoute
+  '/production/themes/$themeId/': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/sounds'
+    | '/production'
     | '/theory'
     | '/ableton'
     | '/privacy'
     | '/theory/$chapterId'
     | '/chords/'
-    | '/sounds/'
+    | '/production/'
     | '/theory/'
-    | '/sounds/recipes/$recipeId'
-    | '/sounds/themes/$themeId/$lessonId'
-    | '/sounds/themes/$themeId/'
+    | '/production/recipes/$recipeId'
+    | '/production/themes/$themeId/$lessonId'
+    | '/production/themes/$themeId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -148,30 +149,30 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/theory/$chapterId'
     | '/chords'
-    | '/sounds'
+    | '/production'
     | '/theory'
-    | '/sounds/recipes/$recipeId'
-    | '/sounds/themes/$themeId/$lessonId'
-    | '/sounds/themes/$themeId'
+    | '/production/recipes/$recipeId'
+    | '/production/themes/$themeId/$lessonId'
+    | '/production/themes/$themeId'
   id:
     | '__root__'
     | '/'
-    | '/sounds'
+    | '/production'
     | '/theory'
     | '/ableton'
     | '/privacy'
     | '/theory/$chapterId'
     | '/chords/'
-    | '/sounds/'
+    | '/production/'
     | '/theory/'
-    | '/sounds/recipes/$recipeId'
-    | '/sounds/themes/$themeId/$lessonId'
-    | '/sounds/themes/$themeId/'
+    | '/production/recipes/$recipeId'
+    | '/production/themes/$themeId/$lessonId'
+    | '/production/themes/$themeId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SoundsRouteRoute: typeof SoundsRouteRouteWithChildren
+  ProductionRouteRoute: typeof ProductionRouteRouteWithChildren
   TheoryRouteRoute: typeof TheoryRouteRouteWithChildren
   AbletonRoute: typeof AbletonRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -201,11 +202,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sounds': {
-      id: '/sounds'
-      path: '/sounds'
-      fullPath: '/sounds'
-      preLoaderRoute: typeof SoundsRouteRouteImport
+    '/production': {
+      id: '/production'
+      path: '/production'
+      fullPath: '/production'
+      preLoaderRoute: typeof ProductionRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/theory': {
@@ -222,12 +223,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChordsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sounds/': {
-      id: '/sounds/'
+    '/production/': {
+      id: '/production/'
       path: '/'
-      fullPath: '/sounds/'
-      preLoaderRoute: typeof SoundsIndexRouteImport
-      parentRoute: typeof SoundsRouteRoute
+      fullPath: '/production/'
+      preLoaderRoute: typeof ProductionIndexRouteImport
+      parentRoute: typeof ProductionRouteRoute
     }
     '/theory/': {
       id: '/theory/'
@@ -243,46 +244,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TheoryChapterIdRouteImport
       parentRoute: typeof TheoryRouteRoute
     }
-    '/sounds/recipes/$recipeId': {
-      id: '/sounds/recipes/$recipeId'
+    '/production/recipes/$recipeId': {
+      id: '/production/recipes/$recipeId'
       path: '/recipes/$recipeId'
-      fullPath: '/sounds/recipes/$recipeId'
-      preLoaderRoute: typeof SoundsRecipesRecipeIdRouteImport
-      parentRoute: typeof SoundsRouteRoute
+      fullPath: '/production/recipes/$recipeId'
+      preLoaderRoute: typeof ProductionRecipesRecipeIdRouteImport
+      parentRoute: typeof ProductionRouteRoute
     }
-    '/sounds/themes/$themeId/': {
-      id: '/sounds/themes/$themeId/'
+    '/production/themes/$themeId/': {
+      id: '/production/themes/$themeId/'
       path: '/themes/$themeId'
-      fullPath: '/sounds/themes/$themeId/'
-      preLoaderRoute: typeof SoundsThemesThemeIdIndexRouteImport
-      parentRoute: typeof SoundsRouteRoute
+      fullPath: '/production/themes/$themeId/'
+      preLoaderRoute: typeof ProductionThemesThemeIdIndexRouteImport
+      parentRoute: typeof ProductionRouteRoute
     }
-    '/sounds/themes/$themeId/$lessonId': {
-      id: '/sounds/themes/$themeId/$lessonId'
+    '/production/themes/$themeId/$lessonId': {
+      id: '/production/themes/$themeId/$lessonId'
       path: '/themes/$themeId/$lessonId'
-      fullPath: '/sounds/themes/$themeId/$lessonId'
-      preLoaderRoute: typeof SoundsThemesThemeIdLessonIdRouteImport
-      parentRoute: typeof SoundsRouteRoute
+      fullPath: '/production/themes/$themeId/$lessonId'
+      preLoaderRoute: typeof ProductionThemesThemeIdLessonIdRouteImport
+      parentRoute: typeof ProductionRouteRoute
     }
   }
 }
 
-interface SoundsRouteRouteChildren {
-  SoundsIndexRoute: typeof SoundsIndexRoute
-  SoundsRecipesRecipeIdRoute: typeof SoundsRecipesRecipeIdRoute
-  SoundsThemesThemeIdLessonIdRoute: typeof SoundsThemesThemeIdLessonIdRoute
-  SoundsThemesThemeIdIndexRoute: typeof SoundsThemesThemeIdIndexRoute
+interface ProductionRouteRouteChildren {
+  ProductionIndexRoute: typeof ProductionIndexRoute
+  ProductionRecipesRecipeIdRoute: typeof ProductionRecipesRecipeIdRoute
+  ProductionThemesThemeIdLessonIdRoute: typeof ProductionThemesThemeIdLessonIdRoute
+  ProductionThemesThemeIdIndexRoute: typeof ProductionThemesThemeIdIndexRoute
 }
 
-const SoundsRouteRouteChildren: SoundsRouteRouteChildren = {
-  SoundsIndexRoute: SoundsIndexRoute,
-  SoundsRecipesRecipeIdRoute: SoundsRecipesRecipeIdRoute,
-  SoundsThemesThemeIdLessonIdRoute: SoundsThemesThemeIdLessonIdRoute,
-  SoundsThemesThemeIdIndexRoute: SoundsThemesThemeIdIndexRoute,
+const ProductionRouteRouteChildren: ProductionRouteRouteChildren = {
+  ProductionIndexRoute: ProductionIndexRoute,
+  ProductionRecipesRecipeIdRoute: ProductionRecipesRecipeIdRoute,
+  ProductionThemesThemeIdLessonIdRoute: ProductionThemesThemeIdLessonIdRoute,
+  ProductionThemesThemeIdIndexRoute: ProductionThemesThemeIdIndexRoute,
 }
 
-const SoundsRouteRouteWithChildren = SoundsRouteRoute._addFileChildren(
-  SoundsRouteRouteChildren,
+const ProductionRouteRouteWithChildren = ProductionRouteRoute._addFileChildren(
+  ProductionRouteRouteChildren,
 )
 
 interface TheoryRouteRouteChildren {
@@ -301,7 +302,7 @@ const TheoryRouteRouteWithChildren = TheoryRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SoundsRouteRoute: SoundsRouteRouteWithChildren,
+  ProductionRouteRoute: ProductionRouteRouteWithChildren,
   TheoryRouteRoute: TheoryRouteRouteWithChildren,
   AbletonRoute: AbletonRoute,
   PrivacyRoute: PrivacyRoute,

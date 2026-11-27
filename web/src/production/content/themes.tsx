@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
-import { Arrangement, EqChart, Rack, SignalMap } from "~/sounds/components/diagrams";
-import { CHORDS_URL, Cell, KeyBox, Note, Row, Sheet, Steps, Task } from "~/sounds/components/ui";
-import { useValues } from "~/sounds/lib/store";
+import { Arrangement, EqChart, Rack, SignalMap } from "~/production/components/diagrams";
+import { CHORDS_URL, Cell, KeyBox, Note, Row, Sheet, Steps, Task } from "~/production/components/ui";
+import { useValues } from "~/production/lib/store";
 
 export interface Lesson {
   id: string;
