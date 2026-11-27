@@ -1,28 +1,33 @@
 name: Web
 
-# Check every pull request that touches web/. Deploy to Cloudflare only on
-# pushes to main.
+# Every pull request that touches web/ deploys its own preview stage, pr-<number>, with its own
+# Worker and database, and destroys it when the pull request closes. Pushes to main deploy prod.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     paths: ["web/**", ".github/workflows/web.yml"]
   push:
     branches: [main]
     paths: ["web/**", ".github/workflows/web.yml"]
   workflow_dispatch:
 
+# One run per stage at a time. A deploy is not cancelled halfway, so state stays consistent.
 concurrency:
-  group: web-${{ github.ref }}
-  cancel-in-progress: true
+  group: web-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 defaults:
   run:
     working-directory: web
 
+env:
+  STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'prod' }}
+
 jobs:
   deploy:
+    # Only main deploys prod, so a manual run from another branch can't.
+    if: github.event.action != 'closed' && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
-    env:
-      CF_SEND_TELEMETRY: "false"
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -36,16 +41,33 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
-      - run: pnpm exec cf build
-      - run: pnpm exec cf deploy --prebuilt --dry-run
-      # Migrations go first, so the new code never runs against an old schema.
-      - if: github.event_name != 'pull_request'
-        run: pnpm exec cf d1 migrations apply 517b7f2f-2e66-4d48-938a-ed41db5eb64c
+      # Builds with Vite, applies new D1 migrations, then uploads the Worker. Secrets are scoped to
+      # this step. Previews use Clerk's development instance; production only accepts its own domain.
+      - run: pnpm exec alchemy deploy --stage "$STAGE" --yes --no-input
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      - if: github.event_name != 'pull_request'
-        run: pnpm exec cf deploy --prebuilt
+          CLERK_SECRET_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_SECRET_KEY_DEV || secrets.CLERK_SECRET_KEY }}
+          CLERK_PUBLISHABLE_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_PUBLISHABLE_KEY_DEV || secrets.CLERK_PUBLISHABLE_KEY }}
+
+  destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      # Destroying prod would delete the live database, so refuse anything but a preview stage.
+      - run: |
+          case "$STAGE" in pr-*) ;; *) echo "Refusing to destroy stage '$STAGE'"; exit 1 ;; esac
+          pnpm exec alchemy destroy --stage "$STAGE" --yes --no-input
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

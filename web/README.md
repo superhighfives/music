@@ -1,7 +1,7 @@
 # web
 
 [music.charliegleason.com](https://music.charliegleason.com): one TanStack Start
-app on Cloudflare Workers, deployed with the `cf` CLI.
+app on Cloudflare Workers, deployed with [Alchemy](https://alchemy.run).
 
 | Path | What it is | Code |
 | --- | --- | --- |
@@ -80,7 +80,7 @@ Progress (chapters read, checks passed, where you were) syncs to an account as
 #### The daily email
 
 Signed in, the book's home page has a switch for one card a day by email. A cron
-(`0 7-23 * * *`, in `cloudflare.config.ts`) runs `sendDaily` in
+(`0 7-23 * * *`, in `alchemy.run.ts`, prod only) runs `sendDaily` in
 `src/theory/email/daily.ts`: each subscriber gets the first card in reading order
 they haven't had, so cards from new chapters join the queue wherever they fall;
 once they've had every card, the one sent longest ago comes round as review.
@@ -95,11 +95,10 @@ Email goes out through Cloudflare Email Service (the `EMAIL` binding), from
 `theory@charliegleason.com`. Before it can send to anyone, `charliegleason.com`
 must be onboarded to Email Service in the Cloudflare dashboard (Email → Email
 Sending), which adds its SPF and DKIM records. Locally, `pnpm dev` simulates the
-binding. To run the cron locally:
+binding and writes each email to `.alchemy/local/email`. To run the cron locally:
 
 ```sh
-curl -X POST 'http://localhost:5173/cdn-cgi/local/explorer/api/local/scheduled?worker=music' \
-  -H 'Content-Type: application/json' -d '{"cron":"0 7-23 * * *"}'
+curl 'http://localhost:1337/cdn-cgi/handler/scheduled?cron=0+7+*+*+*'
 ```
 
 ### Ableton Extensions
@@ -129,9 +128,9 @@ account's once per sign-in, then saves every change:
 
 Signed out, nothing changes: everything stays in the browser, as before.
 
-Clerk's keys are Worker secrets, `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
-Locally they go in `.dev.vars` (git-ignored), using the development instance's
-keys. Development has "Challenge suspicious sign-ups" turned off under Protect,
+Clerk's keys are Worker secrets, `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`,
+read from the environment at deploy time. Locally they go in `.dev.vars`
+(git-ignored), using the development instance's keys. Development has "Challenge suspicious sign-ups" turned off under Protect,
 because its check fails on localhost.
 
 To add a synced value, add its key to `SYNC_KEYS` and call `useAccountSync` where
@@ -141,25 +140,47 @@ the section keeps it.
 
 ```sh
 pnpm install
-pnpm dev        # cf dev: the app in the local Workers runtime
+pnpm dev        # alchemy dev: the app in the local Workers runtime, at localhost:1337
 pnpm typecheck
 pnpm test
-pnpm build      # cf build, into .cloudflare/
 ```
 
-Before the first `pnpm dev`, copy `.dev.vars.example` to `.dev.vars`, fill in Clerk's development keys, and
-create the local database:
+Before the first `pnpm dev`, copy `.dev.vars.example` to `.dev.vars` and fill in
+Clerk's development keys. Alchemy needs a profile with Cloudflare connected:
+`pnpm exec alchemy profile edit` in a terminal. The local database is created and
+migrated on start.
 
-```sh
-pnpm exec cf d1 migrations apply 517b7f2f-2e66-4d48-938a-ed41db5eb64c --local
-```
+Alchemy pins its own `workerd`, which is older than our compatibility date. The
+`pnpm.overrides` entry in `package.json` raises it; remove it once Alchemy's pin
+reaches the date in `alchemy.run.ts`.
 
 ## Deploy
 
-`cloudflare.config.ts` names the Worker (`music`) and its domains. Every push to
-`main` that touches `web/` checks, builds and deploys it
-(`.github/workflows/web.yml`); pull requests are checked and dry-run only. It
-uses the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+`alchemy.run.ts` declares the Worker, the D1 database, the email binding, the
+cron and the secrets. A stage is one copy of all of it:
+
+- `prod` is the live site: the Worker `music`, the database `music`, the domain
+  and the cron.
+- Every other stage gets its own Worker and database with generated names, and
+  no domain or cron.
+
+`.github/workflows/web.yml` deploys every pull request that touches `web/` to a
+`pr-<number>` stage, with Clerk's development keys, and destroys it when the pull
+request closes. Every push to `main` deploys `prod`. New migrations in
+`migrations/` apply on deploy. Deploy state is in the account's
+`alchemy-state-store` Worker, so CI and every machine share it.
+
+`prod` took over the resources `cf` created (the Worker `music`, its domain and
+cron, and the D1 database `music`, `517b7f2f-2e66-4d48-938a-ed41db5eb64c`) on
+27 November 2026 with a one-time `alchemy deploy --stage prod --adopt`. The
+database kept its data, and its `d1_migrations` history was copied into
+`__alchemy_migrations`. Without `--adopt`, Alchemy refuses to touch a resource it
+doesn't own (`OwnedBySomeoneElse`), so a deploy can't replace the live database
+by accident. If the state store is ever lost, run the same command again to take
+the resources back over.
+
+CI uses the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
+`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY` and their `_DEV` versions.
 
 To deploy by hand: `pnpm run deploy` (not `pnpm deploy`, which is a pnpm
-built-in).
+built-in), with the production Clerk keys in the environment.

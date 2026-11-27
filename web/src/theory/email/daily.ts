@@ -42,7 +42,7 @@ export async function sendCard(env: DailyEnv, sub: Subscriber, now: Date, record
 
 /**
  * The cron's job: everyone subscribed who hasn't had today's email gets one. The cron runs hourly
- * through the day (cloudflare.config.ts); the first run sends, and later ones only pick up anyone a
+ * through the day (alchemy.run.ts); the first run sends, and later ones only pick up anyone a
  * failure skipped, since a failed send isn't marked sent.
  *
  * It sends one person at a time, about four subrequests each, which suits a small list. Workers cap
