@@ -43,9 +43,9 @@ export type WebsiteEnv = Cloudflare.InferEnv<typeof Website>
 
 export default Alchemy.Stack(
   'music',
-  // Local files in .alchemy/ for now. Shared deploys need Cloudflare.state(), which first deploys a
-  // state-store Worker into the account (alchemy state bootstrap).
-  { providers: Cloudflare.providers(), state: Alchemy.localState() },
+  // Deploy state lives in the account's alchemy-state-store Worker, so CI and every machine share it.
+  // Set it up once with `alchemy state bootstrap`.
+  { providers: Cloudflare.providers(), state: Cloudflare.state() },
   Effect.gen(function* () {
     const website = yield* Website
     return { url: website.url.as<string>() }
