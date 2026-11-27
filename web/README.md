@@ -33,6 +33,25 @@ All of a view's state is in the URL, so any view can be bookmarked or shared.
 Without Move connected, only the chord lookup (Play) works; Learn, Songs and
 Practice check what you play on Move.
 
+chords is an [Effect UI](https://ui.effect.website/) app inside a TanStack
+route. `src/routes/chords/index.tsx` is only its shell: it keeps the document
+head and the Clerk session, mounts the app in the browser, and hands it the
+account's server functions and Clerk's sign-in UI. The app is in
+`src/chords/app/`:
+
+- `state.ts`: the Model, the URL search, and `derive`, which works out
+  everything the view and Move's lights show.
+- `Chords.ts`: the component. `update` is a pure reducer, `reduce`, tested in
+  `chords.test.ts` by sending it Move's pad and button messages.
+- `effects.ts`: Commands, Subscriptions and mounts for the piano, Move, the URL,
+  storage and the account.
+- `view.ts`: the view. `mount.ts`: the entry the route loads.
+
+Effect UI isn't on npm yet. `vendor/effect-ui-22128c6.tgz` is the snapshot from
+pkg.pr.new for commit `22128c6`. It needs `exactOptionalPropertyTypes`, so the
+app is type-checked with `tsconfig.chords.json`, and the main `tsconfig.json`
+leaves it out. `pnpm typecheck` runs both.
+
 ### Production
 
 The course is plain data in `src/production/content/`:

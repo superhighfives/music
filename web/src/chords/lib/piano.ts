@@ -107,25 +107,27 @@ function releaseVoice(e: Engine, voice: Voice) {
 /**
  * Piano voices keyed by an id, such as a pad. `noteOff` stops the note unless sustain is on.
  * The AudioContext starts on the first note, because browsers allow audio only after a user action.
+ * It has no framework ties, so both the React sections and the Effect UI Chords use it.
  */
-export function usePiano() {
-  const engine = useRef<Engine | null>(null)
-  const sustain = useRef(false)
-  const loaded = useRef<Sample[] | null>(null)
-  useEffect(() => {
-    loadSamples().then((s) => (loaded.current = s))
-  }, [])
+export function createPiano() {
+  let engine: Engine | null = null
+  let sustain = false
+  let loaded: Sample[] | null = null
+
+  /** Starts loading the samples. Before they load, which takes a moment after the page opens, notes are silent. */
+  function load() {
+    void loadSamples().then((s) => (loaded = s))
+  }
 
   function noteOn(id: string, midi: number, velocity = 0.7) {
-    // Before the samples load, which takes a moment after the page opens, notes are silent.
-    if (!loaded.current) return
-    const e = (engine.current ??= createEngine())
+    if (!loaded) return
+    const e = (engine ??= createEngine())
     // A context made from a MIDI message, not a click, can start suspended.
     if (e.ac.state === 'suspended') void e.ac.resume()
     const old = e.voices.get(id)
     if (old) releaseVoice(e, old)
     e.sustained.delete(id)
-    const voice = startVoice(e, loaded.current, midi, velocity)
+    const voice = startVoice(e, loaded, midi, velocity)
     e.voices.set(id, voice)
     // Forget the voice when it stops.
     voice.source.onended = () => {
@@ -137,18 +139,18 @@ export function usePiano() {
   }
 
   function noteOff(id: string) {
-    const e = engine.current
+    const e = engine
     const voice = e?.voices.get(id)
     if (!e || !voice) return
-    if (sustain.current) return void e.sustained.add(id)
+    if (sustain) return void e.sustained.add(id)
     releaseVoice(e, voice)
     e.voices.delete(id)
   }
 
   /** Keeps the setting even before the first note, when there is no engine yet. */
   function setSustain(on: boolean) {
-    sustain.current = on
-    const e = engine.current
+    sustain = on
+    const e = engine
     if (on || !e) return
     for (const id of e.sustained) {
       const voice = e.voices.get(id)
@@ -159,7 +161,7 @@ export function usePiano() {
   }
 
   /** Plays notes for a fixed time, for the Play button and screen pads. `strum` spreads the notes out. */
-  function play(notes: number[], strum = false) {
+  function play(notes: readonly number[], strum = false) {
     const sorted = [...notes].sort((a, b) => a - b)
     sorted.forEach((midi, i) => {
       const id = `play-${midi}`
@@ -173,14 +175,14 @@ export function usePiano() {
    * Call it from a click or key press the first time, because browsers start audio only after a user action.
    */
   function clock() {
-    const e = (engine.current ??= createEngine())
+    const e = (engine ??= createEngine())
     if (e.ac.state === 'suspended') void e.ac.resume()
     return { now: e.ac.currentTime, latency: e.ac.outputLatency || e.ac.baseLatency || 0 }
   }
 
   /** A metronome click at `at` on the audio clock. It skips the reverb, so the beat stays sharp. */
   function click(at: number, accent: boolean) {
-    const e = engine.current
+    const e = engine
     if (!e) return
     const osc = e.ac.createOscillator()
     osc.frequency.value = accent ? 1760 : 1320
@@ -193,5 +195,15 @@ export function usePiano() {
     osc.onended = () => gain.disconnect()
   }
 
-  return { noteOn, noteOff, setSustain, play, clock, click }
+  return { load, noteOn, noteOff, setSustain, play, clock, click }
+}
+
+export type Piano = ReturnType<typeof createPiano>
+
+/** The piano for a React section: one per component, with samples loading once it mounts. */
+export function usePiano(): Piano {
+  const piano = useRef<Piano | null>(null)
+  piano.current ??= createPiano()
+  useEffect(() => piano.current?.load(), [])
+  return piano.current
 }
