@@ -14,6 +14,7 @@ import { Route as AbletonRouteImport } from './routes/ableton'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProductionRouteRouteImport } from './routes/production/route'
 import { Route as TheoryRouteRouteImport } from './routes/theory/route'
+import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as ChordsIndexRouteImport } from './routes/chords/index'
 import { Route as ProductionIndexRouteImport } from './routes/production/index'
 import { Route as TheoryIndexRouteImport } from './routes/theory/index'
@@ -45,6 +46,11 @@ const ProductionRouteRoute = ProductionRouteRouteImport.update({
 const TheoryRouteRoute = TheoryRouteRouteImport.update({
   id: '/theory',
   path: '/theory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChordsIndexRoute = ChordsIndexRouteImport.update({
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/theory': typeof TheoryRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
+  '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords/': typeof ChordsIndexRoute
   '/production/': typeof ProductionIndexRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
+  '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords': typeof ChordsIndexRoute
   '/production': typeof ProductionIndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/theory': typeof TheoryRouteRouteWithChildren
   '/ableton': typeof AbletonRoute
   '/privacy': typeof PrivacyRoute
+  '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/chords/': typeof ChordsIndexRoute
   '/production/': typeof ProductionIndexRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/theory'
     | '/ableton'
     | '/privacy'
+    | '/tools'
     | '/theory/$chapterId'
     | '/chords/'
     | '/production/'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ableton'
     | '/privacy'
+    | '/tools'
     | '/theory/$chapterId'
     | '/chords'
     | '/production'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/theory'
     | '/ableton'
     | '/privacy'
+    | '/tools'
     | '/theory/$chapterId'
     | '/chords/'
     | '/production/'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   TheoryRouteRoute: typeof TheoryRouteRouteWithChildren
   AbletonRoute: typeof AbletonRoute
   PrivacyRoute: typeof PrivacyRoute
+  ToolsRoute: typeof ToolsRoute
   ChordsIndexRoute: typeof ChordsIndexRoute
 }
 
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/theory'
       fullPath: '/theory'
       preLoaderRoute: typeof TheoryRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chords/': {
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   TheoryRouteRoute: TheoryRouteRouteWithChildren,
   AbletonRoute: AbletonRoute,
   PrivacyRoute: PrivacyRoute,
+  ToolsRoute: ToolsRoute,
   ChordsIndexRoute: ChordsIndexRoute,
 }
 export const routeTree = rootRouteImport

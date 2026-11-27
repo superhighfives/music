@@ -16,9 +16,12 @@ First written 15 November 2026 as a claude.ai doc; moved here and updated
 | Soundtoys 5.5 | All 23 plugins. Crystallizer, EchoBoy, SuperPlate and SpaceBlender give raw AI texture character |
 | FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | Upgraded from the 2013 Creative bundle in Nov 2026. Saturn for warmth and multiband drive, Timeless for delay textures, Volcano for moving filters, Twin for synth layers |
 | iZotope Ozone 12 Elements | Mastering: Master Assistant builds an editable chain to start from. Bought Nov 2026 |
+| iZotope RX 12 Standard | Repair: noise, hum, clicks, clipping and room sound, plus the spectral editor. Bought Nov 2026 as a crossgrade from Ozone |
+| Melodyne 5 Editor | Note-by-note pitch and timing, including notes inside chords. Bought Nov 2026 |
 | Chord-O-Mat 3 (Max for Live) | Quick chord beds for pads |
 | ClyphX Pro | Macro scripting in Live |
-| Ableton Move and EP-133 K.O. II | Sketching ideas away from the Mini |
+| Ableton Move | Sketching ideas away from the Mini |
+| Tascam DR-40XP | 32-bit float field recorder: X/Y or A/B mics, 2 XLR inputs, USB-C interface. For acoustic guitar, conversations, ambience and demos. Ordered Nov 2026 |
 | Your own Live Extensions: ambient, chords, progressive, reverse-midi | In [`ableton/`](../ableton/); ambient's Template tab builds a starting set |
 
 The Sonic Charge Authenticator lists only Synplant 2 and Synplant v1, so

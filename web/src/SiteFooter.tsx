@@ -1,6 +1,6 @@
 import css from './site-footer.css?url'
 
-export type Section = 'home' | 'chords' | 'production' | 'theory' | 'ableton' | 'privacy'
+export type Section = 'home' | 'chords' | 'production' | 'theory' | 'ableton' | 'tools' | 'privacy'
 
 const LINKS: { id: Section; href: string; label: string }[] = [
   { id: 'home', href: '/', label: 'music' },
@@ -8,6 +8,7 @@ const LINKS: { id: Section; href: string; label: string }[] = [
   { id: 'production', href: '/production', label: 'Production' },
   { id: 'theory', href: '/theory', label: 'Theory' },
   { id: 'ableton', href: '/ableton', label: 'Extensions' },
+  { id: 'tools', href: '/tools', label: 'Tools' },
   { id: 'privacy', href: '/privacy', label: 'Privacy' },
 ]
 

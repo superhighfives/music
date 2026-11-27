@@ -8,6 +8,7 @@ export const Route = createFileRoute("/production/")({ component: Home });
 
 /** Edition log, newest first. Add a line when a theme or recipe lands. */
 const LOG: [string, string, string][] = [
+  ["2026-11-27", "Edition 7.", "Every tool in the studio, with exercises and links back to these lessons, at music.charliegleason.com/tools."],
   ["2026-11-26", "Edition 6.", "sounds is now Production, at music.charliegleason.com/production."],
   ["2026-11-26", "Edition 5.", "Fog & Pulse is now just sounds, with the same footer as the rest of music."],
   ["2026-11-25", "Edition 4.", "Moves to music.charliegleason.com/sounds, beside chords and the Ableton Extensions."],
@@ -72,6 +73,14 @@ function Home() {
             </span>
           </h2>
           <KeyBox />
+        </section>
+        <section className="block">
+          <h2>
+            Tools <span className="dim">The plugins and gear these lessons use, with exercises for each.</span>
+          </h2>
+          <p>
+            <a href="/tools">See every tool →</a>
+          </p>
         </section>
         <section className="block">
           <h2>Edition log</h2>

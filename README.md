@@ -5,7 +5,7 @@ own `package.json` and lockfile; nothing is shared between them.
 
 | Folder | What it is | Where it lives |
 | --- | --- | --- |
-| [`web/`](web/) | music.charliegleason.com: chords (chord shapes on the Ableton Move pad grid), sounds (a course in music production with Live 12), Theory (an illustrated, playable music theory book with a daily email), and the Ableton Extensions page | [music.charliegleason.com](https://music.charliegleason.com) |
+| [`web/`](web/) | music.charliegleason.com: chords (chord shapes on the Ableton Move pad grid), sounds (a course in music production with Live 12), Theory (an illustrated, playable music theory book with a daily email), the Ableton Extensions page, and Tools (the studio setup, with exercises for each tool) | [music.charliegleason.com](https://music.charliegleason.com) |
 | [`ableton/`](ableton/) | Ableton Live 12 Extensions, plus a Stable Audio texture generator | [Releases](https://github.com/superhighfives/music/releases) |
 | [`setup/`](setup/) | The Mac Mini studio setup: tools, Claude driving Live, plugins and licences, plus the AI-in-Ableton guide | [`setup/README.md`](setup/README.md) |
 

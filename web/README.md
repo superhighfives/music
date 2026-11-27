@@ -10,13 +10,14 @@ app on Cloudflare Workers, deployed with [Alchemy](https://alchemy.run).
 | `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/routes/production/`, `src/production/` |
 | `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/routes/theory/`, `src/theory/` |
 | `/ableton` | The Ableton Live Extensions, with downloads | `src/routes/ableton.tsx` |
+| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/routes/tools.tsx`, `src/tools.ts` |
 
 ## Sections
 
 Each section brings its own styles in its route's `head`, so they never meet:
 chords uses Tailwind (`src/chords/styles.css`, which scans only chords' files),
 Production uses its own CSS (`src/production/styles/app.css`), theory uses its own
-(`src/theory/styles/theory.css`), and home, `/ableton` and
+(`src/theory/styles/theory.css`), and home, `/ableton`, `/tools` and
 `/privacy` share `src/site.css`. chords is always dark, like Move. Production and Theory have
 a light/dark toggle, and the other pages follow the system setting. Clerk's
 sign-in dialog and account menu follow each section (`appearance` on

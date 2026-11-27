@@ -68,6 +68,8 @@ signature (`pkgutil --check-signature <pkg>`), then install with
 | Synplant 2 + PhenoType | 2.0.2 | soniccharge.com account; authorise in Sonic Charge Authenticator. Install with [`scripts/install-synplant.sh`](scripts/install-synplant.sh) |
 | Magenta RealTime 2 (AU + standalone) | 0.0.1 | Free, from Google Magenta ([magenta.withgoogle.com/mrt2](https://magenta.withgoogle.com/mrt2)). Move `MRT2 (AU).app`, `MRT2 - Collider.app` and `MRT2 - Jam.app` to /Applications before first open; opening the AU app once registers the plugin. Needs Live at 48 kHz (44.1 kHz distorts or goes silent) and **Use Audio Units v3** on in Plug-Ins settings. No Drums only nudges the model; remove prompts that imply drums (for example "Jazz Piano Trio") and reset. The Mini's base M4 runs the small model; first launch downloads its weights (about 450 MB) |
 | iZotope Ozone 12 Elements | 12.2.0 | Bought Nov 2026. Installed (AU + VST3); authorise through your iZotope / Native Instruments account (Native Access) |
+| iZotope RX 12 Standard | Not installed yet | Bought Nov 2026 as a crossgrade from Ozone 12 Elements; same iZotope / Native Instruments account (Native Access) |
+| Melodyne 5 Editor | Not installed yet | Bought Nov 2026 |
 | ClyphX Pro | 1.3.1 | Isotonik account (order #487061, 2019). Copy `Remote Scripts/*` to User Library → Remote Scripts and `Factory Packs (Lessons)/*` to Factory Packs |
 | Chord-O-Mat 3 | 3.3 | user.soundmanufacture.net (order Jun 2023). `.amxd` files in User Library → Presets → MIDI Effects → Max MIDI Effect |
 | Circle of Fifth | 1.0.2 | user.soundmanufacture.net (same account as Chord-O-Mat). Same Max MIDI Effect folder. The zip holds 1.0.0 and 1.0.1; if the circle draws offset, try the other |

@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
       { title: 'music · Charlie Gleason' },
       {
         name: 'description',
-        content: 'Music tools: chord shapes for Ableton Move, a production course for Live 12, an illustrated theory book, and Live Extensions.',
+        content: 'Music tools: chord shapes for Ableton Move, a production course for Live 12, an illustrated theory book, Live Extensions, and the studio setup.',
       },
     ],
     links: [
@@ -27,6 +27,7 @@ const CYAN = '#00d6d7'
 const YELLOW = '#f7cd3a'
 const BLUE = '#70b1ed'
 const TERRACOTTA = '#bb4d2a'
+const GREEN = '#7fd18b'
 const PAPER = '#fbf6ee'
 
 const reducedMotion = matchMediaStore('(prefers-reduced-motion: reduce)')
@@ -87,6 +88,18 @@ function Home() {
             <div>
               <h3>Extensions</h3>
               <p>Right-click tools for Live 12 that write chords, progressions and ambient soundscapes into your Set.</p>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a className="card art-card" href="/tools">
+            <Dithering className="art" shape="warp" type="2x2" colorBack="#101a12" colorFront={GREEN} size={1.5} scale={1.5} rotation={45} speed={speed(0.35)} />
+            <div>
+              <h3>Tools</h3>
+              <p>
+                The whole studio, from Live and a field recorder to Melodyne, RX and Ozone, with exercises to learn each
+                tool and links to Production lessons.
+              </p>
             </div>
           </a>
         </li>
