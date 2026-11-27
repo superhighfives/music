@@ -1,12 +1,12 @@
 import { mod, scaleById } from './music'
 
 /** A chord name read as one of our chord types. `bass` is the note after a slash, as in "G/B". */
-export type SongChord = { name: string; root: number; chord: string; bass?: number }
+export type SongChord = { name: string; root: number; chord: string; bass?: number | undefined }
 
 /** One lyric line. Each chord sits above the lyric character at index `at`. `parsed` is null for a name we cannot read. */
 export type SongLine = { lyric: string; chords: { at: number; name: string; parsed: SongChord | null }[] }
 
-export type Song = { id: string; title: string; artist?: string; lines: SongLine[] }
+export type Song = { id: string; title: string; artist?: string | undefined; lines: SongLine[] }
 
 /** One chord to play, in song order. */
 export type SongEvent = { line: number; index: number; chord: SongChord }

@@ -1,15 +1,7 @@
+import { SITE_LINKS, type Section } from './site-links'
 import css from './site-footer.css?url'
 
-export type Section = 'home' | 'chords' | 'production' | 'theory' | 'ableton' | 'privacy'
-
-const LINKS: { id: Section; href: string; label: string }[] = [
-  { id: 'home', href: '/', label: 'music' },
-  { id: 'chords', href: '/chords', label: 'Chords' },
-  { id: 'production', href: '/production', label: 'Production' },
-  { id: 'theory', href: '/theory', label: 'Theory' },
-  { id: 'ableton', href: '/ableton', label: 'Extensions' },
-  { id: 'privacy', href: '/privacy', label: 'Privacy' },
-]
+export type { Section }
 
 /**
  * The same footer in every section: home and each part of music. It brings its own small stylesheet
@@ -21,7 +13,7 @@ export function SiteFooter({ current, className }: { current: Section; className
     <footer className={className ? `sitefoot ${className}` : 'sitefoot'}>
       <link rel="stylesheet" href={css} precedence="default" />
       <nav aria-label="music">
-        {LINKS.map((l) => (
+        {SITE_LINKS.map((l) => (
           <a key={l.id} href={l.href} aria-current={l.id === current ? 'page' : undefined}>
             {l.label}
           </a>

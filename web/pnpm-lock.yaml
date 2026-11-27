@@ -17,6 +17,9 @@ importers:
       '@clerk/ui':
         specifier: ^1.46.0
         version: 1.46.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@effect/ui':
+        specifier: file:vendor/effect-ui-22128c6.tgz
+        version: file:vendor/effect-ui-22128c6.tgz(effect@4.1.7)
       '@paper-design/shaders-react':
         specifier: ^0.0.82
         version: 0.0.82(@types/react@19.3.0)(react@19.3.1)
@@ -26,6 +29,9 @@ importers:
       '@tanstack/react-start':
         specifier: ^1.169.7
         version: 1.169.7(@types/react@19.3.0)(esbuild@0.28.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rolldown@1.2.16)(vite@8.3.8(@types/node@26.6.11)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      effect:
+        specifier: 4.1.7
+        version: 4.1.7
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -60,9 +66,6 @@ importers:
       cf:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@types/node@26.6.11)
-      effect:
-        specifier: 4.1.7
-        version: 4.1.7
       tailwindcss:
         specifier: ^4.3.5
         version: 4.3.5
@@ -440,6 +443,12 @@ packages:
     resolution: {integrity: sha512-qv+D3+xktP+7vVlUKnNiX5NQhyu0nPtyHgtl/C0xMPrdWodiOZUCtCa6ciY0bjLSTPF1ZUjJLRaGOXxGH0h4Tw==}
     peerDependencies:
       effect: ^4.1.7
+
+  '@effect/ui@file:vendor/effect-ui-22128c6.tgz':
+    resolution: {integrity: sha512-b0RsW02XDOdvCfglyl3oGB1wfFpiLc/ANQa+zmKe8qS0z7Z1rTdxsa3fVZfTAlgkdxsyc0jtijYOHC1Mgh5JFQ==, tarball: file:vendor/effect-ui-22128c6.tgz}
+    version: 0.0.0
+    peerDependencies:
+      effect: ^4.1.4
 
   '@emnapi/core@2.0.0-beta.2':
     resolution: {integrity: sha512-MzCVoWtcg4Pm2B3je5mMvYMvj3MmBKw+fU7vbsJc9/iT8ip6/eYIHo/Dsm/mr+wsHB6SEyJDuxB09Yy6r/8+4A==}
@@ -2811,6 +2820,10 @@ snapshots:
   '@effect/sql-d1@4.1.7(effect@4.1.7)':
     dependencies:
       '@cloudflare/workers-types': 5.20261127.1
+      effect: 4.1.7
+
+  '@effect/ui@file:vendor/effect-ui-22128c6.tgz(effect@4.1.7)':
+    dependencies:
       effect: 4.1.7
 
   '@emnapi/core@2.0.0-beta.2':
