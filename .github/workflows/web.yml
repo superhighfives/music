@@ -22,15 +22,11 @@ defaults:
 
 env:
   STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'prod' }}
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-  # Previews use Clerk's development instance; the production instance only accepts its own domain.
-  CLERK_SECRET_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_SECRET_KEY_DEV || secrets.CLERK_SECRET_KEY }}
-  CLERK_PUBLISHABLE_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_PUBLISHABLE_KEY_DEV || secrets.CLERK_PUBLISHABLE_KEY }}
 
 jobs:
   deploy:
-    if: github.event.action != 'closed'
+    # Only main deploys prod, so a manual run from another branch can't.
+    if: github.event.action != 'closed' && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -45,8 +41,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
-      # Builds with Vite, applies new D1 migrations, then uploads the Worker.
+      # Builds with Vite, applies new D1 migrations, then uploads the Worker. Secrets are scoped to
+      # this step. Previews use Clerk's development instance; production only accepts its own domain.
       - run: pnpm exec alchemy deploy --stage "$STAGE" --yes --no-input
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLERK_SECRET_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_SECRET_KEY_DEV || secrets.CLERK_SECRET_KEY }}
+          CLERK_PUBLISHABLE_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_PUBLISHABLE_KEY_DEV || secrets.CLERK_PUBLISHABLE_KEY }}
 
   destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -62,4 +64,10 @@ jobs:
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec alchemy destroy --stage "$STAGE" --yes --no-input
+      # Destroying prod would delete the live database, so refuse anything but a preview stage.
+      - run: |
+          case "$STAGE" in pr-*) ;; *) echo "Refusing to destroy stage '$STAGE'"; exit 1 ;; esac
+          pnpm exec alchemy destroy --stage "$STAGE" --yes --no-input
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
