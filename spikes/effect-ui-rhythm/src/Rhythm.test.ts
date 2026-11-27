@@ -25,6 +25,16 @@ describe('Rhythm as a Story: the state machine, with commands answered by hand',
       story.expectNone()
     }))
 
+  it.effect('Play does nothing with no notes or no tempo', () =>
+    Effect.gen(function* () {
+      for (const bad of [{ ...props, rhythm: '' }, { ...props, bpm: 0 }]) {
+        const story = yield* Story.make(RhythmNoDeps, bad)
+        story.send(RhythmMessage.ClickedPlay())
+        assert.strictEqual(story.model.current, null)
+        story.expectNone()
+      }
+    }))
+
   it.effect('Stop interrupts the waiting step', () =>
     Effect.gen(function* () {
       const story = yield* Story.make(RhythmNoDeps, props)

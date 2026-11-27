@@ -41,7 +41,8 @@ export const RhythmNoDeps = RhythmDef.make({
     const steps = stepMillis($.props.rhythm, $.props.bpm)
     const wait = (index: number) => WaitStep.make({ index, millis: steps[index], last: index === steps.length - 1 })
     return RhythmMessage.match(message, {
-      ClickedPlay: () => $.set({ current: 0 }).run(wait(0)),
+      // Nothing to play, or no usable tempo: Play does nothing rather than wait forever.
+      ClickedPlay: () => (steps.length === 0 || !($.props.bpm > 0) ? $.model : $.set({ current: 0 }).run(wait(0))),
       ClickedStop: () => $.set({ current: null }).run(Command.interrupt(WaitStep)),
       ReachedStep: ({ index }) => $.set({ current: index }).run(wait(index)),
       Finished: () => $.set({ current: null }),
