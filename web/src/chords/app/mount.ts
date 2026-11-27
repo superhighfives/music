@@ -44,6 +44,9 @@ export function mountChords(container: Element, options: { io: SyncIO; auth: Aut
         // TanStack Start owns the document head.
         const root = yield* BrowserHost.mountEffect(Chords, props, container, { head: false })
         resolveRoot(root)
+        // Spike only: `?move=fake` acts as if Move is connected, so Learn, Songs and Practice can be tried
+        // and measured without the device. Nothing answers on MIDI, so no pad is ever pressed.
+        if (new URLSearchParams(location.search).get('move') === 'fake') root.send(ChordsMessage.ChangedMoveStatus({ status: 'connected' }))
         if (imported !== undefined) {
           const text = decodeURIComponent(imported)
           root.send(ChordsMessage.ImportedSheet({ id: `my-${Date.now().toString(36)}`, title: parseSheet(text).title, text }))
