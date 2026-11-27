@@ -21,7 +21,6 @@
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.87",
     "@alchemy.run/frontend-frameworks": "2.0.0-beta.87",
-    "@cloudflare/vite-plugin": "2.0.0-rc.4",
     "@effect/platform-node": "4.1.7",
     "@tailwindcss/vite": "^4.3.5",
     "@types/react": "^19.3.0",

@@ -20,7 +20,7 @@ const entry = createServerEntry({
 
 export default {
   ...entry,
-  // The cron in cloudflare.config.ts: the theory book's daily email.
+  // The cron in alchemy.run.ts: the theory book's daily email.
   scheduled(_controller: unknown, env: DailyEnv, ctx: { waitUntil(p: Promise<unknown>): void }) {
     ctx.waitUntil(sendDaily(env))
   },
