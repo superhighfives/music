@@ -64,13 +64,14 @@ signature (`pkgutil --check-signature <pkg>`), then install with
 | --- | --- |
 | Soundtoys 5.5 bundle (23 plugins, incl. SuperPlate and SpaceBlender) | soundtoys.com account; activate in iLok License Manager |
 | FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | fabfilter.com account; enter each key on first open |
-| FabFilter Saturn, Timeless 2, Twin 2, Volcano 2 (legacy) | Same licence; for older sets. fabfilter.com/support/downloads |
+| FabFilter Saturn, Timeless 2, Twin 2, Volcano 2 (legacy, optional) | Same licence. Install only to open older sets that use them. fabfilter.com/support/downloads |
 | Synplant 2 + PhenoType | soniccharge.com account; authorise in Sonic Charge Authenticator. Install with [`scripts/install-synplant.sh`](scripts/install-synplant.sh) |
 | Magenta RealTime 2 (AU + standalone) | Free, from Google Magenta ([magenta.withgoogle.com/mrt2](https://magenta.withgoogle.com/mrt2)). Move `MRT2 (AU).app`, `MRT2 - Collider.app` and `MRT2 - Jam.app` to /Applications before first open; opening the AU app once registers the plugin. Needs Live at 48 kHz (44.1 kHz distorts or goes silent) and **Use Audio Units v3** on in Plug-Ins settings. No Drums only nudges the model; remove prompts that imply drums (for example "Jazz Piano Trio") and reset. The Mini's base M4 runs the small model; first launch downloads its weights (about 450 MB) |
 | Goodhertz LA-210 | Free, from [goodhertz.com/la-210](https://goodhertz.com/la-210); needs a Goodhertz account. Still in beta |
 | iZotope Ozone 12 Elements | iZotope / Native Instruments account; authorise in Native Access |
 | iZotope RX 12 Standard | Same iZotope / Native Instruments account (Native Access) |
 | Melodyne 5 Editor | celemony.com account |
+| Tonalic Essentials | Same celemony.com account as Melodyne |
 | AutoTune Advanced | antarestech.com account; authorise through that account |
 | Harmony Engine | antarestech.com account; authorise through that account |
 | ClyphX Pro | Isotonik account. Copy `Remote Scripts/*` to User Library → Remote Scripts and `Factory Packs (Lessons)/*` to Factory Packs |
