@@ -1,0 +1,21 @@
+---
+title: "Gain staging"
+---
+
+<p>Every device in a chain reacts to how loud its input is. Saturation drives harder, compressors grab more, and the master clips. Gain staging means keeping every track at a sensible level so devices behave the way their defaults expect.</p>
+<Sheet head="Targets" sub="Peaks, dBFS">
+  <Row>
+    <Cell l="Recording" num>−10 dBFS peaks</Cell>
+    <Cell l="Each track" num tone="lit">−12 to −6 dBFS</Cell>
+    <Cell l="Master, before mastering" num>about −6 dBFS</Cell>
+    <Cell l="Format" num>48 kHz · 24-bit</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Set the format once.</b> Settings → Audio: sample rate 48 kHz. Settings → Record, Warp &amp; Launch: bit depth 24.</div></li>
+  <li><div><b>Gain at the start of the chain.</b> Put Utility first on each track and set its Gain so the track peaks in the target range. Leave the fader near 0 dB for mixing.</div></li>
+  <li><div><b>Match in and out on every device.</b> Toggle a device off and on. If it gets louder, it isn't better yet: lower its output until bypass sounds the same level, then judge.</div></li>
+  <li><div><b>When the master turns red, turn tracks down,</b> not the master. Select all tracks and pull them down together.</div></li>
+</Steps>
+<Note label="Why it matters:">Live mixes in 32-bit float, so internal clipping is rarely permanent. Analog-modelled plugins like Decapitator and Saturn still react to level, though, and a quiet mix leaves room for the master chain.</Note>
+<Task>Open the Fog set. Get every track peaking between −12 and −6 dBFS with Utility, and the master peaking near −6 dBFS.</Task>

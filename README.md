@@ -22,7 +22,7 @@ and so on. Each folder's README has the details.
 
 ## Deploys
 
-`web/` is one Cloudflare Worker that renders every page with Effect UI, deployed
+`web/` is an Astro site on a Cloudflare Worker, deployed
 with Alchemy. Its workflow, `.github/workflows/web.yml`, only runs when `web/`
 changes: each pull request is type-checked, tested and deployed to its own
 preview, which is removed when it closes; pushes to `main` deploy the live site.

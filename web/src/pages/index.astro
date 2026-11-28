@@ -1,0 +1,112 @@
+---
+import '~/site.css'
+import Masthead from '~/components/Masthead.astro'
+import SiteFooter from '~/components/SiteFooter.astro'
+import Page from '~/layouts/Page.astro'
+
+// Each card's art is the same dithered warp in its section's colours, as hex: the shaders don't read oklch.
+const CARDS = [
+  {
+    href: '/chords',
+    name: 'Chords',
+    blurb: 'Chord shapes on the Ableton Move pad grid, in any key, scale and layout. Learn, play along with songs, and practise to a playhead.',
+    art: { type: '2x2', back: '#0b1517', front: '#00d6d7', size: 2, scale: 1.4, rotation: 0, speed: 0.6 },
+  },
+  {
+    href: '/production',
+    name: 'Production',
+    blurb: 'A step-by-step course in music production with Ableton Live 12: sound, soundscapes, melody, songwriting, drums and mixing.',
+    art: { type: '4x4', back: '#141a24', front: '#f7cd3a', size: 1.5, scale: 1.2, rotation: 90, speed: 0.4 },
+  },
+  {
+    href: '/theory',
+    name: 'Theory',
+    blurb:
+      'An illustrated music theory book you can play, from the first note to advanced harmony: reading music, scales, chords and theory for songwriting. One idea a day by email, if you like.',
+    art: { type: '8x8', back: '#fbf6ee', front: '#bb4d2a', size: 1.5, scale: 1.6, rotation: 180, speed: 0.3 },
+  },
+  {
+    href: '/ableton',
+    name: 'Extensions',
+    blurb: 'Right-click tools for Live 12 that write chords, progressions and ambient soundscapes into your Set.',
+    art: { type: 'random', back: '#141414', front: '#70b1ed', size: 1.5, scale: 1.3, rotation: 270, speed: 0.5 },
+  },
+  {
+    href: '/tools',
+    name: 'Tools',
+    blurb: 'The whole studio, from Live and a field recorder to Melodyne, RX and Ozone, with exercises to learn each tool and links to Production lessons.',
+    art: { type: '2x2', back: '#101a12', front: '#7fd18b', size: 1.5, scale: 1.5, rotation: 45, speed: 0.35 },
+  },
+]
+---
+
+<Page
+  title="music · Charlie Gleason"
+  description="Music tools: chord shapes for Ableton Move, a production course for Live 12, an illustrated theory book, Live Extensions, and the studio setup."
+>
+  <div class="page">
+    <Masthead />
+    <section class="hero">
+      <h1>music</h1>
+      <p class="lede">Tools and theory for making music, with Ableton Live and Move.</p>
+    </section>
+    <ul class="cards">
+      {
+        CARDS.map((c) => (
+          <li>
+            <a class="card" href={c.href}>
+              <div class="art" data-art={JSON.stringify(c.art)} />
+              <span class="name">{c.name}</span>
+              <span class="blurb">{c.blurb}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <SiteFooter current="home" />
+  </div>
+</Page>
+
+<script>
+  import {
+    DitheringShapes,
+    DitheringTypes,
+    ShaderFitOptions,
+    ShaderMount,
+    defaultPatternSizing as sizing,
+    ditheringFragmentShader,
+    getShaderColorFromString,
+  } from '@paper-design/shaders'
+
+  // Each card's art: Paper's dithered warp shader. It stays still while the visitor asks for reduced motion,
+  // and follows that setting as it changes.
+  type Art = { type: keyof typeof DitheringTypes; back: string; front: string; size: number; scale: number; rotation: number; speed: number }
+  const motion = matchMedia('(prefers-reduced-motion: reduce)')
+  for (const node of document.querySelectorAll<HTMLElement>('.art[data-art]')) {
+    const art: Art = JSON.parse(node.dataset.art ?? '{}')
+    const speed = () => (motion.matches ? 0 : art.speed)
+    const shader = new ShaderMount(
+      node,
+      ditheringFragmentShader,
+      {
+        u_colorBack: getShaderColorFromString(art.back),
+        u_colorFront: getShaderColorFromString(art.front),
+        u_shape: DitheringShapes.warp,
+        u_type: DitheringTypes[art.type],
+        u_pxSize: art.size,
+        u_fit: ShaderFitOptions[sizing.fit],
+        u_scale: art.scale,
+        u_rotation: art.rotation,
+        u_offsetX: sizing.offsetX,
+        u_offsetY: sizing.offsetY,
+        u_originX: sizing.originX,
+        u_originY: sizing.originY,
+        u_worldWidth: sizing.worldWidth,
+        u_worldHeight: sizing.worldHeight,
+      },
+      undefined,
+      speed(),
+    )
+    motion.addEventListener('change', () => shader.setSpeed(speed()))
+  }
+</script>

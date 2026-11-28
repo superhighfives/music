@@ -19,12 +19,12 @@ export const DB = Cloudflare.D1.Database(
 // The theory book's daily email (src/theory/email/). charliegleason.com must be onboarded to Email Service.
 export const Email = Cloudflare.Email.SendEmail('Email', { allowedSenderAddresses: ['theory@charliegleason.com'] })
 
-export const Website = Cloudflare.Website.Vite(
+export const Website = Cloudflare.Website.Astro(
   'Website',
   Effect.map(isProd, (prod) => ({
     ...(prod && { name: 'music', domain: 'music.charliegleason.com' }),
-    // Every page renders in this Worker; Vite builds only the pages' client scripts.
-    main: 'src/server.ts',
+    // Astro's handler, plus the cron's scheduled handler.
+    main: 'src/worker.ts',
     compatibility: { date: '2026-11-23', flags: ['nodejs_compat'] },
     // The daily email goes out at 07:00 UTC; later runs retry anyone a failure skipped. Only prod
     // sends it, so a preview never emails real subscribers.
@@ -35,7 +35,8 @@ export const Website = Cloudflare.Website.Vite(
       EMAIL: Email,
       // Clerk's keys: read from the environment at deploy time and bound as secrets.
       CLERK_SECRET_KEY: Config.Redacted('CLERK_SECRET_KEY'),
-      CLERK_PUBLISHABLE_KEY: Config.Redacted('CLERK_PUBLISHABLE_KEY'),
+      // @clerk/astro reads the publishable key under this name.
+      PUBLIC_CLERK_PUBLISHABLE_KEY: Config.Redacted('CLERK_PUBLISHABLE_KEY'),
     },
   })),
 )

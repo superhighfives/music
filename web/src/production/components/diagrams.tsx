@@ -1,5 +1,3 @@
-/** @jsxImportSource ~/content */
-import { island } from "~/content/jsx-runtime";
 import type { Settings } from "~/production/lib/music";
 
 function Arrows() {
@@ -122,9 +120,7 @@ export function EqChart() {
   );
 }
 
-/** 44-bar vignette timeline, timed at the current tempo. The page fills it in from its settings. */
-export const Arrangement = () => island("Arrangement");
-
+/** 44-bar vignette timeline, timed at the current tempo. */
 export function ArrangementView({ settings }: { settings: Settings }) {
   const X0 = 86;
   const W = 670;

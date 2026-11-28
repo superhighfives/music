@@ -1,8 +1,7 @@
 import { createClerkClient } from '@clerk/backend'
-import { userOf } from '~/account/api'
 import { type DailyEnv, sendCard } from './daily'
 
-type Env = DailyEnv & { CLERK_SECRET_KEY: string; CLERK_PUBLISHABLE_KEY: string }
+type Env = DailyEnv & { CLERK_SECRET_KEY: string }
 
 /** How long someone waits between previews, so "Send one now" can't send in a loop. */
 const PREVIEW_COOLDOWN = 10 * 60_000
@@ -63,11 +62,10 @@ async function sendPreview(env: Env, userId: string): Promise<PreviewResult> {
 const json = (body: unknown, status = 200) => Response.json(body, { status })
 
 /**
- * The daily email switch, for the signed-in person only. GET /api/theory/email reads it, POST with
+ * The daily email switch, for the signed-in person only (`userId`, from Clerk's middleware). GET /api/theory/email reads it, POST with
  * `{ on }` sets it, and POST /api/theory/email/preview sends one now.
  */
-export async function emailApi(request: Request, env: Env, path: string): Promise<Response> {
-  const userId = await userOf(request, env)
+export async function emailApi(request: Request, env: Env, path: string, userId: string | null): Promise<Response> {
   try {
     if (path === '/api/theory/email' && request.method === 'GET') return json(userId ? await status(env, userId) : { signedIn: false })
     if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)

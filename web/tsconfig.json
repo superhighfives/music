@@ -1,8 +1,9 @@
 {
   "include": [
     "src",
-    "vite.config.ts",
-    "alchemy.run.ts"
+    "integrations",
+    "alchemy.run.ts",
+    "astro.config.ts"
   ],
   "compilerOptions": {
     "target": "ES2022",
@@ -19,7 +20,8 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "types": [
-      "vite/client"
+      "vite/client",
+      "astro/client"
     ],
     "noUncheckedIndexedAccess": false,
     "paths": {
@@ -27,7 +29,10 @@
         "./src/*"
       ]
     },
-    "jsxImportSource": "~/content",
+    "jsxImportSource": "preact",
     "exactOptionalPropertyTypes": true
-  }
+  },
+  "exclude": [
+    "dist"
+  ]
 }

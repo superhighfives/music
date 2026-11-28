@@ -1,0 +1,32 @@
+---
+import { findRecipe } from '~/production/catalog'
+import { recipeContent } from '~/production/content'
+import Crumbs from '~/production/Crumbs.astro'
+import DoneButton from '~/production/islands/DoneButton'
+import RecipeRail from '~/production/islands/RecipeRail'
+import { components } from '~/production/mdx'
+import ProductionPage from '~/production/ProductionPage.astro'
+
+const recipe = findRecipe(Astro.params.recipe ?? '')
+const Content = recipe ? await recipeContent(recipe.id) : undefined
+if (!recipe || !Content) return Astro.rewrite('/404')
+---
+
+<ProductionPage title={`${recipe.title} · Production`}>
+  <Crumbs section="Recipes" />
+  <header class="themehead">
+    <span class="lab">{recipe.artist} · {recipe.track} · {recipe.album}</span>
+    <h1>{recipe.title}</h1>
+    <p class="lede dim">{recipe.summary}</p>
+  </header>
+  <div class="reader">
+    <RecipeRail client:load current={recipe.id} />
+    <article class="lesson">
+      <Content components={components} />
+      <div class="lessonfoot">
+        <DoneButton client:load doneKey={`recipe.${recipe.id}`} label="Mark recipe done" />
+        <a class="btn" href="/production">All themes and recipes</a>
+      </div>
+    </article>
+  </div>
+</ProductionPage>

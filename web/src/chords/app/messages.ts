@@ -29,8 +29,6 @@ export const ChordsMessage = UiSchema.TaggedEnum({
   SelectedTab: { tab: Tab },
   ClickedBrowse: {},
   ClickedConnect: {},
-  ClickedSignIn: {},
-  ClickedThemeToggle: {},
   ToggledSustain: {},
   ClickedPlayChord: {},
   ClickedPad: { midi: Schema.Number },

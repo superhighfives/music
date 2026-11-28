@@ -1,0 +1,63 @@
+---
+import { findTheme, lessonKey } from '~/production/catalog'
+import { lessonContent } from '~/production/content'
+import Crumbs from '~/production/Crumbs.astro'
+import DoneButton from '~/production/islands/DoneButton'
+import KeyBox from '~/production/islands/KeyBox'
+import LessonRail from '~/production/islands/LessonRail'
+import ThemeProgress from '~/production/islands/ThemeProgress'
+import Visit from '~/production/islands/Visit'
+import { components } from '~/production/mdx'
+import ProductionPage from '~/production/ProductionPage.astro'
+
+// /production/themes/<theme> opens its first lesson; /production/themes/<theme>/<lesson> opens that one.
+const theme = findTheme(Astro.params.theme ?? '')
+const lessonId = Astro.params.lesson
+const index = theme ? Math.max(0, theme.lessons.findIndex((l) => l.id === lessonId)) : -1
+const lesson = theme?.lessons[index]
+if (!theme || (lessonId && lesson?.id !== lessonId)) return Astro.rewrite('/404')
+const Content = lesson ? await lessonContent(theme.id, lesson.id) : undefined
+const key = lesson ? lessonKey(theme, lesson) : null
+const prev = theme.lessons[index - 1]
+const next = theme.lessons[index + 1]
+const href = (id: string) => `/production/themes/${theme.id}/${id}`
+const title = lessonId && lesson ? `${lesson.title} · ${theme.name} · Production` : `${theme.name} · Production`
+---
+
+<ProductionPage title={title}>
+  <Crumbs section="Themes" />
+  <header class="themehead">
+    <h1>{theme.name}</h1>
+    <p class="lede dim">{theme.blurb}</p>
+    <ThemeProgress client:load themeId={theme.id} />
+  </header>
+  <div class="reader">
+    <LessonRail client:load themeId={theme.id} index={index} />
+    {
+      lesson && key && Content ? (
+        <article class="lesson">
+          <Visit client:load lessonKey={key} />
+          <div>
+            <span class="lab">
+              Lesson {index + 1} of {theme.lessons.length}
+            </span>
+            <h2>{lesson.title}</h2>
+          </div>
+          <Content components={components} />
+          <div class="lessonfoot">
+            <DoneButton client:load doneKey={key} label="Mark lesson done" />
+            <div class="navbtns">
+              {prev && <a class="btn" href={href(prev.id)}>← {prev.title}</a>}
+              {next && <a class="btn" href={href(next.id)}>{next.title} →</a>}
+            </div>
+          </div>
+        </article>
+      ) : (
+        <div class="lesson">
+          <p>This theme is planned. Its lessons are listed alongside; ask Claude to write the first one and it lands here.</p>
+          {theme.keyBox && <KeyBox client:load />}
+        </div>
+      )
+    }
+  </div>
+</ProductionPage>

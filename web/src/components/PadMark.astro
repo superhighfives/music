@@ -1,0 +1,12 @@
+---
+/** A 4×4 pad grid with one pad lit in the section's accent. Each section lights a different pad. */
+interface Props {
+  lit: number
+  big?: boolean
+}
+const { lit, big } = Astro.props
+---
+
+<span class={big ? 'logo big' : 'logo'} aria-hidden="true">
+  {Array.from({ length: 16 }, (_, i) => <i class={i === lit ? 'on' : undefined} />)}
+</span>

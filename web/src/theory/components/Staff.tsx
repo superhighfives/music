@@ -1,6 +1,6 @@
-/** @jsxImportSource ~/content */
-import type { Node } from '~/content/jsx-runtime'
-import { play as playNotes } from '~/theory/app/define'
+import type { ComponentChildren as ReactNode } from 'preact'
+import { useId } from 'preact/hooks'
+import { useAudio } from '~/theory/lib/hooks'
 import {
   ACCIDENTALS,
   BOTTOM_LINE,
@@ -17,7 +17,7 @@ import type { Tone } from './Keyboard'
 
 /** One column on the staff: a note, a chord, or a barline. */
 export type StaffItem =
-  | { notes: (Note | string)[]; tone?: Tone; label?: string; /** Force the staff on a grand staff. */ staff?: Clef }
+  | { notes: (Note | string)[]; tone?: Tone | undefined; label?: string; /** Force the staff on a grand staff. */ staff?: Clef }
   | { bar: true }
 
 interface Props {
@@ -35,7 +35,7 @@ interface Props {
   names?: boolean
   /** Click a column to hear it. */
   sound?: boolean
-  caption?: Node
+  caption?: ReactNode
   /** Describes the figure, for screen readers. */
   label: string
 }
@@ -59,6 +59,8 @@ const toNote = (n: Note | string) => (typeof n === 'string' ? parseNote(n) : n)
 
 /** A five-line staff (or a grand staff) with notes on it. Click a note to hear it. */
 export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads = 'open', names, sound = true, caption, label }: Props) {
+  const audio = useAudio()
+  const titleId = useId()
   const cols = typeof items === 'string' ? parseItems(items) : items
   const staves: Clef[] = clef === 'grand' ? ['treble', 'bass'] : [clef]
   const tops: Record<Clef, number> = { treble: PAD, bass: clef === 'grand' ? PAD + 4 * GAP + GRAND_GAP : PAD }
@@ -75,19 +77,19 @@ export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads
 
   return (
     <figure className="fig staff">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} style={{ maxWidth: width * 1.35 }}>
-        <title>{label}</title>
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId} style={{ maxWidth: width * 1.35 }}>
+        <title id={titleId}>{label}</title>
         {staves.map((c) => (
-          <g>
+          <g key={c}>
             {[0, 1, 2, 3, 4].map((i) => (
-              <line className="line" x1={left} x2={width - 4} y1={tops[c] + i * GAP} y2={tops[c] + i * GAP} />
+              <line key={i} className="line" x1={left} x2={width - 4} y1={tops[c] + i * GAP} y2={tops[c] + i * GAP} />
             ))}
             {/* Noto Music's clefs sit on their baselines: these offsets put the treble curl round G4 and the bass dots round F3. */}
             <text className="glyph clef" x={left + 4} y={c === 'treble' ? y(c, 32) + 4 : y(c, 24) + 26} fontSize={GAP * 4}>
               {c === 'treble' ? '𝄞' : '𝄢'}
             </text>
             {keySignatureSteps(keySig, c).map((s, i) => (
-              <text className="glyph acc" x={sigX + i * 10} y={y(c, s)} fontSize={GAP * 3} dominantBaseline="central">
+              <text key={i} className="glyph acc" x={sigX + i * 10} y={y(c, s)} fontSize={GAP * 3} dominantBaseline="central">
                 {keySig > 0 ? '♯' : '♭'}
               </text>
             ))}
@@ -113,11 +115,11 @@ export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads
         {cols.map((item, i) => {
           const cx = startX + i * COLUMN + COLUMN / 2
           if ('bar' in item)
-            return staves.map((c) => <line className="line" x1={cx} x2={cx} y1={tops[c]} y2={tops[c] + 4 * GAP} />)
+            return staves.map((c) => <line key={`${i}${c}`} className="line" x1={cx} x2={cx} y1={tops[c]} y2={tops[c] + 4 * GAP} />)
           const notes = item.notes.map(toNote)
           const lit = current === i
           const midis = notes.map(midiOf)
-          const play = () => (sound ? playNotes(midis, notes.length > 2) : undefined)
+          const play = () => sound && audio.play(midis, notes.length > 2)
           // Notes a step apart in a chord can't share a column, so every other one moves right.
           const sorted = [...notes].sort((a, b) => staffStep(a) - staffStep(b))
           let shifted = false
@@ -128,12 +130,18 @@ export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads
           })
           return (
             <g
+              key={i}
               className={['col', item.tone ?? '', lit ? 'now' : ''].filter(Boolean).join(' ')}
               role={sound ? 'button' : undefined}
               tabIndex={sound ? 0 : undefined}
               aria-label={sound ? `Play ${notes.map(noteName).join(', ')}` : undefined}
               onPointerDown={sound ? play : undefined}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ' ? play() : undefined)}
+              onKeyDown={(e) => {
+                if (sound && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  play()
+                }
+              }}
             >
               <rect className="hit" x={cx - COLUMN / 2} y={0} width={COLUMN} height={height} />
               {notes.map((n, j) => {
@@ -147,9 +155,9 @@ export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads
                 for (let s = bottom + 10; s <= step; s += 2) ledgers.push(s)
                 const showAcc = n.acc !== sigAccs[n.letter]
                 return (
-                  <g>
+                  <g key={j}>
                     {ledgers.map((s) => (
-                      <line className="line ledger" x1={nx - 10} x2={nx + 10} y1={y(c, s)} y2={y(c, s)} />
+                      <line key={s} className="line ledger" x1={nx - 10} x2={nx + 10} y1={y(c, s)} y2={y(c, s)} />
                     ))}
                     {showAcc ? (
                       <text className="glyph acc" x={nx - 11 - (offset.get(n) ?? 0)} y={ny} fontSize={GAP * 3} textAnchor="end" dominantBaseline="central">

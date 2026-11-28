@@ -1,0 +1,39 @@
+---
+title: "Space: reverb and delay"
+---
+
+<p>Put reverb and delay on return tracks, not on each track, so every sound shares one room. That shared room is most of what makes a mix feel glued.</p>
+<Sheet head="Timing">
+  <V slot="sub" k="bpm" />
+  <Row>
+    <Cell l="¼ note" num tone="lit"><V k="quarter" /></Cell>
+    <Cell l="Dotted ⅛" num><V k="dotted" /></Cell>
+    <Cell l="⅛ note" num><V k="eighth" /></Cell>
+    <Cell l="1 bar" num><V k="bar" /></Cell>
+    <Cell l="Pre-delay" num><V k="pre" /></Cell>
+  </Row>
+</Sheet>
+<Sheet head="Returns">
+  <Row>
+    <Cell l="A · Plate" span={2} tone="cool">SuperPlate · vocals, snare</Cell>
+    <Cell l="Decay">1–1.5 s</Cell>
+    <Cell l="Filter" num>HP 250 Hz · LP 7 kHz</Cell>
+  </Row>
+  <Row>
+    <Cell l="B · Hall" span={2} tone="cool">Hybrid Reverb · pads, textures</Cell>
+    <Cell l="Decay">2 bars</Cell>
+    <Cell l="Pre-delay" num><V k="pre" /></Cell>
+  </Row>
+  <Row>
+    <Cell l="C · Echo" span={2} tone="cool">EchoBoy or Timeless 3</Cell>
+    <Cell l="Time" num><V k="dotted" /></Cell>
+    <Cell l="Feedback" num>35–45%</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Returns fully wet.</b> Dry/Wet at 100% on every return; the send knob sets how much.</div></li>
+  <li><div><b>EQ the returns.</b> High-pass reverbs around 250 Hz so the low end stays clear.</div></li>
+  <li><div><b>Pre-delay keeps things close.</b> A short gap before the tail keeps vocals and hits in front.</div></li>
+  <li><div><b>Automate the sends,</b> not the reverb. Pushing a send for one phrase is how a song breathes.</div></li>
+</Steps>
+<Task>Build the three returns and mix a loop using only send levels. No reverb on individual tracks.</Task>

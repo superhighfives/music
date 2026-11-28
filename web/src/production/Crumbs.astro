@@ -1,0 +1,11 @@
+---
+interface Props {
+  section: string
+}
+---
+
+<nav class="crumbs">
+  <a href="/production">Production</a>
+  <span>/</span>
+  <span>{Astro.props.section}</span>
+</nav>

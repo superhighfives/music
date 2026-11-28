@@ -1,0 +1,70 @@
+---
+import '~/site.css'
+import Masthead from '~/components/Masthead.astro'
+import PadMark from '~/components/PadMark.astro'
+import SiteFooter from '~/components/SiteFooter.astro'
+import Page from '~/layouts/Page.astro'
+import { lessonLink, TOOL_GROUPS } from '~/tools'
+---
+
+<Page title="Tools · music" description="The whole studio setup: Live, recording, editing, effects and mastering, with exercises to learn each tool and links to Production lessons.">
+  <div class="page" data-section="tools">
+    <Masthead>
+      <a slot="brand" class="brand" href="/tools"><PadMark lit={10} />Tools</a>
+    </Masthead>
+    <section class="hero">
+      <PadMark lit={10} big />
+      <h1>Tools</h1>
+      <p class="lede">
+        Everything in the studio, what each tool is for, and short exercises to learn it. Lessons link to <a href="/production">Production</a>, where
+        the techniques are taught in order.
+      </p>
+    </section>
+    <div class="home">
+      {TOOL_GROUPS.map((group) => (
+        <section class="block">
+          <h2>
+            {group.name} <span class="dim">{group.about}</span>
+          </h2>
+          <ul class="cards">
+            {group.tools.map((tool) => {
+              const links = [
+                ...tool.lessons.flatMap((key) => {
+                  const link = lessonLink(key)
+                  return link ? [{ label: link.title, href: link.href }] : []
+                }),
+                ...(tool.links ?? []),
+              ]
+              return (
+                <li class="card">
+                  <span class="name">{tool.name}</span>
+                  <span class="blurb">{tool.what}</span>
+                  <span class="lab">Learn it</span>
+                  <ol class="steps">
+                    {tool.learn.map((step) => (
+                      <li>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  {links.length > 0 ? (
+                    <p class="src">
+                      See: 
+                      {links.map((l, i) => (
+                        <span>
+                          {i > 0 ? ' · ' : null}
+                          <a href={l.href}>{l.label}</a>
+                        </span>
+                      ))}
+                    </p>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+    <SiteFooter current="tools" />
+  </div>
+</Page>

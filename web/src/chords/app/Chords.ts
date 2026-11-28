@@ -1,14 +1,12 @@
 import { Subscription } from '@effect/ui'
 import { Html, HtmlSubscription } from '@effect/ui/html'
-import { Schema, Stream } from 'effect'
+import { Schema } from 'effect'
 import { BUTTON } from '../lib/move'
 import { mod } from '../lib/music'
 import { HIT_MS, eventAllowedPcs, judge, summarize } from '../lib/practice'
 import { tutorialById, type Tutorial } from '../lib/tutorials'
-import { ToggleTheme } from '../../islands/theme'
 import {
   ConnectMove,
-  OpenSignIn,
   JoinAccount,
   PlayNotes,
   ReadPracticeClock,
@@ -23,6 +21,7 @@ import {
   StoreSheets,
   StoreSidebar,
   WaitToRetry,
+  signedInUser,
   every,
   moveMessages,
   piano,
@@ -70,8 +69,6 @@ type Commands = Array<
   | ReturnType<typeof SaveToAccount.make>
   | ReturnType<typeof RefreshAccount.make>
   | ReturnType<typeof WaitToRetry.make>
-  | ReturnType<typeof OpenSignIn.make>
-  | ReturnType<typeof ToggleTheme.make>
   | ReturnType<typeof ReadStorage.make>
 >
 type Next = { model: ChordsModel; run: Commands }
@@ -205,8 +202,6 @@ function handle(model: ChordsModel, message: ChordsMessage): Next {
     SelectedTab: ({ tab }) => done({ ...model, tab }),
     ClickedBrowse: () => done(setSearch({ ...model, browsing: true, tab: 'play' }, { t: null, s: 0, song: null, p: 0, x: null })),
     ClickedConnect: () => done(model, ConnectMove.make({})),
-    ClickedSignIn: () => done(model, OpenSignIn.make({})),
-    ClickedThemeToggle: () => done(model, ToggleTheme.make({})),
     ToggledSustain: () => done({ ...model, sustainLatched: !model.sustainLatched }),
     ClickedPlayChord: () => done(model, ...(d.voicing ? [PlayNotes.make({ notes: d.voicing.pads.map((p) => p.midi), strum: true })] : [])),
     ClickedPad: ({ midi }) => done(model, PlayNotes.make({ notes: [midi], strum: false })),
@@ -386,7 +381,7 @@ export const Chords = Html.component({ name: 'Chords', props: ChordsProps, model
       d.cue && Subscription.make('cue', 'cue', () => every(150, ChordsMessage.TickedCue())),
       model.practice.running &&
         HtmlSubscription.onAnimationFrame(() => ChordsMessage.TickedPractice({ now: performance.now(), audioNow: piano.clock().now })),
-      Subscription.make('user', props.userId ?? '', () => Stream.make(ChordsMessage.ChangedUser({ userId: props.userId }))),
+      Subscription.make('user', 'clerk', () => signedInUser),
       joined(model) && HtmlSubscription.onVisibility((visible) => ChordsMessage.ChangedVisibility({ visible })),
     ]
   },

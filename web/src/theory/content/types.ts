@@ -1,4 +1,4 @@
-import type { Node } from '~/content/jsx-runtime'
+import type { ComponentChildren as ReactNode } from 'preact'
 
 /**
  * A short, standalone idea from a chapter. Cards close each chapter as its key ideas, and the daily
@@ -14,14 +14,14 @@ export interface Card {
 }
 
 export interface Question {
-  prompt: Node
+  prompt: ReactNode
   /** Something to look at or hear with the question, such as a Staff or Keyboard. */
-  figure?: Node
+  figure?: ReactNode
   options: string[]
   /** Index into options. */
   answer: number
   /** Shown once answered, right or wrong. */
-  why: Node
+  why: ReactNode
 }
 
 export interface Chapter {
@@ -32,7 +32,6 @@ export interface Chapter {
   summary: string
   /** About how long it takes, reading and playing. */
   minutes: number
-  Body: () => Node
   cards: Card[]
   /** "Check yourself" at the end. Getting them all right marks the check passed. */
   check: Question[]

@@ -1,0 +1,7 @@
+---
+// A row of cells; its column count is the sum of the cells' spans, read from what they rendered.
+const html = await Astro.slots.render('default')
+const cols = [...html.matchAll(/data-span="(\d+)"/g)].reduce((n, m) => n + Number(m[1]), 0) || 1
+---
+
+<div class="gf-r" style={`--cols: ${cols}`} set:html={html} />

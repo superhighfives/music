@@ -1,0 +1,11 @@
+---
+import type { Derived } from '~/production/lib/music'
+import Value from '~/production/islands/Value'
+
+/** A value that follows the key and tempo in the masthead, such as a delay time. */
+interface Props {
+  k: keyof Derived
+}
+---
+
+<Value client:load k={Astro.props.k} />
