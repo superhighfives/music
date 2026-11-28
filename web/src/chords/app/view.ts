@@ -18,6 +18,7 @@ import {
 import { eventLabel, type Result } from '../lib/practice'
 import { SONGS, chordLabel, unknownChords, type Song, type SongEvent } from '../lib/songs'
 import { TUTORIALS, type Tutorial } from '../lib/tutorials'
+import { Music } from 'lucide'
 import { SITE_LINKS } from '../../site-links'
 import { CenterInBox, SetBookmarklet, ShowOnMove } from './effects'
 import { ChordsMessage, type SearchPatch } from './messages'
@@ -190,11 +191,29 @@ function PadGrid(
   )
 }
 
+/** Lucide's music note, as the Astro footer draws it (src/components/Icon.astro). */
+const MusicIcon = (h: H) =>
+  h.svg
+    .attr('width', '16')
+    .attr('height', '16')
+    .attr('viewBox', '0 0 24 24')
+    .attr('fill', 'none')
+    .attr('stroke', 'currentColor')
+    .attr('stroke-width', '1.75')
+    .attr('stroke-linecap', 'round')
+    .attr('stroke-linejoin', 'round')
+    .attr('aria-hidden', 'true')
+    .children(Music.map(([tag, attrs]) => Object.entries(attrs).reduce((el, [name, value]) => el.attr(name, String(value)), h.el(tag))))
+
 /** The site footer, as every section has it (src/components/SiteFooter.astro). Chords draws its own, inside the app's scroll area. */
 const Footer = (h: H, extra: string) =>
   h.footer.class(`sitefoot chordsfoot ${extra}`.trim()).children(
     h.nav.attr('aria-label', 'music').children(
-      SITE_LINKS.map((l) => h.a.key(l.id).attr('href', l.href).attr('aria-current', l.id === 'chords' ? 'page' : undefined).children(l.label)),
+      SITE_LINKS.map((l) =>
+        l.id === 'home'
+          ? h.a.key(l.id).class('home').attr('href', l.href).attr('aria-label', l.label).children(MusicIcon(h))
+          : h.a.key(l.id).attr('href', l.href).attr('aria-current', l.id === 'chords' ? 'page' : undefined).children(l.label),
+      ),
     ),
   )
 

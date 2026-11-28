@@ -1,4 +1,4 @@
-/* The footer every section shares (SiteFooter.tsx). Colours come from the surrounding text, so it suits
+/* The footer every section shares (components/SiteFooter.astro, and Chords' own in chords/app/view.ts). Colours come from the surrounding text, so it suits
    each section's palette without knowing it. */
 .sitefoot {
   margin-top: 4rem;
@@ -10,7 +10,13 @@
 .sitefoot nav {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.25rem 1.25rem;
+}
+
+/* Home is the music note, sitting on the text's line. */
+.sitefoot .home {
+  display: inline-flex;
 }
 
 .sitefoot a {

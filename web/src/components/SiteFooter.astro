@@ -1,6 +1,8 @@
 ---
 import '~/site-footer.css'
+import { Music } from 'lucide'
 import { SITE_LINKS, type Section } from '~/site-links'
+import Icon from './Icon.astro'
 
 interface Props {
   current?: Section
@@ -11,6 +13,19 @@ const { current, class: extra } = Astro.props
 
 <footer class:list={['sitefoot', extra]}>
   <nav aria-label="music">
-    {SITE_LINKS.map((l) => <a href={l.href} aria-current={l.id === current ? 'page' : undefined}>{l.label}</a>)}
+    {
+      SITE_LINKS.map((l) =>
+        // Home is the masthead's music note; its label is what a screen reader says.
+        l.id === 'home' ? (
+          <a class="home" href={l.href} aria-label={l.label} aria-current={l.id === current ? 'page' : undefined}>
+            <Icon icon={Music} size={16} strokeWidth={1.75} />
+          </a>
+        ) : (
+          <a href={l.href} aria-current={l.id === current ? 'page' : undefined}>
+            {l.label}
+          </a>
+        ),
+      )
+    }
   </nav>
 </footer>
