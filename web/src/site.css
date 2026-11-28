@@ -1,230 +1,139 @@
+/* The one look every section shares, taken from Production: greyscale cells on a quiet page, Instrument Sans with
+   IBM Plex Mono labels, and one accent per section. Sections import this, then add their own parts.
+   Colours use light-dark(), so the theme is only color-scheme: the system's, or the toggle's data-theme. */
+
 :root {
-  color-scheme: light;
-  --bg: #fafafa;
-  --card: #ffffff;
-  --line: #e5e5e5;
-  --line-strong: #a3a3a3;
-  --heading: #0a0a0a;
-  --text: #262626;
-  --muted: #525252;
-  --dim: #737373;
-  /* Chords' cyan, darkened in light mode so links stay readable on white. */
-  --led: oklch(0.55 0.12 200);
-  --on-led: #ffffff;
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  line-height: 1.5;
+  color-scheme: light dark;
+  --bg: light-dark(oklch(0.985 0.003 90), oklch(0.175 0.007 260));
+  --cell: light-dark(oklch(0.995 0.002 90), oklch(0.19 0.007 260));
+  --surface: light-dark(oklch(0.955 0.004 260), oklch(0.215 0.008 260));
+  --ink: light-dark(oklch(0.21 0.01 260), oklch(0.94 0.005 90));
+  --muted: light-dark(oklch(0.52 0.012 260), oklch(0.64 0.01 260));
+  --line: light-dark(oklch(0.87 0.006 260), oklch(0.3 0.008 260));
+  --line-strong: light-dark(oklch(0.74 0.008 260), oklch(0.44 0.01 260));
+  --cool: light-dark(oklch(0.52 0.12 248), oklch(0.74 0.11 248));
+  --cool-soft: light-dark(oklch(0.94 0.03 248), oklch(0.27 0.04 248));
+  --good: light-dark(oklch(0.55 0.13 150), oklch(0.74 0.13 150));
+  --good-soft: light-dark(oklch(0.93 0.05 150), oklch(0.29 0.05 150));
+  --bad: light-dark(oklch(0.56 0.18 25), oklch(0.72 0.15 25));
+  --bad-soft: light-dark(oklch(0.93 0.04 25), oklch(0.31 0.06 25));
+  /* The accent: Production's yellow unless a section sets its own (see [data-section] below). */
+  --lit: oklch(0.86 0.16 92);
+  --lit-ink: light-dark(oklch(0.52 0.12 80), oklch(0.86 0.16 92));
+  --lit-soft: light-dark(oklch(0.95 0.06 95), oklch(0.3 0.05 92));
+  --on-lit: oklch(0.2 0.02 90);
+  --sans: 'Instrument Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+
+/* Each section's accent, on its .page. The home page's shader art uses the same colours. */
+[data-section='chords'] {
+  --lit: oklch(0.82 0.13 200);
+  --lit-ink: light-dark(oklch(0.5 0.1 210), oklch(0.82 0.13 200));
+  --lit-soft: light-dark(oklch(0.94 0.04 200), oklch(0.29 0.05 205));
+}
+[data-section='theory'] {
+  --lit: oklch(0.7 0.15 42);
+  --lit-ink: light-dark(oklch(0.5 0.15 38), oklch(0.78 0.13 50));
+  --lit-soft: light-dark(oklch(0.93 0.045 50), oklch(0.32 0.06 45));
+}
+[data-section='ableton'] {
+  --lit: oklch(0.78 0.12 248);
+  --lit-ink: light-dark(oklch(0.5 0.13 252), oklch(0.78 0.12 248));
+  --lit-soft: light-dark(oklch(0.94 0.03 248), oklch(0.28 0.05 250));
+}
+[data-section='tools'] {
+  --lit: oklch(0.8 0.15 150);
+  --lit-ink: light-dark(oklch(0.5 0.13 150), oklch(0.8 0.15 150));
+  --lit-soft: light-dark(oklch(0.94 0.05 150), oklch(0.29 0.05 150));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #0a0a0a;
-    --card: #171717;
-    --line: #262626;
-    --line-strong: #525252;
-    --heading: #ffffff;
-    --text: #e5e5e5;
-    --muted: #a3a3a3;
-    --dim: #737373;
-    --led: oklch(0.78 0.16 195);
-    --on-led: #0a0a0a;
-  }
-}
+html { -webkit-text-size-adjust: 100%; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 18px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; }
+a { color: inherit; text-decoration-color: var(--muted); text-underline-offset: 4px; }
+a:hover { text-decoration-color: var(--ink); }
+:focus-visible { outline: 2px solid var(--lit); outline-offset: 2px; }
+code, kbd, .mono { font-family: var(--mono); font-size: 0.82em; }
+button { font: inherit; color: inherit; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
-* {
-  box-sizing: border-box;
-}
+.page { max-width: 1180px; margin: 0 auto; padding-inline: 24px; padding-block: 0 96px; }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-}
+/* Masthead: 🎵 / mark and section, the section's own controls, then theme and account. */
+.mast { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding-block: 22px; border-bottom: 1px solid var(--line); }
+.where { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+.where .home { font-size: 22px; line-height: 1; text-decoration: none; }
+.where .slash { color: var(--muted); font-size: 20px; line-height: 1; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; font-size: 18px; }
+.iconbtn { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px; display: grid; place-items: center; }
+.iconbtn:hover { color: var(--ink); }
 
-main {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 4rem 1rem 5rem;
-}
+/* Marks: a 4×4 pad grid with one pad lit, or Theory's staff, in the same box. */
+.logo, .mark { width: 30px; height: 30px; flex: none; border: 2px solid var(--ink); border-radius: 5px; }
+.logo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5px; padding: 2px; }
+.logo i { border: 1px solid var(--ink); border-radius: 1px; }
+.logo i.on { background: var(--lit); border-color: var(--lit); }
+.logo.big, .mark.big { width: 64px; height: 64px; border-width: 2.5px; border-radius: 7px; }
+.logo.big { gap: 3px; padding: 3px; }
+.logo.big i { border-width: 1.5px; border-radius: 2px; }
 
-h1 {
-  margin: 0 0 0.25rem;
-  font-size: 2.25rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--heading);
-}
+/* Type */
+h1 { font: 500 40px/1.1 var(--sans); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h2 { font: 500 24px/1.3 var(--sans); margin: 0; text-wrap: balance; }
+h2 .dim, .dim { color: var(--muted); }
+h3 { font: 600 12px/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; margin: 12px 0 -6px; }
+p { margin: 0; max-width: 38em; text-wrap: pretty; }
+.lede { font-size: 22px; line-height: 1.45; max-width: 34em; }
+.lab { font: 500 11.5px/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.src { font-size: 14px; color: var(--muted); }
 
-h2 {
-  margin: 2.5rem 0 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--dim);
-}
+/* Controls */
+.btn { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; cursor: pointer; font-size: 16px; line-height: 1.2; text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+.btn:hover { border-color: var(--muted); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+.btn.primary { background: var(--lit); border-color: var(--lit); color: var(--on-lit); font-weight: 500; }
+.btn.isdone { background: var(--cell); color: var(--good); border-color: var(--good); }
+.navbtns { display: flex; gap: 10px; flex-wrap: wrap; }
+.chip { font: 500 11px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 7px; border-radius: 4px; background: var(--surface); color: var(--muted); white-space: nowrap; }
+.chip.lit { background: var(--lit-soft); color: var(--lit-ink); }
+.chip.cool { background: var(--cool-soft); color: var(--cool); }
+.bar { height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--lit); border-radius: 2px; }
 
-p {
-  margin: 0 0 1rem;
-  color: var(--muted);
-}
+/* Pages: a hero, then blocks of cells */
+.hero { padding-block: 64px 56px; display: grid; gap: 20px; justify-items: start; }
+.home { display: grid; gap: 72px; }
+.block { display: grid; gap: 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.card { background: var(--cell); padding: 18px 18px 16px; display: grid; gap: 10px; align-content: start; text-decoration: none; min-height: 190px; }
+a.card:hover { background: var(--surface); }
+.card .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.card .num { font: 500 12px/1 var(--mono); color: var(--muted); letter-spacing: 0.08em; }
+.card .name { font-size: 21px; font-weight: 500; line-height: 1.25; }
+.card .blurb { font-size: 16px; color: var(--muted); line-height: 1.45; }
+.card .meta { margin-top: auto; display: grid; gap: 8px; }
+.card .meta > .btn { justify-self: start; }
+.list { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.list > a, .list > div { background: var(--cell); padding: 15px 18px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; text-decoration: none; }
+.list > a:hover { background: var(--surface); }
+.list .t { font-size: 19px; font-weight: 500; }
+.list .s { font-size: 15px; color: var(--muted); grid-column: 1; }
+.log { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.log > div { background: var(--cell); display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 14px; padding: 13px 16px; font-size: 16px; }
+.log time { font: 500 12px/1.9 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 520px) { .log > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
 
-a {
-  color: var(--led);
-  text-underline-offset: 3px;
-}
+ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 14px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; max-width: 40em; }
+ol.steps li::before { content: counter(s, decimal-leading-zero); font: 500 13px/1.9 var(--mono); color: var(--muted); }
+ol.steps b { font-weight: 600; }
 
-code,
-kbd {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 0.9em;
-  color: var(--text);
-}
+.empty { padding-block: 80px; display: grid; gap: 14px; }
 
-.back {
-  display: inline-block;
-  margin-bottom: 2rem;
-  font-size: 0.875rem;
-  color: var(--dim);
-  text-decoration: none;
-}
-
-.back:hover {
-  color: var(--text);
-}
-
-.cards {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.card {
-  display: block;
-  padding: 1rem 1.125rem;
-  border: 1px solid var(--line);
-  border-radius: 0.875rem;
-  background: var(--card);
-  color: inherit;
-  text-decoration: none;
-  transition: border-color 150ms ease;
-}
-
-a.card:hover,
-a.card:focus-visible {
-  border-color: var(--line-strong);
-}
-
-.art-card {
-  display: grid;
-  grid-template-columns: 4rem 1fr;
-  align-items: start;
-  gap: 1rem;
-}
-
-/* A square of shader art. Its own colours, so it reads the same in light and dark. */
-.art {
-  aspect-ratio: 1;
-  border-radius: 0.625rem;
-  overflow: hidden;
-  outline: 1px solid var(--line);
-  outline-offset: -1px;
-}
-
-.card h3 {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--heading);
-}
-
-.card h3 span {
-  font-size: 0.8125rem;
-  font-weight: 400;
-  color: var(--dim);
-}
-
-.card p {
-  margin: 0;
-  font-size: 0.9375rem;
-}
-
-.card .how {
-  margin-top: 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--dim);
-}
-
-.download {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.25rem;
-  margin-top: 0.75rem;
-  padding: 0 0.875rem;
-  border-radius: 0.5rem;
-  background: var(--led);
-  color: var(--on-led);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.group-about {
-  margin-top: -0.25rem;
-  font-size: 0.9375rem;
-}
-
-.card h4 {
-  margin: 0.75rem 0 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--dim);
-}
-
-.learn {
-  margin: 0;
-  padding-left: 1.25rem;
-  font-size: 0.9375rem;
-  color: var(--muted);
-}
-
-ol {
-  margin: 0 0 1rem;
-  padding-left: 1.25rem;
-  color: var(--muted);
-}
-
-li + li {
-  margin-top: 0.25rem;
-}
-
-.account {
-  display: flex;
-  justify-content: flex-end;
-  min-height: 2.25rem;
-  margin-bottom: 1rem;
-}
-
-.signin {
-  min-height: 2.25rem;
-  padding: 0 0.875rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.signin:hover {
-  border-color: var(--line-strong);
-}
+/* Home: each section's card leads with shader art in that section's colours, the same in light and dark. */
+.cards > li { display: grid; }
+.card .art { aspect-ratio: 2; margin-bottom: 4px; border-radius: 4px; overflow: hidden; }

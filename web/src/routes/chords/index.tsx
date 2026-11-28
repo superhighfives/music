@@ -19,10 +19,10 @@ import {
   type Pad,
   type Voicing,
 } from '~/chords/lib/music'
-import { AccountButton, DARK_APPEARANCE } from '~/account/AccountButton'
 import { useAccountSync } from '~/account/sync'
 import { usePiano } from '~/chords/lib/piano'
 import { mergeSheets, parseSheets, type SavedSheet } from '~/chords/lib/sheets'
+import { Masthead, PadMark } from '~/Masthead'
 import { SiteFooter } from '~/SiteFooter'
 import css from '~/chords/styles.css?url'
 import { BUTTON, BUTTON_DIM, COLOR, STEP_NOTE, padNote, useMove, type Lights, type MoveStatus } from '~/chords/lib/move'
@@ -81,8 +81,19 @@ export const Route = createFileRoute('/chords/')({
       { rel: 'icon', href: '/chords/favicon.svg', type: 'image/svg+xml' },
     ],
   }),
+  // A full-height app under the shared masthead: the sidebar and pads fill what's left of the screen.
   component: () => (
-    <div className="min-h-dvh bg-neutral-950 font-sans text-neutral-200 antialiased">
+    <div data-section="chords" className="flex h-dvh flex-col text-base text-neutral-200">
+      <div className="shrink-0 px-4 lg:px-6">
+        <Masthead
+          brand={
+            <a className="brand" href="/chords">
+              <PadMark lit={5} />
+              Chords
+            </a>
+          }
+        />
+      </div>
       <App />
     </div>
   ),
@@ -643,7 +654,7 @@ function App() {
             onClick={() => set({ sevenths: !search.sevenths })}
             className={[
               'rounded-full border px-2 py-px text-[11px] tracking-normal normal-case',
-              search.sevenths ? 'border-led text-led' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500',
+              search.sevenths ? 'border-led text-led-ink' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500',
             ].join(' ')}
           >
             7ths {search.sevenths ? 'on' : 'off'}
@@ -690,7 +701,7 @@ function App() {
     <div className="flex flex-col gap-1.5">
       {CHORD_FAMILIES.map((family) => (
         <div key={family.name} className="grid grid-cols-[3.25rem_1fr] items-start gap-2">
-          <div className="pt-1.5 text-[10px] font-medium tracking-wider text-neutral-500 uppercase">{family.name}</div>
+          <div className="pt-1.5 font-mono text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase">{family.name}</div>
           <div className="grid grid-cols-5 gap-1">
             {family.ids.map((id) => (
               <Chip key={id} active={search.chord === id} onClick={() => set({ chord: id })}>
@@ -730,19 +741,15 @@ function App() {
   )
 
   return (
-    <main className="flex h-dvh flex-col overflow-hidden lg:flex-row">
+    <main className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
       <aside
         ref={(el) => el?.style.setProperty('--sidebar', `${sidebar.width}px`)}
         className="flex shrink-0 flex-col gap-3 px-4 pt-4 lg:w-[var(--sidebar,392px)] lg:gap-4 lg:overflow-y-auto lg:px-6 lg:py-5"
       >
-        <div className="flex items-center gap-2">
-          <h1 className="mr-auto text-lg font-semibold tracking-tight text-white">chords</h1>
-          <AccountButton appearance={DARK_APPEARANCE} className="min-h-9 rounded-md border border-neutral-700 px-2.5 text-sm text-neutral-300 hover:border-neutral-500" />
-          {/* Phone: key and scale sit beside the title to save height. */}
-          <div className="flex gap-2 lg:hidden">
-            <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />
-            <ScaleSelect value={scale.id} onChange={(id) => set({ scale: id })} />
-          </div>
+        {/* Phone: key and scale sit at the top to save height. */}
+        <div className="flex gap-2 lg:hidden">
+          <KeySelect value={search.key} onChange={(key) => set({ key, root: key })} />
+          <ScaleSelect value={scale.id} onChange={(id) => set({ scale: id })} />
         </div>
         {/* Phone: the layout stays at the top. The pickers are in tabs below the pads. */}
         <div className="flex flex-col gap-3 lg:hidden">{layoutControls}</div>
@@ -814,7 +821,7 @@ function App() {
           {showAll ? (
             <div className="min-w-0">
               <div className="text-xs text-neutral-500">{search.sevenths ? 'Sevenths' : 'Triads'} in key</div>
-              <h2 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h2 className="text-3xl font-medium tracking-tight text-white lg:text-4xl">
                 {NOTE_NAMES[search.key]} {scale.name}
               </h2>
               <p className="text-sm text-neutral-400">Select a chord to open it.</p>
@@ -827,7 +834,7 @@ function App() {
                   {search.sevenths ? '7' : ''} in {NOTE_NAMES[search.key]} {scale.name}
                 </div>
               )}
-              <h2 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h2 className="text-3xl font-medium tracking-tight text-white lg:text-4xl">
                 {practiceEvent?.kind === 'note' ? noteWithOctave(practiceEvent.midi) : chordSymbol(search.root, type.id, type.name)}
               </h2>
               <p className="text-sm text-neutral-400">
@@ -868,7 +875,7 @@ function App() {
             {!showAll && (
               <button
                 type="button"
-                className="min-h-11 rounded-lg bg-led px-4 font-medium text-neutral-950 disabled:opacity-40 lg:min-h-9"
+                className="min-h-11 rounded-lg bg-led px-4 font-medium text-on-led disabled:opacity-40 lg:min-h-9"
                 disabled={!voicing}
                 onClick={() => voicing && play(voicing.pads.map((p) => p.midi), true)}
               >
@@ -896,7 +903,7 @@ function App() {
                     >
                       <span className="flex h-5 items-baseline gap-2 text-sm">
                         <span className="text-xs text-neutral-500">{c.numeral}</span>
-                        <span className={selected ? 'font-semibold text-led' : 'font-medium text-white'}>
+                        <span className={selected ? 'font-semibold text-led-ink' : 'font-medium text-white'}>
                           {chordSymbol(c.rootPc, c.type.id, c.type.name)}
                         </span>
                         <span className="truncate text-xs text-neutral-500">
@@ -1042,12 +1049,12 @@ function PadGrid({
             compact ? 'text-[clamp(6px,2.4cqw,11px)]' : 'text-[clamp(9px,2.4cqmin,14px)]',
             hit
               ? hit.interval === 0
-                ? `${ring} bg-led text-neutral-950 shadow-[0_0_24px_-4px_var(--color-led)]`
+                ? `${ring} bg-led text-on-led shadow-[0_0_24px_-4px_var(--color-led)]`
                 : hit.optional
                   ? 'bg-neutral-800 text-white outline-2 -outline-offset-2 outline-white/70 outline-dashed'
                   : `${ring} bg-white text-neutral-950 shadow-[0_0_20px_-6px_white]`
               : isKeyRoot
-                ? 'bg-led/25 text-led'
+                ? 'bg-led/25 text-led-ink'
                 : lit
                   ? 'bg-neutral-700/70 text-neutral-300'
                   : 'bg-neutral-950 text-neutral-600',
@@ -1112,7 +1119,7 @@ function ConnectScreen({
 }) {
   const problem = CONNECT_PROBLEM[status]
   return (
-    <main className="flex min-h-dvh items-center justify-center px-6 py-12">
+    <main className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-12">
       <div className="flex w-full max-w-md flex-col items-center gap-8 text-center">
         <div aria-hidden className="grid grid-cols-8 gap-1.5">
           {[3, 2, 1, 0].flatMap((row) =>
@@ -1122,7 +1129,7 @@ function ConnectScreen({
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-semibold tracking-tight text-white">chords</h1>
+          <h1 className="text-4xl font-medium tracking-tight text-white">Chords</h1>
           <p className="text-neutral-400">Learn chords and play along with songs on Ableton Move.</p>
         </div>
         <div className="flex flex-col items-center gap-3">
@@ -1130,7 +1137,7 @@ function ConnectScreen({
             type="button"
             onClick={onConnect}
             disabled={status === 'connecting'}
-            className="min-h-11 rounded-xl bg-led px-6 text-base font-medium text-neutral-950 disabled:opacity-40"
+            className="min-h-11 rounded-xl bg-led px-6 text-base font-medium text-on-led disabled:opacity-40"
           >
             {status === 'connecting' ? 'Connecting…' : 'Connect Move'}
           </button>
@@ -1165,7 +1172,7 @@ function OfflineBar({ status, onConnect }: { status: MoveStatus; onConnect: () =
           type="button"
           onClick={onConnect}
           disabled={status === 'connecting'}
-          className="min-h-9 shrink-0 rounded-md bg-led px-3 text-sm font-medium text-neutral-950 disabled:opacity-40"
+          className="min-h-9 shrink-0 rounded-md bg-led px-3 text-sm font-medium text-on-led disabled:opacity-40"
         >
           {status === 'connecting' ? 'Connecting…' : 'Connect Move'}
         </button>
@@ -1241,7 +1248,7 @@ function TutorialCard({
             waitingForNext ? 'bg-emerald-950/60 ring-emerald-700' : 'bg-neutral-800/60 ring-neutral-700'
           }`}
         >
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Your turn</span>
+          <span className="shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">Your turn</span>
           <span className={prompt.tone}>{prompt.text}</span>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -1344,7 +1351,7 @@ function SongCard({
           finished ? 'bg-emerald-950/60 ring-emerald-700' : 'bg-neutral-800/60 ring-neutral-700'
         }`}
       >
-        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Your turn</span>
+        <span className="shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">Your turn</span>
         <span className={prompt.tone}>{prompt.text}</span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -1418,12 +1425,12 @@ function LyricLine({
           : !current
             ? st === 'done'
               ? 'text-neutral-600'
-              : 'text-led/60'
+              : 'text-led-ink/60'
             : st === 'now'
-              ? 'rounded bg-led px-1 text-neutral-950'
+              ? 'rounded bg-led px-1 text-on-led'
               : st === 'done'
                 ? 'text-emerald-400'
-                : 'text-led'
+                : 'text-led-ink'
         const label = (
           <span className={`mr-2 text-sm font-semibold ${chordClass}`}>{c.parsed ? chordLabel(c.parsed) : c.name}</span>
         )
@@ -1505,7 +1512,7 @@ function Segmented<T extends string>({
 function Group({ label, action, children }: { label: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between text-[10px] font-medium tracking-wider text-neutral-500 uppercase">
+      <div className="flex items-center justify-between font-mono text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase">
         {label}
         {action}
       </div>
@@ -1528,7 +1535,7 @@ function Field({
   return (
     <label
       className={[
-        'flex gap-1 text-[10px] font-medium tracking-wider text-neutral-500 uppercase',
+        'flex gap-1 font-mono text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase',
         inline ? 'items-center gap-2' : 'flex-col',
         className,
       ].join(' ')}

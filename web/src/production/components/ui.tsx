@@ -79,16 +79,6 @@ export function Note({ label, children }: { label: string; children: ReactNode }
   );
 }
 
-export function Logo({ big }: { big?: boolean }) {
-  return (
-    <span className={big ? "logo big" : "logo"} aria-hidden="true">
-      {Array.from({ length: 16 }, (_, i) => (
-        <i key={i} className={i === 12 ? "on" : undefined} />
-      ))}
-    </span>
-  );
-}
-
 /** The current key's scale and diatonic triads. */
 export function KeyBox() {
   const { settings } = useStore();

@@ -15,8 +15,8 @@ function Home() {
   const today = cardOfTheDay()
   const done = CHAPTERS.filter((c) => read[c.id]).length
   return (
-    <div className="home">
-      <section className="cover">
+    <>
+      <section className="hero">
         <Mark big />
         <h1>{BOOK_TITLE}</h1>
         <p className="subtitle">{BOOK_SUBTITLE}</p>
@@ -45,73 +45,77 @@ function Home() {
         ) : null}
       </section>
 
-      <div className="homegrid">
-        {today ? (
-          <section className="today" aria-labelledby="today-h">
-            <h2 id="today-h" className="lab">
-              Today's idea
-            </h2>
-            <CardView card={today} />
-            <Link className="more" to="/theory/$chapterId" params={{ chapterId: today.chapter.id }} hash={`card-${today.id}`}>
-              From {today.chapter.title} →
-            </Link>
-          </section>
-        ) : null}
-        <DailyEmail />
-      </div>
+      <div className="home">
+        <div className="homegrid">
+          {today ? (
+            <section className="today" aria-labelledby="today-h">
+              <h2 id="today-h" className="lab">
+                Today's idea
+              </h2>
+              <CardView card={today} />
+              <Link className="more" to="/theory/$chapterId" params={{ chapterId: today.chapter.id }} hash={`card-${today.id}`}>
+                From {today.chapter.title} →
+              </Link>
+            </section>
+          ) : null}
+          <DailyEmail />
+        </div>
 
-      <section className="toc" id="contents" aria-labelledby="contents-h">
-        <h2 id="contents-h">Contents</h2>
-        {PARTS.map((part, pi) => (
-          <div key={part.id} className="tocpart">
-            <div className="tochead">
-              <span className="lab">
-                Part {pi + 1} · {part.level}
-              </span>
-              <h3>{part.title}</h3>
-              <p>{part.blurb}</p>
-            </div>
-            <ol className="toclist">
-              {CONTENTS.filter((e) => e.part === part).map((e) =>
-                'chapter' in e ? (
-                  <li key={e.n}>
-                    <Link to="/theory/$chapterId" params={{ chapterId: e.chapter.id }} className={ready && read[e.chapter.id] ? 'done' : undefined}>
+        <section className="block" id="contents" aria-labelledby="contents-h">
+          <h2 id="contents-h">Contents</h2>
+          {PARTS.map((part, pi) => (
+            <div key={part.id} className="tocpart">
+              <div className="tochead">
+                <span className="lab">
+                  Part {pi + 1} · {part.level}
+                </span>
+                <h3>{part.title}</h3>
+                <p>{part.blurb}</p>
+              </div>
+              <ol className="toclist">
+                {CONTENTS.filter((e) => e.part === part).map((e) =>
+                  'chapter' in e ? (
+                    <li key={e.n}>
+                      <Link to="/theory/$chapterId" params={{ chapterId: e.chapter.id }} className={ready && read[e.chapter.id] ? 'done' : undefined}>
+                        <span className="n">{String(e.n).padStart(2, '0')}</span>
+                        <span className="t">
+                          <b>{e.chapter.title}</b>
+                          <span>{e.chapter.summary}</span>
+                        </span>
+                        <span className="st">
+                          {ready && checks[e.chapter.id] ? 'Passed' : ready && read[e.chapter.id] ? 'Read' : `${e.chapter.minutes} min`}
+                        </span>
+                      </Link>
+                    </li>
+                  ) : (
+                    <li key={e.n} className="planned">
                       <span className="n">{String(e.n).padStart(2, '0')}</span>
                       <span className="t">
-                        <b>{e.chapter.title}</b>
-                        <span>{e.chapter.summary}</span>
+                        <b>{e.planned.title}</b>
+                        <span>{e.planned.summary}</span>
                       </span>
-                      <span className="st">
-                        {ready && checks[e.chapter.id] ? 'Passed' : ready && read[e.chapter.id] ? 'Read' : `${e.chapter.minutes} min`}
-                      </span>
-                    </Link>
-                  </li>
-                ) : (
-                  <li key={e.n} className="planned">
-                    <span className="n">{String(e.n).padStart(2, '0')}</span>
-                    <span className="t">
-                      <b>{e.planned.title}</b>
-                      <span>{e.planned.summary}</span>
-                    </span>
-                    <span className="st">Soon</span>
-                  </li>
-                ),
-              )}
-            </ol>
-          </div>
-        ))}
-      </section>
+                      <span className="st">Soon</span>
+                    </li>
+                  ),
+                )}
+              </ol>
+            </div>
+          ))}
+        </section>
 
-      <section className="log" aria-labelledby="log-h">
-        <h2 id="log-h">Edition log</h2>
-        {LOG.map(([date, text]) => (
-          <div key={date + text}>
-            <time dateTime={date}>{new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time>
-            <span>{text}</span>
+        <section className="block" aria-labelledby="log-h">
+          <h2 id="log-h">Edition log</h2>
+          <div className="log">
+            {LOG.map(([date, text]) => (
+              <div key={date + text}>
+                <time dateTime={date}>{new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time>
+                <span>{text}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   )
 }
 

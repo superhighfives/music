@@ -242,7 +242,7 @@ export function PracticeCard({ exercise, practice, onExit }: { exercise: Exercis
         <button
           type="button"
           onClick={running ? practice.stop : practice.start}
-          className={`min-h-9 rounded-lg px-4 font-medium ${running ? 'bg-white text-neutral-950' : 'bg-led text-neutral-950'}`}
+          className={`min-h-9 rounded-lg px-4 font-medium ${running ? 'bg-white text-neutral-950' : 'bg-led text-on-led'}`}
         >
           {running ? 'Stop' : 'Start'}
         </button>
