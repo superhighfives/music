@@ -1,6 +1,6 @@
 import type { ComponentChildren as ReactNode } from 'preact'
 import { useId } from 'preact/hooks'
-import { useAudio } from '~/theory/lib/hooks'
+import { useAudio, usePressed } from '~/theory/lib/hooks'
 import { isBlackKey, pitchName, spell } from '~/theory/lib/theory'
 
 export type Tone = 'lit' | 'cool' | 'good' | 'bad' | 'soft'
@@ -55,13 +55,16 @@ export function Keyboard({ from = 60, to = 83, marks = {}, names = 'c', prefer =
     onKey?.(midi)
   }
 
+  const pressed = usePressed<number>()
+
   const key = (midi: number) => {
     const black = isBlackKey(midi)
     const mark = marks[midi]
     const name = mark?.label ?? keyName(midi, names, prefer)
     const w = black ? BW : W
     const h = black ? BH : H
-    const cls = ['key', black ? 'black' : 'white', mark?.tone ?? ''].filter(Boolean).join(' ')
+    const cls = ['key', black ? 'black' : 'white', mark?.tone ?? '', pressed.down === midi ? 'down' : ''].filter(Boolean).join(' ')
+    const { press: hold, ...release } = pressed.handlers(midi)
     return (
       <g
         key={midi}
@@ -71,14 +74,17 @@ export function Keyboard({ from = 60, to = 83, marks = {}, names = 'c', prefer =
         aria-label={`${pitchName(spell(midi, prefer))}${spell(midi, prefer).octave}`}
         onPointerDown={(e) => {
           e.preventDefault()
+          hold()
           press(midi)
         }}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
             e.preventDefault()
+            hold()
             press(midi)
           }
         }}
+        {...release}
       >
         <rect x={x(midi)} y={top} width={w} height={h} rx={black ? 2.5 : 4} />
         {name ? (

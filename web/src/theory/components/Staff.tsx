@@ -1,6 +1,6 @@
 import type { ComponentChildren as ReactNode } from 'preact'
 import { useId } from 'preact/hooks'
-import { useAudio } from '~/theory/lib/hooks'
+import { useAudio, usePressed } from '~/theory/lib/hooks'
 import {
   ACCIDENTALS,
   BOTTOM_LINE,
@@ -60,6 +60,7 @@ const toNote = (n: Note | string) => (typeof n === 'string' ? parseNote(n) : n)
 /** A five-line staff (or a grand staff) with notes on it. Click a note to hear it. */
 export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads = 'open', names, sound = true, caption, label }: Props) {
   const audio = useAudio()
+  const pressed = usePressed<number>()
   const titleId = useId()
   const cols = typeof items === 'string' ? parseItems(items) : items
   const staves: Clef[] = clef === 'grand' ? ['treble', 'bass'] : [clef]
@@ -120,6 +121,7 @@ export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads
           const lit = current === i
           const midis = notes.map(midiOf)
           const play = () => sound && audio.play(midis, notes.length > 2)
+          const { press: hold, ...release } = pressed.handlers(i)
           // Notes a step apart in a chord can't share a column, so every other one moves right.
           const sorted = [...notes].sort((a, b) => staffStep(a) - staffStep(b))
           let shifted = false
@@ -131,17 +133,26 @@ export function Staff({ clef = 'treble', items, keySig = 0, time, current, heads
           return (
             <g
               key={i}
-              className={['col', item.tone ?? '', lit ? 'now' : ''].filter(Boolean).join(' ')}
+              className={['col', item.tone ?? '', lit ? 'now' : '', pressed.down === i ? 'down' : ''].filter(Boolean).join(' ')}
               role={sound ? 'button' : undefined}
               tabIndex={sound ? 0 : undefined}
               aria-label={sound ? `Play ${notes.map(noteName).join(', ')}` : undefined}
-              onPointerDown={sound ? play : undefined}
+              onPointerDown={
+                sound
+                  ? () => {
+                      hold()
+                      play()
+                    }
+                  : undefined
+              }
               onKeyDown={(e) => {
-                if (sound && (e.key === 'Enter' || e.key === ' ')) {
+                if (sound && (e.key === 'Enter' || e.key === ' ') && !e.repeat) {
                   e.preventDefault()
+                  hold()
                   play()
                 }
               }}
+              {...(sound ? release : {})}
             >
               <rect className="hit" x={cx - COLUMN / 2} y={0} width={COLUMN} height={height} />
               {notes.map((n, j) => {

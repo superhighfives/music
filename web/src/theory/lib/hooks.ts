@@ -29,3 +29,25 @@ export function usePlayer() {
     play: (notes: number[], strum?: boolean) => piano.play(notes, strum),
   }
 }
+
+/**
+ * Which part of a figure is held down, by a pointer or by Enter or Space, so it can light up while it
+ * plays. CSS `:active` can't do this: the figures cancel the pointer's default action, and touch screens
+ * apply `:active` unreliably.
+ */
+export function usePressed<K>() {
+  const [down, setDown] = useState<K | null>(null)
+  const release = () => setDown(null)
+  return {
+    down,
+    /** Event handlers for one part: it's down from press to release, or until the pointer leaves it. */
+    handlers: (part: K) => ({
+      onPointerUp: release,
+      onPointerLeave: release,
+      onPointerCancel: release,
+      onKeyUp: release,
+      onBlur: release,
+      press: () => setDown(part),
+    }),
+  }
+}

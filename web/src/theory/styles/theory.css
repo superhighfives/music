@@ -131,7 +131,6 @@ p.big { margin: 26px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--li
 /* Keys stay light and dark in both themes, so white keys' states mix from the key colours, not the page's. */
 .key.white:hover rect { fill: color-mix(in oklch, var(--key-white), var(--key-black) 10%); }
 .key.black:hover rect { fill: color-mix(in oklch, var(--key-black), white 18%); }
-.key:active rect { filter: brightness(0.92); }
 .key.lit rect { fill: var(--lit); stroke: var(--lit); }
 .key.cool rect { fill: var(--cool); stroke: var(--cool); }
 .key.good rect { fill: var(--good); stroke: var(--good); }
@@ -142,6 +141,12 @@ p.big { margin: 26px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--li
 .key.black .keyname { fill: var(--key-white); font-size: 9.5px; }
 .key.lit .keyname, .key.cool .keyname, .key.good .keyname, .key.bad .keyname { fill: #fff; }
 .key.white.soft .keyname { fill: color-mix(in oklch, var(--lit), var(--key-black) 40%); }
+/* A key lights in the accent while it's held, and keyboard focus draws the accent round the key itself,
+   not the site's focus box beside it. After the marks, so a pressed key shows over any colour. */
+.key:focus { outline: none; }
+.key:focus-visible rect { stroke: var(--lit); stroke-width: 2; }
+.key.down rect { fill: var(--lit); stroke: var(--lit); }
+.key.down .keyname { fill: #fff; }
 .arc path { fill: none; stroke: var(--muted); stroke-width: 1.3; }
 .arc text { font: 600 11px var(--sans); fill: var(--muted); }
 .arc.lit path { stroke: var(--lit); }
@@ -159,6 +164,11 @@ p.big { margin: 26px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--li
 .col .hit { fill: transparent; }
 .col[role='button'] { cursor: pointer; }
 .col[role='button']:hover .hit { fill: var(--surface); }
+/* The same for a playable column of the staff: its notes light while held, and focus tints the column. */
+.col:focus { outline: none; }
+.col:focus-visible .hit { fill: var(--lit-soft); }
+.col.down .head { stroke: var(--lit); }
+.col.down .head:not(.open), .col.down .acc { fill: var(--lit); }
 .col.lit .head, .col.now .head { stroke: var(--lit); }
 .col.lit .head:not(.open), .col.now .head:not(.open) { fill: var(--lit); }
 .col.lit .acc, .col.now .acc { fill: var(--lit); }
