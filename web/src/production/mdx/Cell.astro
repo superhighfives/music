@@ -1,0 +1,16 @@
+---
+/** A labelled cell. `span` widens it; its Row counts spans to set its columns. */
+interface Props {
+  l: string
+  span?: number
+  tone?: 'lit' | 'cool'
+  /** Monospaced, tabular figures. */
+  num?: boolean
+}
+const { l, span = 1, tone, num } = Astro.props
+---
+
+<div class:list={['f', span > 1 && `s${span}`, tone]} data-span={span}>
+  <div class="lab">{l}</div>
+  <div class:list={['v', num && 'num']}><slot /></div>
+</div>

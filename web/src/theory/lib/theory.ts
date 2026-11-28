@@ -243,7 +243,7 @@ export const DURATIONS = {
 export type Duration = keyof typeof DURATIONS
 
 /** One note or rest in a rhythm. A dot adds half the value again. */
-export type RhythmEvent = { value: Duration; rest?: boolean; dot?: boolean }
+export type RhythmEvent = { value: Duration; rest?: boolean | undefined; dot?: boolean | undefined }
 
 export const beatsOf = (e: RhythmEvent) => DURATIONS[e.value] * (e.dot ? 1.5 : 1)
 

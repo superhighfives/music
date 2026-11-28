@@ -1,5 +1,6 @@
-import { type ReactNode, useId } from 'react'
-import { useAudio } from '~/theory/lib/audio'
+import type { ComponentChildren as ReactNode } from 'preact'
+import { useId } from 'preact/hooks'
+import { useAudio } from '~/theory/lib/hooks'
 import {
   ACCIDENTALS,
   BOTTOM_LINE,
@@ -16,7 +17,7 @@ import type { Tone } from './Keyboard'
 
 /** One column on the staff: a note, a chord, or a barline. */
 export type StaffItem =
-  | { notes: (Note | string)[]; tone?: Tone; label?: string; /** Force the staff on a grand staff. */ staff?: Clef }
+  | { notes: (Note | string)[]; tone?: Tone | undefined; label?: string; /** Force the staff on a grand staff. */ staff?: Clef }
   | { bar: true }
 
 interface Props {

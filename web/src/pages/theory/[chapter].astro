@@ -1,0 +1,56 @@
+---
+import { chapterBody, chapterSections } from '~/theory/chapters'
+import { CardView } from '~/theory/components/ui'
+import { BOOK_TITLE, CHAPTERS, chapterNumber, findChapter, partOf } from '~/theory/content/book'
+import Contents from '~/theory/islands/Contents'
+import { ChapterStatus, Check, ReadButton } from '~/theory/islands/Progress'
+import TheoryPage from '~/theory/TheoryPage.astro'
+
+const chapter = findChapter(Astro.params.chapter ?? '')
+const Body = chapter ? await chapterBody(chapter.id) : undefined
+if (!chapter || !Body) return Astro.rewrite('/404')
+const index = CHAPTERS.indexOf(chapter)
+const prev = CHAPTERS[index - 1]
+const next = CHAPTERS[index + 1]
+const sections = chapterSections(chapter.id, chapter.check.length > 0)
+---
+
+<TheoryPage title={`${chapter.title} · ${BOOK_TITLE}`} description={chapter.summary}>
+  <div class="readbar" aria-hidden="true"></div>
+  <div class="reader">
+    <!-- A sticky rail on wide screens; on narrow ones, a closed disclosure above the chapter. -->
+    <div class="rail"><Contents client:load current={chapter.id} sections={sections} /></div>
+    <details class="railmobile">
+      <summary>Contents</summary>
+      <Contents client:idle current={chapter.id} sections={sections} />
+    </details>
+    <article class="chapter">
+      <header class="chead">
+        <span class="lab">{partOf(chapter)?.title} · Chapter {chapterNumber(chapter)}</span>
+        <h1>{chapter.title}</h1>
+        <p class="summary">{chapter.summary}</p>
+        <span class="meta">About {chapter.minutes} minutes<ChapterStatus client:load chapterId={chapter.id} /></span>
+      </header>
+      <div class="prose"><Body /></div>
+      <section class="sec ideas" id="key-ideas" aria-labelledby="key-ideas-h">
+        <h2 id="key-ideas-h">Key ideas</h2>
+        <div class="cards">{chapter.cards.map((c) => <CardView card={c} />)}</div>
+      </section>
+      {
+        chapter.check.length > 0 && (
+          <section class="sec" id="check" aria-labelledby="check-h">
+            <h2 id="check-h">Check yourself</h2>
+            <Check client:visible chapterId={chapter.id} />
+          </section>
+        )
+      }
+      <div class="cfoot">
+        <ReadButton client:load chapterId={chapter.id} />
+        <div class="navbtns">
+          {prev && <a class="btn" href={`/theory/${prev.id}`}>← {prev.title}</a>}
+          {next ? <a class="btn" href={`/theory/${next.id}`}>{next.title} →</a> : <a class="btn" href="/theory">More chapters soon · Contents</a>}
+        </div>
+      </div>
+    </article>
+  </div>
+</TheoryPage>

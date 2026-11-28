@@ -1,4 +1,4 @@
-import type { AccountCopy, SaveResult } from './saved'
+import type { AccountCopy, SaveResult } from './store'
 
 /** How one section reads and combines its value. */
 export type SyncRules<T> = {
@@ -16,7 +16,7 @@ export type SyncIO = {
 /**
  * One value kept in step with an account. It remembers the account's version, so a save from a tab
  * that's behind never overwrites a newer copy: it merges with that copy instead, to be saved again.
- * No React here, so it can be tested on its own; useAccountSync drives it.
+ * It has no browser or framework ties, so it can be tested on its own; `islands/sync.ts` and Chords drive it.
  */
 export class AccountSync<T> {
   private version: number | null = null

@@ -1,5 +1,4 @@
-import { RECIPES } from '~/production/content/recipes'
-import { THEMES } from '~/production/content/themes'
+import { RECIPES, THEMES } from '~/production/catalog'
 
 /**
  * The whole studio, as /tools lists it. `learn` holds short exercises for one tool. `lessons` links to

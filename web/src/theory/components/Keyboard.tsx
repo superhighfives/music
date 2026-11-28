@@ -1,5 +1,6 @@
-import { type ReactNode, useId } from 'react'
-import { useAudio } from '~/theory/lib/audio'
+import type { ComponentChildren as ReactNode } from 'preact'
+import { useId } from 'preact/hooks'
+import { useAudio } from '~/theory/lib/hooks'
 import { isBlackKey, pitchName, spell } from '~/theory/lib/theory'
 
 export type Tone = 'lit' | 'cool' | 'good' | 'bad' | 'soft'
@@ -22,7 +23,7 @@ interface Props {
   /** Keys don't sound when false. */
   sound?: boolean
   /** Arcs drawn between keys, such as steps in a scale, each with a label. Pass [] to keep room for arcs to come. */
-  arcs?: { from: number; to: number; label: string; tone?: Tone }[]
+  arcs?: { from: number; to: number; label: string; tone?: Tone | undefined }[]
   caption?: ReactNode
   /** Describes what's marked, for screen readers. */
   label: string

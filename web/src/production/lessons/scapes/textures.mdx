@@ -1,0 +1,33 @@
+---
+title: "Textures as instruments"
+---
+
+<p>A generated file becomes useful when you can play it. Each use needs the file made differently.</p>
+<Sheet head="Played pad" sub="Simpler · Classic">
+  <Row>
+    <Cell l="Loop">On · fade 35%</Cell>
+    <Cell l="Attack / release">Slow / long</Cell>
+    <Cell l="Transpose" num tone="lit"><V k="transpose" /></Cell>
+    <Cell l="Warp">Off</Cell>
+  </Row>
+  <Row>
+    <Cell l="Generate" num span={4}><V k="cmdPads" /></Cell>
+  </Row>
+</Sheet>
+<Sheet head="Bed loop" sub="Audio clip · Session">
+  <Row>
+    <Cell l="Length" num>14 bars</Cell>
+    <Cell l="Duration" num><V k="loopSecs" /></Cell>
+    <Cell l="Warp">On · 1.1.1 at start</Cell>
+    <Cell l="Follow action">Next · 14 bars</Cell>
+  </Row>
+  <Row>
+    <Cell l="Generate" num span={4}><V k="cmdLoops" /></Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Generate in the key, then check by ear.</b> The script retries until a clip measures in key, but the measurement is rough.</div></li>
+  <li><div><b>Play intervals, not full chords.</b> The texture already holds a chord; root and fifth stays clear.</div></li>
+  <li><div><b>Genopatch it in Synplant</b> when you want something cleaner to play polyphonically.</div></li>
+</Steps>
+<Task>Generate a pad in this key, load it into Simpler, and play a progression from <a href="/chords">Chords</a> on it.</Task>

@@ -1,0 +1,33 @@
+---
+import { THEME_SCRIPT } from '~/islands/theme'
+
+/**
+ * The document every page shares: the fonts, the light/dark choice applied before first paint, and the
+ * page's title and description. Pages import their own stylesheet, so sections never meet.
+ */
+interface Props {
+  title: string
+  description: string
+  icon?: string
+}
+const { title, description, icon = '/favicon.svg' } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={icon} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+    <script is:inline set:html={THEME_SCRIPT} />
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

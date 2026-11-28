@@ -1,0 +1,9 @@
+---
+/** A panel to play with. Whatever's inside is the interaction. */
+interface Props {
+  title?: string
+}
+const { title = 'Try it' } = Astro.props
+---
+
+<div class="try"><div class="lab">{title}</div><slot /></div>

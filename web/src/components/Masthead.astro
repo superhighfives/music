@@ -1,0 +1,68 @@
+---
+import { Show, SignInButton, UserButton } from '@clerk/astro/components'
+import { Music, Sun } from 'lucide'
+import Icon from './Icon.astro'
+
+/**
+ * The header every section shares: a music note back to the home page, then the section's mark and name
+ * (the `brand` slot), then the section's own controls (the default slot), the theme toggle and sign-in.
+ */
+const hasBrand = Astro.slots.has('brand')
+---
+
+<header class="mast">
+  <nav class="where" aria-label="Breadcrumb">
+    <a class="home" href="/" aria-label="music"><Icon icon={Music} size={22} strokeWidth={1.75} /></a>
+    {
+      hasBrand && (
+        <>
+          <span class="slash" aria-hidden="true">
+            /
+          </span>
+          <slot name="brand" />
+        </>
+      )
+    }
+  </nav>
+  <slot />
+  <button type="button" class="iconbtn" aria-label="Switch light or dark theme" data-theme-toggle>
+    <Icon icon={Sun} size={20} strokeWidth={1.6} />
+  </button>
+  <Show when="signed-out">
+    <SignInButton mode="modal" asChild><button type="button" class="btn">Sign in</button></SignInButton>
+  </Show>
+  <Show when="signed-in">
+    <UserButton />
+  </Show>
+</header>
+
+<script>
+  import { $clerkStore, updateClerkOptions } from '@clerk/astro/client'
+  import { dark } from '@clerk/ui/themes'
+
+  const system = matchMedia('(prefers-color-scheme: dark)')
+  const isDark = () => {
+    const chosen = document.documentElement.getAttribute('data-theme')
+    return chosen ? chosen === 'dark' : system.matches
+  }
+
+  // Clerk's dialog and menu follow the page's light or dark theme, in its type. Clerk takes options only once it has loaded.
+  const followTheme = () => {
+    if ($clerkStore.get()) updateClerkOptions({ appearance: { theme: isDark() ? dark : undefined, variables: { fontFamily: 'var(--sans)' } } })
+  }
+  $clerkStore.subscribe(followTheme)
+  system.addEventListener('change', followTheme)
+
+  // Switches between light and dark, and remembers the choice. Without a choice the page follows the system.
+  for (const button of document.querySelectorAll('[data-theme-toggle]'))
+    button.addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark'
+      document.documentElement.setAttribute('data-theme', next)
+      try {
+        localStorage.setItem('music.theme', next)
+      } catch {
+        // Not remembered, but the switch still applies.
+      }
+      followTheme()
+    })
+</script>

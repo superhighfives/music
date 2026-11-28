@@ -1,0 +1,13 @@
+---
+/** A chapter section. Its heading links to itself, and the chapter's contents list it (see sections.ts). */
+interface Props {
+  id: string
+  title: string
+}
+const { id, title } = Astro.props
+---
+
+<section class="sec" id={id} aria-labelledby={`${id}-h`}>
+  <h2 id={`${id}-h`}><a href={`#${id}`} class="anchor" aria-hidden="true" tabindex="-1">§</a>{title}</h2>
+  <slot />
+</section>

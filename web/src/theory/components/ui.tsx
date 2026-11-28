@@ -1,4 +1,5 @@
-import { type ReactNode, useState } from 'react'
+import type { ComponentChildren as ReactNode } from 'preact'
+import { useState } from 'preact/hooks'
 import type { Card, Question } from '~/theory/content/types'
 
 /** A chapter section. Its heading links to itself, and the chapter's contents list it. */

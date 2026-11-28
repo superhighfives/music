@@ -1,0 +1,50 @@
+import Section from '~/theory/mdx/Section.astro'
+import Big from '~/theory/mdx/Big.astro'
+import Aside from '~/theory/mdx/Aside.astro'
+import Try from '~/theory/mdx/Try.astro'
+import Term from '~/theory/mdx/Term.astro'
+import { Rhythm } from '~/theory/components/Rhythm'
+import { ValueTree } from '~/theory/content/chapters/rhythm'
+
+<p class="lede">Pitch is where a note sits; rhythm is <i>when</i> it happens and how long it lasts. You already feel rhythm: it's why your foot taps along to a song. This chapter gives names to what your foot already knows.</p>
+
+<Section id="beat" title="The beat">
+  <p>Under almost all music runs a steady pulse, like a heartbeat or a clock ticking. That's the <Term>beat</Term>. When you nod your head to a song, you're nodding on the beat. How fast the beats come is the <Term>tempo</Term>, measured in beats per minute (bpm).</p>
+  <Try title="Tap along">
+    <p class="prompt">Press play and tap your foot or a finger with each click. Each note lands on a beat.</p>
+    <Rhythm client:visible rhythm="q q q q q q q q" bpm={80} label="Eight quarter notes, one on each beat" />
+  </Try>
+  <p>Beats are grouped into <Term>bars</Term> (also called measures), most often of four. The first beat of each bar feels a little stronger, which is why the metronome clicks higher there. Counting four beats to a bar is called <b>4/4</b>, or common time; the next chapter is all about these groupings.</p>
+</Section>
+
+<Section id="values" title="Note values">
+  <p>Written music shows how long each note lasts by its shape. Hollow or filled head, a stem or not, flags or beams: each detail halves the length. Everything is measured against the <Term>whole note</Term>, which fills a whole bar of 4/4.</p>
+  <ValueTree />
+  <Big>Each note value is half the one before: whole, half, quarter, eighth, sixteenth.</Big>
+  <p>In 4/4, a quarter note gets one beat. That makes a half note two beats and a whole note four. Hear how the same bar can hold one long note or several shorter ones:</p>
+  <Rhythm client:visible rhythm="w" counts label="One whole note, four beats long" caption="A whole note: held for all four beats." />
+  <Rhythm client:visible rhythm="h h" label="Two half notes" caption="Two half notes: two beats each. Hollow heads with stems." />
+  <Rhythm client:visible rhythm="q q q q" label="Four quarter notes" caption="Four quarter notes: one beat each. Filled heads with stems." />
+</Section>
+
+<Section id="counting" title="Counting smaller notes">
+  <p>Shorter than a beat, notes are counted by splitting the beat. Two eighth notes share one beat; we count them <b>“1 &amp; 2 &amp;”</b>, saying “and” halfway between beats. Eighth notes have one flag, and when they come in groups their flags join into a <Term>beam</Term>.</p>
+  <Rhythm client:visible rhythm="e e e e e e e e" bpm={76} label="Eight eighth notes, counted 1 and 2 and 3 and 4 and" />
+  <p>Split each eighth again and you get sixteenth notes: four to a beat, with two beams. We count them <b>“1 e &amp; a”</b> (say “one ee and uh”).</p>
+  <Rhythm client:visible rhythm="s s s s s s s s e e q" bpm={66} label="Sixteenth notes, then eighths, then a quarter" />
+  <Aside label="Say it out loud">Counting aloud is the fastest way to learn rhythm. Keep the numbers on the beat steady and fit the “&amp;”s and “e”s in between. The beat never speeds up for the small notes.</Aside>
+</Section>
+
+<Section id="rests" title="Rests: measured silence">
+  <p>Silence in music is counted too. Each note value has a matching <Term>rest</Term> that lasts just as long. The beat carries on through a rest; you just don't play.</p>
+  <Rhythm client:visible rhythm="q rq q rq" label="Quarter note, quarter rest, quarter note, quarter rest" caption="Notes on 1 and 3, rests on 2 and 4. The counts in brackets are silent." />
+  <Rhythm client:visible rhythm="h rh" label="Half note then half rest" caption="A half note, then a half rest: two beats of silence." />
+  <Rhythm client:visible rhythm="re e re e re e re e" bpm={84} label="Eighth rests on the beats, eighth notes on the ands" caption="Rests on the beat, notes on the “&”: the start of a groove." />
+</Section>
+
+<Section id="dots-ties" title="Dots and ties">
+  <p>A <Term>dot</Term> after a note adds half its value again. A half note is two beats, so a dotted half note is three. A dotted quarter is one and a half beats, which leaves room for an eighth to finish the beat. That long-short pair is everywhere in music.</p>
+  <Rhythm client:visible rhythm="h. q" label="A dotted half note then a quarter note" caption="Dotted half: 2 + 1 = 3 beats." />
+  <Rhythm client:visible rhythm="q. e q q" label="Dotted quarter, eighth, quarter, quarter" caption="Dotted quarter and eighth: long, short, then two steady beats." />
+  <p>A <Term>tie</Term> is a curved line joining two notes of the same pitch: you play the first and hold it through the second. Ties let a note last across a barline, or for a length no single symbol can show.</p>
+</Section>

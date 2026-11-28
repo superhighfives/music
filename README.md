@@ -22,11 +22,11 @@ and so on. Each folder's README has the details.
 
 ## Deploys
 
-`web/` is one TanStack Start app on Cloudflare Workers, deployed with the `cf`
-CLI. Its workflow, `.github/workflows/web.yml`, only runs when `web/` changes:
-pull requests are type-checked, tested, built and dry-run; pushes to `main`
-deploy. It uses the repository secrets `CLOUDFLARE_API_TOKEN` and
-`CLOUDFLARE_ACCOUNT_ID`.
+`web/` is an Astro site on a Cloudflare Worker, deployed
+with Alchemy. Its workflow, `.github/workflows/web.yml`, only runs when `web/`
+changes: each pull request is type-checked, tested and deployed to its own
+preview, which is removed when it closes; pushes to `main` deploy the live site.
+See [`web/README.md`](web/README.md#deploy) for the stages and secrets.
 
 `ableton/` doesn't deploy. Extensions are released by hand as `.ablx` files, with
 tags prefixed `ableton/` (see its README).

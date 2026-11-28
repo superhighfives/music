@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentChildren as ReactNode } from 'preact'
 
 /**
  * A short, standalone idea from a chapter. Cards close each chapter as its key ideas, and the daily
@@ -32,7 +32,6 @@ export interface Chapter {
   summary: string
   /** About how long it takes, reading and playing. */
   minutes: number
-  Body: ComponentType
   cards: Card[]
   /** "Check yourself" at the end. Getting them all right marks the check passed. */
   check: Question[]

@@ -1,4 +1,4 @@
-import { useStore } from "~/production/lib/store";
+import type { Settings } from "~/production/lib/music";
 
 function Arrows() {
   return (
@@ -88,7 +88,7 @@ export function EqChart() {
       <svg viewBox="0 0 780 200" role="img" aria-labelledby="eqT">
         <title id="eqT">Frequency regions from 20 Hz to 20 kHz on a log scale, with mud, harshness and sibilance marked</title>
         {regions.map(([a, b, name], i) => (
-          <g key={name}>
+          <g>
             <rect className={i % 2 ? "band-b" : "band-a"} x={fx(a)} y={20} width={fx(b) - fx(a)} height={70} />
             <text className="t1" x={fx(a) + 6} y={44} style={{ fontSize: 12.5 }}>
               {name}
@@ -99,7 +99,7 @@ export function EqChart() {
           </g>
         ))}
         {problems.map(([a, b, name], i) => (
-          <g key={name}>
+          <g>
             <rect className="warn" x={fx(a)} y={108 + i * 22} width={fx(b) - fx(a)} height={14} rx={3} />
             <text className="t2" x={fx(b) + 6} y={119 + i * 22}>
               {name}
@@ -107,7 +107,7 @@ export function EqChart() {
           </g>
         ))}
         {[50, 100, 200, 500, 1000, 2000, 5000, 10000].map((f) => (
-          <g key={f}>
+          <g>
             <line className="gl" x1={fx(f)} y1={92} x2={fx(f)} y2={100} />
             <text className="t2" x={fx(f)} y={192} textAnchor="middle">
               {k(f)}
@@ -121,8 +121,7 @@ export function EqChart() {
 }
 
 /** 44-bar vignette timeline, timed at the current tempo. */
-export function Arrangement() {
-  const { settings } = useStore();
+export function ArrangementView({ settings }: { settings: Settings }) {
   const X0 = 86;
   const W = 670;
   const B = 44;
@@ -142,7 +141,7 @@ export function Arrangement() {
       <svg viewBox="0 0 780 270" role="img" aria-labelledby="arrT">
         <title id="arrT">A 44-bar arrangement: bed throughout, pad from bar 9 to 40, drums from 17 to 32 and 37 to 40, bass from 17 to 40</title>
         {([[0, "FOG"], [8, "PAD"], [16, "PULSE"], [32, "STRIP"], [36, "SWELL"], [40, "TAIL"]] as const).map(([b, n]) => (
-          <text key={n} className="t2" x={bx(b) + 5} y={22}>
+          <text className="t2" x={bx(b) + 5} y={22}>
             {n}
           </text>
         ))}
@@ -150,7 +149,7 @@ export function Arrangement() {
           const end = b === 44;
           const anchor = end ? "end" : b === 0 ? "start" : "middle";
           return (
-            <g key={b}>
+            <g>
               <line className="gl" x1={bx(b)} y1={32} x2={bx(b)} y2={214} />
               <text className="t2" x={bx(b)} y={236} textAnchor={anchor}>
                 BAR {b + (end ? 0 : 1)}
@@ -162,12 +161,12 @@ export function Arrangement() {
           );
         })}
         {lanes.map(([name, cls, segs], i) => (
-          <g key={name}>
+          <g>
             <text className="t1" x={12} y={62 + i * 43}>
               {name}
             </text>
             {segs.map(([a, b]) => (
-              <rect key={a} className={cls} x={bx(a) + 2} y={45 + i * 43} width={bx(b) - bx(a) - 4} height={24} rx={4} />
+              <rect className={cls} x={bx(a) + 2} y={45 + i * 43} width={bx(b) - bx(a) - 4} height={24} rx={4} />
             ))}
           </g>
         ))}
@@ -211,7 +210,7 @@ export function Rack() {
   return (
     <div className="rack">
       {rows.map(([note, name, tone]) => (
-        <div key={note} className={tone || undefined}>
+        <div className={tone || undefined}>
           <small>{note}</small>
           <span>{name}</span>
         </div>

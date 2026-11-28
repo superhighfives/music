@@ -1,31 +1,45 @@
 # web
 
-[music.charliegleason.com](https://music.charliegleason.com): one TanStack Start
-app on Cloudflare Workers, deployed with [Alchemy](https://alchemy.run).
+[music.charliegleason.com](https://music.charliegleason.com): an
+[Astro](https://astro.build) site on a Cloudflare Worker, deployed with
+[Alchemy](https://alchemy.run).
 
 | Path | What it is | Code |
 | --- | --- | --- |
-| `/` | Home | `src/routes/index.tsx` |
-| `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/routes/chords/`, `src/chords/` |
-| `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/routes/production/`, `src/production/` |
-| `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/routes/theory/`, `src/theory/` |
-| `/ableton` | The Ableton Live Extensions, with downloads | `src/routes/ableton.tsx` |
-| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/routes/tools.tsx`, `src/tools.ts` |
+| `/` | Home | `src/pages/index.astro` |
+| `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/chords/`, `src/pages/chords.astro` |
+| `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/production/`, `src/pages/production/` |
+| `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/theory/`, `src/pages/theory/` |
+| `/ableton` | The Ableton Live Extensions, with downloads | `src/pages/ableton.astro`, `src/extensions.ts` |
+| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/pages/tools.astro`, `src/tools.ts` |
 
-## Sections
+## How it fits together
 
-Each section brings its own styles in its route's `head`, so they never meet:
-chords uses Tailwind (`src/chords/styles.css`, which scans only chords' files),
-Production uses its own CSS (`src/production/styles/app.css`), theory uses its own
-(`src/theory/styles/theory.css`), and home, `/ableton`, `/tools` and
-`/privacy` share `src/site.css`. chords is always dark, like Move. Production and Theory have
-a light/dark toggle, and the other pages follow the system setting. Clerk's
-sign-in dialog and account menu follow each section (`appearance` on
-`AccountButton`). The root route is a bare shell. Links between sections are
-plain `<a>`s, so each one is a full page load with only its own styles.
+Every page is an Astro page in `src/pages/`, rendered in the Worker. Anything
+that runs in the browser is an island: Preact components (`.tsx`) for Production
+and Theory, and Effect UI for Chords. A page marks each island with a `client:`
+directive (`client:load`, or `client:visible` to wait until it scrolls into
+view); everything else is plain HTML with no script. Endpoints are `.ts` files in
+`src/pages/` (`/api/saved`, `/api/theory/email`, the `.ablx` redirects and the
+unsubscribe page). `src/worker.ts` wraps Astro's handler and adds the cron's
+`scheduled` handler.
+
+Every section shares one look, `src/site.css`: its tokens, the masthead, cards
+and lists, with one accent per section (`data-section`). Each section's
+stylesheet imports it and adds its own parts: chords uses Tailwind
+(`src/chords/styles.css`, which scans only chords' files and maps its colours
+onto the shared tokens), Production `src/production/styles/app.css`, and Theory
+`src/theory/styles/theory.css`. Every page uses `src/layouts/Page.astro` and the
+same masthead (`src/components/Masthead.astro`): home, the section's mark and
+name, its controls, the light/dark toggle and sign-in. The toggle's choice
+(`music.theme`) covers every section, and Clerk's dialog and menu follow it.
+Links between sections are plain `<a>`s.
 
 Settings, saved songs and course progress live in each visitor's browser
-(localStorage). Signing in also keeps them in an account (see Accounts).
+(localStorage). Signing in also keeps them in an account (see Accounts). Islands
+on one page share state through signals (`src/production/islands/store.ts`,
+`src/theory/islands/store.ts`). An island draws the server's defaults until it
+has hydrated, then this browser's values, so hydration always matches.
 
 ### chords
 
@@ -33,54 +47,79 @@ All of a view's state is in the URL, so any view can be bookmarked or shared.
 Without Move connected, only the chord lookup (Play) works; Learn, Songs and
 Practice check what you play on Move.
 
+Chords is an [Effect UI](https://ui.effect.website) app, used in
+`src/pages/chords.astro` as one island. The app is in `src/chords/app/`:
+
+- `state.ts`: the Model, the URL search, and `derive`, which works out
+  everything the view and Move's lights show.
+- `Chords.ts`: the component. `update` is a pure reducer, `reduce`, tested in
+  `chords.test.ts` by sending it Move's pad and button messages.
+- `effects.ts`: Commands, Subscriptions and mounts for the piano, Move, the URL,
+  storage, the account and the signed-in user.
+- `view.ts`: the view.
+
+`integrations/effect-ui` is the Astro integration that makes this work, as the
+local package `astro-effect-ui`: it renders an Effect UI component on the server
+and hydrates it in the browser from the state the server wrote. An Effect UI
+island takes no children or slots, and anything it adds to the head is left out.
+
+Effect UI isn't on npm yet. `vendor/effect-ui-22128c6.tgz` is the snapshot from
+pkg.pr.new for commit `22128c6`. It needs `exactOptionalPropertyTypes`, which
+`tsconfig.json` turns on.
+
 ### Production
 
-The course is plain data in `src/production/content/`:
+The course is in `src/production/`:
 
-- **`themes.tsx`**: six themes, each a list of `lessons` plus `planned` titles
-  still to write. A lesson is an `id`, a `title` and a `Body` component. To add
-  one, append it to `lessons` and remove its title from `planned`.
-- **`recipes.tsx`**: short tutorials that rebuild one sound from a real record.
-  Cite where any claim about the record comes from.
+- **`catalog.ts`**: six themes, each a list of `lessons` plus `planned` titles
+  still to write, and the recipes. To add a lesson, write its MDX file, add it to
+  its theme's `lessons`, and remove its title from `planned`.
+- **`lessons/<theme>/<lesson>.mdx`**: each lesson's text.
+- **`recipes/<id>.mdx`**: short tutorials that rebuild one sound from a real
+  record. Cite where any claim about the record comes from.
 
-Lessons build from the components in `src/production/components/ui.tsx` (`Sheet`,
-`Row`, `Cell`, `Steps`, `Task`, `Note`, `KeyBox`) and the diagrams in
-`src/production/components/diagrams.tsx`. Anything that depends on the key or tempo
-reads `useValues()`, so it follows the controls in the header.
+Lessons are MDX: prose and HTML, plus the course's components, with no imports
+(`mdx/index.ts` lists them): `Sheet`, `Row`, `Cell`, `Steps` (each step an
+`<li><div>…</div></li>`), `Task`, `Note`, `KeyBox`, `Arrangement` and the
+diagrams. `<V k="quarter" />` is a value that follows the key and tempo in the
+masthead; `Derived` in `lib/music.ts` lists them.
 
 When a theme or recipe lands, add a line to the edition log in
-`src/routes/production/index.tsx`.
+`src/pages/production/index.astro`.
 
 ### Theory
 
-A music theory book, beginner to advanced, in five parts. It's plain data in
-`src/theory/content/`:
+A music theory book, beginner to advanced, in five parts, in `src/theory/`:
 
-- **`book.ts`**: the parts in reading order, each with its written `chapters` and
-  the `planned` ones still to write, plus the edition `LOG`. To add a chapter,
-  write it in `chapters/`, add it to its part's `chapters`, and remove its title
-  from `planned`. Add a line to `LOG`.
-- **`chapters/*.tsx`**: one chapter each (`keyboard.tsx` is the model). A chapter
-  is an `id` (its address, `/theory/<id>`, and the key progress is saved under, so
-  never rename one), a `Body`, its `cards` and a `check`.
+- **`content/book.ts`**: the parts in reading order, each with its written
+  `chapters` and the `planned` ones still to write, plus the edition `LOG`. To add
+  a chapter, write it, add it to its part's `chapters`, and remove its title from
+  `planned`. Add a line to `LOG`.
+- **`content/chapters/<id>.tsx`**: a chapter's `id` (its address,
+  `/theory/<id>`, and the key progress is saved under, so never rename one),
+  title, summary, `cards` and `check`, plus any figures only it uses.
+- **`chapters/<id>.mdx`**: the chapter's text.
 - **Cards** are a chapter's key ideas: plain text, each one making sense on its
   own, because the daily email sends them one at a time. `*word*` is bold. Never
   rename a card's `id` either; the email tracks what each person was sent by it.
 
-Chapters build from `src/theory/components/`: `Keyboard` and `Staff` (both
-playable), `Rhythm` (notation that plays to a metronome), the explorers
-(`NoteFinder`, `IntervalExplorer`, `ScaleExplorer`, `NoteNamer`), and the prose
-pieces in `ui.tsx` (`Section`, `Big`, `Aside`, `Try`, `Term`). The theory itself
-(spelling, intervals, scales, key signatures, triads, rhythm) is in
-`src/theory/lib/theory.ts`, with tests. Sound is chords' sampled piano, one
-instance for the whole book (`src/theory/lib/audio.tsx`).
+A chapter's MDX imports what it uses: the prose pieces in `mdx/` (`Section`,
+`Big`, `Aside`, `Try`, `Term`) and the figures in `components/`: `Keyboard` and
+`Staff` (both playable), `Rhythm` (notation that plays to a metronome) and the
+explorers (`NoteFinder`, `IntervalExplorer`, `ScaleExplorer`, `NoteNamer`).
+Anything that plays or responds to a press takes `client:visible`. The
+contents beside a chapter list its `Section`s. The theory itself (spelling,
+intervals, scales, key signatures, triads, rhythm) is in `lib/theory.ts`, with
+tests. Sound is chords' sampled piano, one for the whole page (`lib/audio.ts`,
+with hooks in `lib/hooks.ts`); only one figure plays at a time.
 
 Progress (chapters read, checks passed, where you were) syncs to an account as
 `theory.book`.
 
 #### The daily email
 
-Signed in, the book's home page has a switch for one card a day by email. A cron
+Signed in, the book's home page has a switch for one card a day by email
+(`/api/theory/email`, in `src/theory/email/api.ts`). A cron
 (`0 7-23 * * *`, in `alchemy.run.ts`, prod only) runs `sendDaily` in
 `src/theory/email/daily.ts`: each subscriber gets the first card in reading order
 they haven't had, so cards from new chapters join the queue wherever they fall;
@@ -89,8 +128,8 @@ The 07:00 UTC run sends; later runs that day only retry anyone a failure skipped
 since each person's last send day is recorded. "Send one now" sends a preview
 that doesn't count, at most once every ten minutes.
 Subscribers and what they've been sent are in D1 (`migrations/0002_theory_email.sql`).
-Each email has a one-click unsubscribe link, `/theory/unsubscribe?t=<token>`,
-served by `src/server.ts`.
+Each email has a one-click unsubscribe link, `/theory/unsubscribe?t=<token>`
+(`src/pages/theory/unsubscribe.ts`).
 
 Email goes out through Cloudflare Email Service (the `EMAIL` binding), from
 `theory@charliegleason.com`. Before it can send to anyone, `charliegleason.com`
@@ -111,16 +150,17 @@ its release tags.
 
 ## Accounts
 
-Sign-in is [Clerk](https://dashboard.clerk.com), application "music". The root
-route wraps every section in one `ClerkProvider`, and `src/start.ts` runs
-`clerkMiddleware()` on every request so server functions can call `auth()`.
-Each section has a Sign in button (`src/account/AccountButton.tsx`).
+Sign-in is [Clerk](https://dashboard.clerk.com), application "music", through
+`@clerk/astro`. Its middleware (`src/middleware.ts`) checks the session on every
+request, so pages render signed in and endpoints read `locals.auth()`. Its
+components draw the masthead's sign-in button and account menu, and islands
+follow the signed-in user through its `$authStore`.
 
 Signed in, chords' pasted songs (`chords.songs`), Production's settings and
 progress (`production.course`) and Theory's progress (`theory.book`) are also kept in the D1 database `music`, one JSON
-value per person and key (`migrations/0001_saved.sql`). `src/account/saved.ts`
-has the two server functions, which only ever touch the signed-in person's rows.
-`useAccountSync` (`src/account/sync.ts`) merges this browser's copy into the
+value per person and key (`migrations/0001_saved.sql`). `GET` and `POST
+/api/saved` (`src/account/api.ts`) only ever touch the signed-in person's rows.
+`AccountSync` (`src/account/account-sync.ts`) merges this browser's copy into the
 account's once per sign-in, then saves every change:
 
 - Songs: both lists, nothing dropped; the same sheet pasted twice is one song.
@@ -129,13 +169,14 @@ account's once per sign-in, then saves every change:
 
 Signed out, nothing changes: everything stays in the browser, as before.
 
-Clerk's keys are Worker secrets, `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`,
-read from the environment at deploy time. Locally they go in `.dev.vars`
+Clerk's keys are Worker secrets, read from `CLERK_PUBLISHABLE_KEY` and
+`CLERK_SECRET_KEY` in the environment at deploy time. The publishable key is bound
+as `PUBLIC_CLERK_PUBLISHABLE_KEY`, the name `@clerk/astro` reads. Locally they go in `.dev.vars`
 (git-ignored), using the development instance's keys. Development has "Challenge suspicious sign-ups" turned off under Protect,
 because its check fails on localhost.
 
-To add a synced value, add its key to `SYNC_KEYS` and call `useAccountSync` where
-the section keeps it.
+To add a synced value, add its key to `SYNC_KEYS` and connect it with
+`createAccountSync` (`src/islands/sync.ts`) where the section keeps it.
 
 ## Develop
 
@@ -145,6 +186,12 @@ pnpm dev        # alchemy dev: the app in the local Workers runtime, at localhos
 pnpm typecheck
 pnpm test
 ```
+
+`pnpm typecheck` checks the `.ts` and `.tsx` files, not the `.astro` ones: `astro
+check` doesn't support TypeScript 7, and `@astrojs/ts-content-mapper`, which lets
+`tsc` check `.astro` files, needs TypeScript 7.1 (in beta). Add it once 7.1 is
+released. Run Astro through Alchemy, not `astro dev`: Alchemy adds the Cloudflare
+adapter that Clerk's integration needs.
 
 Before the first `pnpm dev`, copy `.dev.vars.example` to `.dev.vars` and fill in
 Clerk's development keys. Alchemy needs a profile with Cloudflare connected:

@@ -1,0 +1,9 @@
+---
+/** A side note: a tip, a why, or a "you might hear". */
+interface Props {
+  label?: string
+}
+const { label = 'Note' } = Astro.props
+---
+
+<aside class="aside"><span class="lab">{label}</span><div><slot /></div></aside>

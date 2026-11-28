@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { usePlayer } from '~/theory/lib/audio'
+import { useState } from 'preact/hooks'
+import { usePlayer } from '~/theory/lib/hooks'
 import {
   BOTTOM_LINE,
   type Clef,
@@ -143,7 +143,7 @@ export function ScaleExplorer({ types = ['major'], initial = 'C' }: { types?: st
       <div className="figbar">
         <label className="pick">
           <span className="lab">Root</span>
-          <select value={root} onChange={(e) => setRoot(e.target.value)}>
+          <select value={root} onChange={(e) => setRoot(e.currentTarget.value)}>
             {ROOTS.map((r) => (
               <option key={r} value={r}>
                 {pitchName(parseNote(`${r}4`))}
@@ -154,7 +154,7 @@ export function ScaleExplorer({ types = ['major'], initial = 'C' }: { types?: st
         {types.length > 1 ? (
           <label className="pick">
             <span className="lab">Scale</span>
-            <select value={typeId} onChange={(e) => setTypeId(e.target.value)}>
+            <select value={typeId} onChange={(e) => setTypeId(e.currentTarget.value)}>
               {SCALE_TYPES.filter((t) => types.includes(t.id)).map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}

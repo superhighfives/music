@@ -1,0 +1,17 @@
+---
+import '~/site.css'
+import Masthead from '~/components/Masthead.astro'
+import Page from '~/layouts/Page.astro'
+---
+
+<Page title="Not found · music" description="Nothing lives at this address.">
+  <div class="page">
+    <Masthead />
+    <section class="empty">
+      <h1>Not found</h1>
+      <p>
+        Nothing lives at this address. <a href="/">Back to music</a>
+      </p>
+    </section>
+  </div>
+</Page>

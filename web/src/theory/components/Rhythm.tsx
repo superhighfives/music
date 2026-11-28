@@ -1,5 +1,6 @@
-import { type ReactNode, useId } from 'react'
-import { usePlayer } from '~/theory/lib/audio'
+import type { ComponentChildren as ReactNode } from 'preact'
+import { useId } from 'preact/hooks'
+import { usePlayer } from '~/theory/lib/hooks'
 import { beatsOf, parseRhythm, type RhythmEvent } from '~/theory/lib/theory'
 import { PlayButton } from './ui'
 
