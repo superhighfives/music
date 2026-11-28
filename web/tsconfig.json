@@ -3,8 +3,7 @@
     "src",
     "integrations",
     "alchemy.run.ts",
-    "astro.config.ts",
-    ".astro/types.d.ts"
+    "astro.config.ts"
   ],
   "compilerOptions": {
     "target": "ES2022",
