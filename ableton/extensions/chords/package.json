@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/extension.js",
   "engines": {
-    "node": ">=22.11.0"
+    "node": ">=24.16.0"
   },
   "type": "module",
   "scripts": {
@@ -14,10 +14,10 @@
     "package": "pnpm build && mkdir -p build && extensions-cli package -o build/chords-${npm_package_version}.ablx"
   },
   "dependencies": {
-    "@ableton-extensions/sdk": "file:../../sdks/extensions-sdk-1.0.0-beta.0/ableton-extensions-sdk-1.0.0-beta.0.tgz"
+    "@ableton-extensions/sdk": "file:../../sdks/extensions-sdk-1.0.0-beta.1/ableton-extensions-sdk-1.0.0-beta.1.tgz"
   },
   "devDependencies": {
-    "@ableton-extensions/cli": "file:../../sdks/extensions-sdk-1.0.0-beta.0/ableton-extensions-cli-1.0.0-beta.0.tgz",
+    "@ableton-extensions/cli": "file:../../sdks/extensions-sdk-1.0.0-beta.1/ableton-extensions-cli-1.0.0-beta.1.tgz",
     "@types/node": "^24.1.0",
     "esbuild": "0.28.0",
     "tsx": "^4.19.0",

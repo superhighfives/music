@@ -74,7 +74,7 @@ open. Once installed and enabled:
 ### Requirements
 
 - **Ableton Live 12.4.5 Suite Beta** — Extensions are Suite + beta only.
-- **Node.js ≥ 22.11** (the SDK suggests the v24 LTS).
+- **Node.js ≥ 24.16** (the SDK and CLI require it).
 - **pnpm** — `npm i -g pnpm`, or `corepack enable pnpm`.
 - **The Extensions SDK** — not included in this repo (see below).
 
@@ -89,11 +89,11 @@ packages via relative paths.
 2. From the SDK release page, download:
    - **Ableton Live 12.4.5 Beta** (Suite) and install it.
    - **`extensions-sdk-<version>.zip`** — the SDK distribution.
-3. Extract the zip into `sdks/` so `sdks/extensions-sdk-1.0.0-beta.0/` sits next
+3. Extract the zip into `sdks/` so `sdks/extensions-sdk-1.0.0-beta.1/` sits next
    to the `.gitkeep`. It holds the `.tgz` packages (SDK,
    CLI, project creator), docs, API reference, and official examples.
 
-Start with `sdks/extensions-sdk-1.0.0-beta.0/docs/` or the online docs at
+Start with `sdks/extensions-sdk-1.0.0-beta.1/docs/` or the online docs at
 <https://ableton.github.io/extensions-sdk>.
 
 ### Run an extension in Live
@@ -172,7 +172,7 @@ Scaffold a fresh project inside `extensions/` with the SDK's project creator:
 
 ```sh
 mkdir extensions/my-extension && cd extensions/my-extension
-pnpm dlx file:../../sdks/extensions-sdk-1.0.0-beta.0/ableton-create-extension-1.0.0-beta.0.tgz
+pnpm dlx file:../../sdks/extensions-sdk-1.0.0-beta.1/ableton-create-extension-1.0.0-beta.1.tgz
 ```
 
 It asks for a name, author, and your Live install, then writes a ready-to-run
@@ -217,7 +217,7 @@ ableton/
 │   └── reverse-midi/            # MIDI-clip note reverser extension
 ├── scripts/extensions.mjs       # fans pnpm commands across every extension
 └── sdks/                        # SDK (downloaded separately, gitignored)
-    └── extensions-sdk-1.0.0-beta.0/
+    └── extensions-sdk-1.0.0-beta.1/
 ```
 
 - **`.env`** holds the machine-specific path to Live's Extension Host and is

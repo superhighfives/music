@@ -75,7 +75,7 @@ lament (i–VI–VII), epic (i–iv–VII–III), 12‑bar blues.
 ## Requirements
 
 - Ableton Live 12.4.5 Suite **Beta** (Extensions are Suite + beta only)
-- Node.js ≥ 22.11 (the SDK suggests v24 LTS)
+- Node.js ≥ 24.16 (the SDK and CLI require it)
 - pnpm (`npm i -g pnpm`, or via `corepack enable pnpm`)
 
 ## One‑time setup
@@ -87,7 +87,7 @@ pnpm install
 ```
 
 This pulls the Ableton SDK + CLI from the local `.tgz` files in
-`../extensions-sdk-1.0.0-beta.0/` and the build tools from the registry.
+`../../sdks/extensions-sdk-1.0.0-beta.1/` and the build tools from the registry.
 `pnpm-workspace.yaml` already approves esbuild's build script.
 
 Then in Live: **Settings → Extensions → enable Developer Mode**.
