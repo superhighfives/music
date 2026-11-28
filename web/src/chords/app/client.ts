@@ -6,9 +6,9 @@ import { HtmlHydrate } from '@effect/ui/html'
 import { Effect } from 'effect'
 import type { SyncIO } from '../../account/account-sync'
 import type { AccountCopy, SaveResult } from '../../account/store'
-import { loadClerk } from '../../islands/clerk'
+import { connectClerk } from '../../islands/auth'
 import { Chords, ChordsProps } from './Chords'
-import { piano, setAccountIO, setAuthUI } from './effects'
+import { piano, setAccountIO } from './effects'
 import type { ChordsMessage } from './messages'
 import type { ChordsModel } from './state'
 
@@ -59,17 +59,4 @@ Effect.runFork(
   ).pipe(Effect.catch((e) => Effect.sync(() => console.error("Chords couldn't start", e)))),
 )
 
-// Sign-in loads after the page is running, so it never holds up the pads.
-const publishableKey = document.body.dataset.clerkKey
-if (publishableKey)
-  loadClerk(publishableKey, appearance)
-    .then((clerk) => {
-      setAuthUI({
-        openSignIn: () => clerk.openSignIn({ appearance }),
-        mountUserButton: (node) => clerk.mountUserButton(node, { appearance }),
-        unmountUserButton: (node) => clerk.unmountUserButton(node),
-      })
-      setUser(clerk.user?.id ?? null)
-      clerk.addListener(({ user }) => setUser(user?.id ?? null))
-    })
-    .catch((e) => console.warn("Sign-in couldn't load.", e))
+connectClerk(appearance, setUser)

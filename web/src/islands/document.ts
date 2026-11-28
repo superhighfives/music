@@ -16,6 +16,8 @@ export function page(o: {
   head: string
   state: string
   data?: Record<string, string>
+  /** False for a page with no client script: it still gets its entry's stylesheets. */
+  script?: boolean
 }): Response {
   const entry = islands[o.island]
   if (!entry) throw new Error(`No client entry for ${o.island}`)
@@ -36,7 +38,7 @@ export function page(o: {
   <body${data}>
     <div id="app">${o.html}</div>
     <script type="application/json" id="state">${o.state}</script>
-    <script type="module" src="${escape(entry.js)}"></script>
+    ${o.script === false ? '' : `<script type="module" src="${escape(entry.js)}"></script>`}
   </body>
 </html>`
   return new Response(body, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })

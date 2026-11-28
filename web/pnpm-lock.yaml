@@ -23,6 +23,9 @@ importers:
       '@effect/ui':
         specifier: file:vendor/effect-ui-22128c6.tgz
         version: file:vendor/effect-ui-22128c6.tgz(effect@4.1.7)
+      '@paper-design/shaders':
+        specifier: 0.0.82
+        version: 0.0.82
       '@paper-design/shaders-react':
         specifier: ^0.0.82
         version: 0.0.82(@types/react@19.3.0)(react@19.3.1)

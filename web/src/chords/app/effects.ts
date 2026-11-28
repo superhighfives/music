@@ -280,30 +280,4 @@ export const SetBookmarklet = Mount.make('SetBookmarklet', {}, (node: HTMLAnchor
   }).pipe(Effect.as(Component.noop)),
 )
 
-/**
- * Clerk's sign-in dialog and account menu. The route hands these over with Chords' appearance set, so the
- * island needs no Clerk types: the page's ClerkProvider owns the session.
- */
-export type AuthUI = {
-  openSignIn: () => void
-  mountUserButton: (node: HTMLDivElement) => void
-  unmountUserButton: (node: HTMLDivElement) => void
-}
-let authUI: AuthUI | null = null
-export const setAuthUI = (ui: AuthUI) => {
-  authUI = ui
-}
-
-export const OpenSignIn = Command.make('OpenSignIn', {}, () => noop(() => authUI?.openSignIn()))
-
-/** The signed-in person's menu, drawn by Clerk into this element for as long as it lives. */
-export const ShowUserButton = Mount.makeStream('ShowUserButton', {}, (node: HTMLDivElement) =>
-  Stream.callback<never>(
-    Effect.fnUntraced(function* () {
-      yield* Effect.acquireRelease(
-        Effect.sync(() => authUI?.mountUserButton(node)),
-        () => Effect.sync(() => authUI?.unmountUserButton(node)),
-      )
-    }),
-  ),
-)
+export { OpenSignIn, ShowUserButton, setAuthUI, type AuthUI } from '../../islands/auth'

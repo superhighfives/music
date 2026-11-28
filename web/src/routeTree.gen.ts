@@ -9,12 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AbletonRouteImport } from './routes/ableton'
-import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProductionRouteRouteImport } from './routes/production/route'
 import { Route as TheoryRouteRouteImport } from './routes/theory/route'
-import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as ProductionIndexRouteImport } from './routes/production/index'
 import { Route as TheoryIndexRouteImport } from './routes/theory/index'
 import { Route as TheoryChapterIdRouteImport } from './routes/theory/$chapterId'
@@ -22,21 +18,6 @@ import { Route as ProductionRecipesRecipeIdRouteImport } from './routes/producti
 import { Route as ProductionThemesThemeIdIndexRouteImport } from './routes/production/themes.$themeId.index'
 import { Route as ProductionThemesThemeIdLessonIdRouteImport } from './routes/production/themes.$themeId.$lessonId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AbletonRoute = AbletonRouteImport.update({
-  id: '/ableton',
-  path: '/ableton',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProductionRouteRoute = ProductionRouteRouteImport.update({
   id: '/production',
   path: '/production',
@@ -45,11 +26,6 @@ const ProductionRouteRoute = ProductionRouteRouteImport.update({
 const TheoryRouteRoute = TheoryRouteRouteImport.update({
   id: '/theory',
   path: '/theory',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ToolsRoute = ToolsRouteImport.update({
-  id: '/tools',
-  path: '/tools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductionIndexRoute = ProductionIndexRouteImport.update({
@@ -87,12 +63,8 @@ const ProductionThemesThemeIdLessonIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/production': typeof ProductionRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
-  '/ableton': typeof AbletonRoute
-  '/privacy': typeof PrivacyRoute
-  '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
@@ -101,10 +73,6 @@ export interface FileRoutesByFullPath {
   '/production/themes/$themeId/': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/ableton': typeof AbletonRoute
-  '/privacy': typeof PrivacyRoute
-  '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/production': typeof ProductionIndexRoute
   '/theory': typeof TheoryIndexRoute
@@ -114,12 +82,8 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/production': typeof ProductionRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
-  '/ableton': typeof AbletonRoute
-  '/privacy': typeof PrivacyRoute
-  '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
   '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
@@ -130,12 +94,8 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/production'
     | '/theory'
-    | '/ableton'
-    | '/privacy'
-    | '/tools'
     | '/theory/$chapterId'
     | '/production/'
     | '/theory/'
@@ -144,10 +104,6 @@ export interface FileRouteTypes {
     | '/production/themes/$themeId/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/ableton'
-    | '/privacy'
-    | '/tools'
     | '/theory/$chapterId'
     | '/production'
     | '/theory'
@@ -156,12 +112,8 @@ export interface FileRouteTypes {
     | '/production/themes/$themeId'
   id:
     | '__root__'
-    | '/'
     | '/production'
     | '/theory'
-    | '/ableton'
-    | '/privacy'
-    | '/tools'
     | '/theory/$chapterId'
     | '/production/'
     | '/theory/'
@@ -171,37 +123,12 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   ProductionRouteRoute: typeof ProductionRouteRouteWithChildren
   TheoryRouteRoute: typeof TheoryRouteRouteWithChildren
-  AbletonRoute: typeof AbletonRoute
-  PrivacyRoute: typeof PrivacyRoute
-  ToolsRoute: typeof ToolsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ableton': {
-      id: '/ableton'
-      path: '/ableton'
-      fullPath: '/ableton'
-      preLoaderRoute: typeof AbletonRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/production': {
       id: '/production'
       path: '/production'
@@ -214,13 +141,6 @@ declare module '@tanstack/react-router' {
       path: '/theory'
       fullPath: '/theory'
       preLoaderRoute: typeof TheoryRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tools': {
-      id: '/tools'
-      path: '/tools'
-      fullPath: '/tools'
-      preLoaderRoute: typeof ToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/production/': {
@@ -301,12 +221,8 @@ const TheoryRouteRouteWithChildren = TheoryRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   ProductionRouteRoute: ProductionRouteRouteWithChildren,
   TheoryRouteRoute: TheoryRouteRouteWithChildren,
-  AbletonRoute: AbletonRoute,
-  PrivacyRoute: PrivacyRoute,
-  ToolsRoute: ToolsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

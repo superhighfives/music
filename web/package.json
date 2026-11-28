@@ -14,6 +14,7 @@
     "@clerk/tanstack-react-start": "^1.7.22",
     "@clerk/ui": "^1.46.0",
     "@effect/ui": "file:vendor/effect-ui-22128c6.tgz",
+    "@paper-design/shaders": "0.0.82",
     "@paper-design/shaders-react": "^0.0.82",
     "@tanstack/react-router": "^1.170.46",
     "@tanstack/react-start": "^1.169.7",

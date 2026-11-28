@@ -19,7 +19,7 @@ import { eventLabel, type Result } from '../lib/practice'
 import { SONGS, chordLabel, unknownChords, type Song, type SongEvent } from '../lib/songs'
 import { TUTORIALS, type Tutorial } from '../lib/tutorials'
 import { CenterInBox, SetBookmarklet, ShowOnMove, ShowUserButton } from './effects'
-import { SITE_LINKS } from '../../site-links'
+import { SiteFooter } from '../../islands/views'
 import { ChordsMessage, type SearchPatch } from './messages'
 import { EXERCISES, SIDEBAR_DEFAULT, SIDEBAR_MAX, SIDEBAR_MIN, TABS, moveView, type ChordsModel, type Derived, type Tab } from './state'
 
@@ -190,13 +190,7 @@ function PadGrid(
   )
 }
 
-/** The site footer, as the other sections draw it. Its stylesheet loads with the page. */
-const Footer = (h: H, extra: string) =>
-  h.footer.class(cx('sitefoot chordsfoot', extra)).children(
-    h.nav.attr('aria-label', 'music').children(
-      SITE_LINKS.map((l) => h.a.key(l.id).attr('href', l.href).attr('aria-current', l.id === 'chords' ? 'page' : undefined).children(l.label)),
-    ),
-  )
+const Footer = (h: H, extra: string) => SiteFooter(h, { current: 'chords', className: `chordsfoot ${extra}`.trim() })
 
 /** Why connecting failed. Other statuses show no message. */
 const CONNECT_PROBLEM: Partial<Record<MoveStatus, string>> = {
