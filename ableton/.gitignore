@@ -26,6 +26,6 @@ dist/
 
 # Ableton Extensions SDK — licensed/confidential beta, do NOT redistribute.
 # Each developer downloads it themselves from Centercode into sdks/.
-# Ignore everything in sdks/ but keep the folder itself (.gitkeep) tracked.
+# Ignore every SDK version in sdks/; track only its README.
 /sdks/*
-!/sdks/.gitkeep
+!/sdks/README.md

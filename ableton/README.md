@@ -90,7 +90,7 @@ packages via relative paths.
    - **Ableton Live 12.4.5 Beta** (Suite) and install it.
    - **`extensions-sdk-<version>.zip`** — the SDK distribution.
 3. Extract the zip into `sdks/` so `sdks/extensions-sdk-1.0.0-beta.1/` sits next
-   to the `.gitkeep`. It holds the `.tgz` packages (SDK,
+   to [`sdks/README.md`](sdks/README.md). It holds the `.tgz` packages (SDK,
    CLI, project creator), docs, API reference, and official examples.
 
 Start with `sdks/extensions-sdk-1.0.0-beta.1/docs/` or the online docs at
@@ -213,6 +213,7 @@ gh release create ableton/<extension>-<version> \
 ableton/
 ├── extensions/                  # the extensions, one self-contained package each
 │   ├── ambient/                 # ambient-soundscape generator extension
+│   ├── chords/                  # diatonic chord-grid extension
 │   ├── progressive/             # chord-progression generator extension
 │   └── reverse-midi/            # MIDI-clip note reverser extension
 ├── scripts/extensions.mjs       # fans pnpm commands across every extension
