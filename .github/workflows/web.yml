@@ -41,7 +41,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
-      # Builds with Vite, applies new D1 migrations, then uploads the Worker. Secrets are scoped to
+      # Builds the site, applies new D1 migrations, then uploads the Worker. Secrets are scoped to
       # this step. Previews use Clerk's development instance; production only accepts its own domain.
       - run: pnpm exec alchemy deploy --stage "$STAGE" --yes --no-input
         env:
@@ -49,6 +49,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLERK_SECRET_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_SECRET_KEY_DEV || secrets.CLERK_SECRET_KEY }}
           CLERK_PUBLISHABLE_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_PUBLISHABLE_KEY_DEV || secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_JWT_KEY: ${{ github.event_name == 'pull_request' && secrets.CLERK_JWT_KEY_DEV || secrets.CLERK_JWT_KEY }}
 
   destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

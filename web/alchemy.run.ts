@@ -37,6 +37,8 @@ export const Website = Cloudflare.Website.Astro(
       CLERK_SECRET_KEY: Config.Redacted('CLERK_SECRET_KEY'),
       // @clerk/astro reads the publishable key under this name.
       PUBLIC_CLERK_PUBLISHABLE_KEY: Config.Redacted('CLERK_PUBLISHABLE_KEY'),
+      // The instance's public key (PEM), so sessions are checked without a call to Clerk (src/middleware.ts).
+      CLERK_JWT_KEY: Config.Redacted('CLERK_JWT_KEY'),
     },
   })),
 )
