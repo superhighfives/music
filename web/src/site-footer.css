@@ -4,7 +4,7 @@
   margin-top: 4rem;
   padding: 1.25rem 0 0.5rem;
   border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
-  font: 400 0.8125rem/1.4 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font: 400 0.8125rem/1.4 var(--sans, ui-sans-serif, system-ui, sans-serif);
 }
 
 .sitefoot nav {

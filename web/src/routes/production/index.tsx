@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CHORDS_URL, KeyBox, Logo } from "~/production/components/ui";
+import { PadMark } from "~/Masthead";
+import { CHORDS_URL, KeyBox } from "~/production/components/ui";
 import { RECIPES } from "~/production/content/recipes";
 import { lessonKey, THEMES, type Theme } from "~/production/content/themes";
 import { useStore } from "~/production/lib/store";
@@ -23,7 +24,7 @@ function Home() {
   return (
     <>
       <section className="hero">
-        <Logo big />
+        <PadMark lit={12} big />
         <h1>Production</h1>
         <p className="lede">
           A step-by-step course in music production with Ableton Live 12: high-quality audio, soundscapes, melody and pop songwriting. Big themes you work through in order, and short recipes that rebuild one sound from a real record.

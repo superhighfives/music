@@ -1,13 +1,40 @@
-/* Only chords uses Tailwind, so it scans only chords' files. */
+/* Only chords uses Tailwind, so it scans only chords' files. The shared look (site.css) sits in the base layer,
+   so chords' utilities still win over its element styles. */
 @import 'tailwindcss' source(none);
+@import '../site.css' layer(base);
 @source './';
 @source '../routes/chords';
 
-@theme {
-  --color-led: oklch(0.78 0.16 195);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-}
-
-html {
-  color-scheme: dark;
+/* Tailwind's colours, mapped onto the shared tokens. Inline, so each utility reads the token where it is used:
+   the neutrals follow light and dark, and led is the section's accent (cyan, from [data-section='chords']).
+   White is the ink and neutral-950 the page, so "bg-white text-neutral-950" stays an inverted pair in both themes. */
+@theme inline {
+  --color-white: var(--ink);
+  --color-neutral-200: light-dark(oklch(0.26 0.01 260), oklch(0.9 0.005 90));
+  --color-neutral-300: light-dark(oklch(0.32 0.01 260), oklch(0.84 0.006 260));
+  --color-neutral-400: light-dark(oklch(0.44 0.012 260), oklch(0.7 0.01 260));
+  --color-neutral-500: var(--muted);
+  --color-neutral-600: light-dark(oklch(0.66 0.01 260), oklch(0.46 0.01 260));
+  --color-neutral-700: light-dark(oklch(0.85 0.006 260), oklch(0.34 0.008 260));
+  --color-neutral-800: light-dark(oklch(0.92 0.005 260), oklch(0.26 0.008 260));
+  --color-neutral-900: var(--cell);
+  --color-neutral-950: var(--bg);
+  --color-led: var(--lit);
+  --color-led-ink: var(--lit-ink);
+  --color-on-led: var(--on-lit);
+  --color-emerald-300: var(--good);
+  --color-emerald-400: var(--good);
+  --color-emerald-500: var(--good);
+  --color-emerald-700: var(--good);
+  --color-emerald-950: var(--good-soft);
+  --color-amber-300: light-dark(oklch(0.55 0.12 70), oklch(0.86 0.14 88));
+  --color-amber-400: light-dark(oklch(0.55 0.12 70), oklch(0.86 0.14 88));
+  --color-red-400: var(--bad);
+  --color-red-500: var(--bad);
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
 }

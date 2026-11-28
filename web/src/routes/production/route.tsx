@@ -1,16 +1,11 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { dark } from "@clerk/ui/themes";
+import { Masthead, PadMark } from "~/Masthead";
 import { SiteFooter } from "~/SiteFooter";
-import { AccountButton, type ClerkAppearance, useDarkPage } from "~/account/AccountButton";
-import { Logo } from "~/production/components/ui";
 import { MODES, type ModeId, SHARP, FLAT } from "~/production/lib/music";
 import { StoreProvider, useStore } from "~/production/lib/store";
 import appCss from "~/production/styles/app.css?url";
 
-// Applies a saved light/dark choice before first paint, so there's no flash.
-const THEME_SCRIPT = `try{var t=localStorage.getItem("production.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
-
-// Production, the course. Its styles, fonts and theme load only under /production.
+// Production, the course. Its styles load only under /production.
 export const Route = createFileRoute("/production")({
   head: () => ({
     meta: [
@@ -21,15 +16,9 @@ export const Route = createFileRoute("/production")({
       },
     ],
     links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
-      },
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
-    scripts: [{ children: THEME_SCRIPT }],
   }),
   component: Root,
 });
@@ -37,8 +26,8 @@ export const Route = createFileRoute("/production")({
 function Root() {
   return (
     <StoreProvider>
-      <div className="page">
-        <Masthead />
+      <div className="page" data-section="production">
+        <ProductionMast />
         <Outlet />
         <SiteFooter current="production" />
       </div>
@@ -46,20 +35,18 @@ function Root() {
   );
 }
 
-const CLERK_LIGHT: ClerkAppearance = { variables: { fontFamily: "var(--sans)" } };
-const CLERK_DARK: ClerkAppearance = { theme: dark, variables: { fontFamily: "var(--sans)" } };
-
-function Masthead() {
+function ProductionMast() {
   const { settings, setSettings } = useStore();
   const setBpm = (v: number) => setSettings({ bpm: Math.min(200, Math.max(40, Math.round(v) || 70)) });
-  // Clerk's dialog and menu follow the course's light or dark theme, in its type.
-  const clerkAppearance = useDarkPage() ? CLERK_DARK : CLERK_LIGHT;
   return (
-    <header className="mast">
-      <Link className="brand" to="/production">
-        <Logo />
-        Production
-      </Link>
+    <Masthead
+      brand={
+        <Link className="brand" to="/production">
+          <PadMark lit={12} />
+          Production
+        </Link>
+      }
+    >
       <div className="ctrls">
         <label className="ctrl">
           <span className="lab">Key</span>
@@ -96,30 +83,6 @@ function Masthead() {
           </div>
         </div>
       </div>
-      <ThemeToggle />
-      <AccountButton className="btn" appearance={clerkAppearance} />
-    </header>
-  );
-}
-
-function ThemeToggle() {
-  const toggle = () => {
-    const root = document.documentElement;
-    const current = root.getAttribute("data-theme") ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    const next = current === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem("production.theme", next);
-    } catch {
-      // Not remembered, but the switch still applies.
-    }
-  };
-  return (
-    <button type="button" className="iconbtn" aria-label="Switch light or dark theme" onClick={toggle}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
-      </svg>
-    </button>
+    </Masthead>
   );
 }

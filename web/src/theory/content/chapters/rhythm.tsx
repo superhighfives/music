@@ -25,10 +25,10 @@ function ValueTree() {
           const bw = w / r.count
           return (
             <g key={r.name}>
-              <text x={0} y={i * row + 20} style={{ font: '600 14px var(--ui)', fill: 'var(--ink)' }}>
+              <text x={0} y={i * row + 20} style={{ font: '600 14px var(--sans)', fill: 'var(--ink)' }}>
                 {r.name}
               </text>
-              <text x={0} y={i * row + 35} style={{ font: '400 12px var(--ui)', fill: 'var(--muted)' }}>
+              <text x={0} y={i * row + 35} style={{ font: '400 12px var(--sans)', fill: 'var(--muted)' }}>
                 {r.beats}
               </text>
               {Array.from({ length: r.count }, (_, j) => (
@@ -40,8 +40,8 @@ function ValueTree() {
                   height={28}
                   rx={Math.min(6, bw / 4)}
                   style={{
-                    fill: i % 2 ? 'var(--accent-soft)' : 'var(--cool-soft)',
-                    stroke: i % 2 ? 'var(--accent)' : 'var(--cool)',
+                    fill: i % 2 ? 'var(--lit-soft)' : 'var(--cool-soft)',
+                    stroke: i % 2 ? 'var(--lit)' : 'var(--cool)',
                     strokeWidth: 1,
                   }}
                 />
