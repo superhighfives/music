@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { AccountSync } from './account-sync'
-import type { AccountCopy } from './saved'
+import type { AccountCopy } from './store'
 
 /** An in-memory account with the same version rule as the database. */
 function fakeAccount(initial: AccountCopy | null = null) {

@@ -1,8 +1,9 @@
+/** @jsxImportSource ~/content */
 import { Keyboard, type Mark } from '~/theory/components/Keyboard'
 import { NoteFinder } from '~/theory/components/explorers'
 import { Aside, Big, PlayButton, Section, Term, Try } from '~/theory/components/ui'
 import type { Chapter } from '~/theory/content/types'
-import { usePlayer } from '~/theory/lib/audio'
+import { figure, NoState } from '~/theory/app/define'
 
 /** The groups of two and three black keys, shaded. */
 function Groups() {
@@ -24,8 +25,11 @@ function Groups() {
 
 const CS = [48, 60, 72, 84]
 
-function Octaves() {
-  const player = usePlayer()
+const Octaves = figure('keyboard.Octaves', {
+  args: NoState,
+  state: NoState,
+  init: () => ({}),
+  view: (_args, _state, player) => {
   const marks: Record<number, Mark> = {}
   CS.forEach((m, i) => (marks[m] = { tone: player.current === i ? 'lit' : 'soft', label: `C${m / 12 - 1}` }))
   return (
@@ -40,7 +44,8 @@ function Octaves() {
       <Keyboard from={48} to={84} names="none" marks={marks} label="Three octaves with C3, C4, C5 and C6 marked" />
     </Try>
   )
-}
+  },
+})
 
 export const keyboard: Chapter = {
   id: 'keyboard',

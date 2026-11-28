@@ -3,6 +3,7 @@ import { Html } from '@effect/ui/html'
 import { Effect, Schema } from 'effect'
 import { render } from '../../content/render'
 import { OpenSignIn, ShowUserButton, absurd } from '../../islands/auth'
+import { ToggleTheme } from '../../islands/theme'
 import { SiteFooter } from '../../islands/views'
 import { ArrangementView } from '../components/diagrams'
 import { KeyBoxView } from '../content/kit'
@@ -45,6 +46,8 @@ export const ProductionMessage = UiSchema.TaggedEnum({
 })
 export type ProductionMessage = typeof ProductionMessage.Type
 
+const isMessage = Schema.is(ProductionMessage)
+
 const KEY = 'production.v1'
 
 /** Where saved changes go besides this browser: the account sync, which the client entry sets up. */
@@ -76,21 +79,6 @@ const StoreSaved = Command.make('StoreSaved', { args: { saved: SavedSchema } }, 
   }).pipe(Effect.as(Component.noop)),
 )
 
-/** Switches light and dark, and remembers the choice. Without a choice the page follows the system. */
-const ToggleTheme = Command.make('ToggleTheme', {}, () =>
-  Effect.sync(() => {
-    const root = document.documentElement
-    const current = root.getAttribute('data-theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    const next = current === 'dark' ? 'light' : 'dark'
-    root.setAttribute('data-theme', next)
-    try {
-      localStorage.setItem('production.theme', next)
-    } catch {
-      // Not remembered, but the switch still applies.
-    }
-  }).pipe(Effect.as(Component.noop)),
-)
-
 const clampBpm = (v: number) => Math.min(200, Math.max(40, Math.round(v) || 70))
 
 const initialSaved: Saved = { settings: DEFAULT_SETTINGS, done: {}, last: null }
@@ -110,7 +98,7 @@ export const Production = Html.component({ name: 'Production', props: Production
         else done[key] = true
         return save({ ...$.model.saved, done })
       },
-      ClickedThemeToggle: () => $.set($.model).run(ToggleTheme.make({})),
+      ClickedThemeToggle: () => $.set($.model).run(ToggleTheme.make({ storageKey: 'production.theme' })),
       ClickedSignIn: () => $.set($.model).run(OpenSignIn.make({})),
       CompletedReadStorage: ({ saved }) => {
         // A lesson page is where you were, for Continue on the course home.
@@ -135,8 +123,8 @@ export const Production = Html.component({ name: 'Production', props: Production
             ? RecipePage({ recipe: route.recipe, done, lesson })
             : NotFoundPage()
     const islands = {
-      KeyBox: () => render(h, KeyBoxView({ settings }))[0] ?? '',
-      Arrangement: () => render(h, ArrangementView({ settings }))[0] ?? '',
+      KeyBox: () => render(h, KeyBoxView({ settings }), {}, isMessage)[0] ?? '',
+      Arrangement: () => render(h, ArrangementView({ settings }), {}, isMessage)[0] ?? '',
       Controls: () =>
         h.div.class('ctrls').children(
           h.label.class('ctrl').children(
@@ -197,6 +185,6 @@ export const Production = Html.component({ name: 'Production', props: Production
           .children(done[key] ? '✓ Done' : String(props.label))
       },
     }
-    return h.div.class('page').children(...render(h, Masthead(), islands), ...render(h, page, islands), SiteFooter(h, { current: 'production' }))
+    return h.div.class('page').children(...render(h, Masthead(), islands, isMessage), ...render(h, page, islands, isMessage), SiteFooter(h, { current: 'production' }))
   },
 })

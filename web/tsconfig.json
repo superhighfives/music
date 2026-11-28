@@ -26,11 +26,8 @@
       "~/*": [
         "./src/*"
       ]
-    }
-  },
-  "exclude": [
-    "src/chords/app",
-    "src/content",
-    "src/production"
-  ]
+    },
+    "jsxImportSource": "~/content",
+    "exactOptionalPropertyTypes": true
+  }
 }

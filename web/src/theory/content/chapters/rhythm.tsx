@@ -1,3 +1,4 @@
+/** @jsxImportSource ~/content */
 import { Rhythm } from '~/theory/components/Rhythm'
 import { Aside, Big, Section, Term, Try } from '~/theory/components/ui'
 import type { Chapter } from '~/theory/content/types'
@@ -24,7 +25,7 @@ function ValueTree() {
         {TREE.map((r, i) => {
           const bw = w / r.count
           return (
-            <g key={r.name}>
+            <g>
               <text x={0} y={i * row + 20} style={{ font: '600 14px var(--sans)', fill: 'var(--ink)' }}>
                 {r.name}
               </text>
@@ -33,7 +34,6 @@ function ValueTree() {
               </text>
               {Array.from({ length: r.count }, (_, j) => (
                 <rect
-                  key={j}
                   x={x0 + j * bw + 1.5}
                   y={i * row + 6}
                   width={bw - 3}

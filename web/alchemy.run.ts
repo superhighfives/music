@@ -23,6 +23,8 @@ export const Website = Cloudflare.Website.Vite(
   'Website',
   Effect.map(isProd, (prod) => ({
     ...(prod && { name: 'music', domain: 'music.charliegleason.com' }),
+    // Every page renders in this Worker; Vite builds only the pages' client scripts.
+    main: 'src/server.ts',
     compatibility: { date: '2026-11-23', flags: ['nodejs_compat'] },
     // The daily email goes out at 07:00 UTC; later runs retry anyone a failure skipped. Only prod
     // sends it, so a preview never emails real subscribers.

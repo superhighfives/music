@@ -14,9 +14,8 @@ async function call<T>(response: Promise<Response>): Promise<T> {
 }
 
 /**
- * Keeps one value in step with the signed-in account, for an Effect UI section. It's the React
- * sections' `useAccountSync` without React: the section reports who is signed in and every change, and
- * gets merged values back through `apply`, which it turns into a message.
+ * Keeps one value in step with the signed-in account, for Production and Theory. The section reports who
+ * is signed in and every change, and gets merged values back through `apply`, which it turns into a message.
  *
  * Signed out, nothing happens. On sign-in it merges this browser's copy into the account's, then saves
  * every change. A tab coming back into view picks up what other devices saved meanwhile.

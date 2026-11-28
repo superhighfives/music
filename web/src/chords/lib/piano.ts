@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 
 /*
  * A sampled piano with reverb, made with Web Audio.
@@ -107,7 +106,7 @@ function releaseVoice(e: Engine, voice: Voice) {
 /**
  * Piano voices keyed by an id, such as a pad. `noteOff` stops the note unless sustain is on.
  * The AudioContext starts on the first note, because browsers allow audio only after a user action.
- * It has no framework ties, so both the React sections and the Effect UI Chords use it.
+ * Chords and Theory each keep one for the page.
  */
 export function createPiano() {
   let engine: Engine | null = null
@@ -199,11 +198,3 @@ export function createPiano() {
 }
 
 export type Piano = ReturnType<typeof createPiano>
-
-/** The piano for a React section: one per component, with samples loading once it mounts. */
-export function usePiano(): Piano {
-  const piano = useRef<Piano | null>(null)
-  piano.current ??= createPiano()
-  useEffect(() => piano.current?.load(), [])
-  return piano.current
-}

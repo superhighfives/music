@@ -13,8 +13,7 @@ export async function userOf(request: Request, env: Env): Promise<string | null>
 const json = (body: unknown, status = 200) => Response.json(body, { status })
 
 /**
- * The account's saved values, for the Effect UI sections: GET /api/saved?key=… reads one, POST stores one.
- * The same rules as the React sections' server functions, which share `store.ts`.
+ * The account's saved values: GET /api/saved?key=… reads one, POST stores one.
  */
 export async function savedApi(request: Request, env: Env): Promise<Response> {
   const userId = await userOf(request, env)

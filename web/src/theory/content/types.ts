@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { Node } from '~/content/jsx-runtime'
 
 /**
  * A short, standalone idea from a chapter. Cards close each chapter as its key ideas, and the daily
@@ -14,14 +14,14 @@ export interface Card {
 }
 
 export interface Question {
-  prompt: ReactNode
+  prompt: Node
   /** Something to look at or hear with the question, such as a Staff or Keyboard. */
-  figure?: ReactNode
+  figure?: Node
   options: string[]
   /** Index into options. */
   answer: number
   /** Shown once answered, right or wrong. */
-  why: ReactNode
+  why: Node
 }
 
 export interface Chapter {
@@ -32,7 +32,7 @@ export interface Chapter {
   summary: string
   /** About how long it takes, reading and playing. */
   minutes: number
-  Body: ComponentType
+  Body: () => Node
   cards: Card[]
   /** "Check yourself" at the end. Getting them all right marks the check passed. */
   check: Question[]

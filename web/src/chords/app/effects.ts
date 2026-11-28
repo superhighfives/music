@@ -129,8 +129,8 @@ export const every = (ms: number, message: ChordsMessage) =>
   )
 
 /*
- * The account's copy of the pasted songs. The route hands over the server functions when it mounts the
- * island, so this file never imports server code.
+ * The account's copy of the pasted songs. The client entry hands over the /api/saved calls, so this file
+ * never makes requests itself and its tests need no network.
  */
 let accountIO: SyncIO | null = null
 let sync: AccountSync<ReadonlyArray<Sheet>> | null = null

@@ -1,27 +1,34 @@
 # web
 
-[music.charliegleason.com](https://music.charliegleason.com): one TanStack Start
-app on Cloudflare Workers, deployed with [Alchemy](https://alchemy.run).
+[music.charliegleason.com](https://music.charliegleason.com): one Cloudflare
+Worker that renders every page with [Effect UI](https://ui.effect.website),
+deployed with [Alchemy](https://alchemy.run).
 
 | Path | What it is | Code |
 | --- | --- | --- |
-| `/` | Home | `src/routes/index.tsx` |
-| `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/routes/chords/`, `src/chords/` |
+| `/` | Home | `src/pages/Home.ts` |
+| `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/chords/` |
 | `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/production/` |
-| `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/routes/theory/`, `src/theory/` |
-| `/ableton` | The Ableton Live Extensions, with downloads | `src/routes/ableton.tsx` |
-| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/routes/tools.tsx`, `src/tools.ts` |
+| `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/theory/` |
+| `/ableton` | The Ableton Live Extensions, with downloads | `src/pages/Static.ts` |
+| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/pages/Static.ts`, `src/tools.ts` |
 
 ## Sections
 
-Each section brings its own styles in its route's `head`, so they never meet:
+`src/server.ts` sends each path to its section. A section renders its page on the
+server with `HtmlServer.renderToHtml`, and its client entry hydrates it in the
+browser (`src/islands/document.ts` writes the page). Vite builds each section's
+client entry; the `islands` plugin in `vite.config.ts` tells the Worker the built
+file names. `/ableton`, `/tools` and `/privacy` send no script at all.
+
+Each section brings only its own styles, so they never meet:
 chords uses Tailwind (`src/chords/styles.css`, which scans only chords' files),
 Production uses its own CSS (`src/production/styles/app.css`), theory uses its own
 (`src/theory/styles/theory.css`), and home, `/ableton`, `/tools` and
 `/privacy` share `src/site.css`. chords is always dark, like Move. Production and Theory have
 a light/dark toggle, and the other pages follow the system setting. Clerk's
-sign-in dialog and account menu follow each section (`appearance` on
-`AccountButton`). The root route is a bare shell. Links between sections are
+sign-in dialog and account menu follow each section (the `appearance` each client
+entry passes to `connectClerk`). Links between sections are
 plain `<a>`s, so each one is a full page load with only its own styles.
 
 Settings, saved songs and course progress live in each visitor's browser
@@ -33,11 +40,7 @@ All of a view's state is in the URL, so any view can be bookmarked or shared.
 Without Move connected, only the chord lookup (Play) works; Learn, Songs and
 Practice check what you play on Move.
 
-chords is an [Effect UI](https://ui.effect.website/) app inside a TanStack
-route. `src/routes/chords/index.tsx` is only its shell: it keeps the document
-head and the Clerk session, mounts the app in the browser, and hands it the
-account's server functions and Clerk's sign-in UI. The app is in
-`src/chords/app/`:
+The app is in `src/chords/app/`:
 
 - `state.ts`: the Model, the URL search, and `derive`, which works out
   everything the view and Move's lights show.
@@ -45,12 +48,12 @@ account's server functions and Clerk's sign-in UI. The app is in
   `chords.test.ts` by sending it Move's pad and button messages.
 - `effects.ts`: Commands, Subscriptions and mounts for the piano, Move, the URL,
   storage and the account.
-- `view.ts`: the view. `mount.ts`: the entry the route loads.
+- `view.ts`: the view. `page.ts` renders it on the Worker for the URL's view;
+  `client.ts` hydrates it.
 
 Effect UI isn't on npm yet. `vendor/effect-ui-22128c6.tgz` is the snapshot from
-pkg.pr.new for commit `22128c6`. It needs `exactOptionalPropertyTypes`, so the
-app is type-checked with `tsconfig.chords.json`, and the main `tsconfig.json`
-leaves it out. `pnpm typecheck` runs both.
+pkg.pr.new for commit `22128c6`. It needs `exactOptionalPropertyTypes`, which
+`tsconfig.json` turns on.
 
 ### Production
 
@@ -91,20 +94,29 @@ A music theory book, beginner to advanced, in five parts. It's plain data in
   own, because the daily email sends them one at a time. `*word*` is bold. Never
   rename a card's `id` either; the email tracks what each person was sent by it.
 
-Chapters build from `src/theory/components/`: `Keyboard` and `Staff` (both
-playable), `Rhythm` (notation that plays to a metronome), the explorers
-(`NoteFinder`, `IntervalExplorer`, `ScaleExplorer`, `NoteNamer`), and the prose
-pieces in `ui.tsx` (`Section`, `Big`, `Aside`, `Try`, `Term`). The theory itself
+Chapters are JSX content, like Production's lessons. They build from
+`src/theory/components/`: `Keyboard` and `Staff` (both playable), `Rhythm`
+(notation that plays to a metronome), the explorers (`NoteFinder`,
+`IntervalExplorer`, `ScaleExplorer`, `NoteNamer`), and the prose pieces in
+`ui.tsx` (`Section`, `Big`, `Aside`, `Try`, `Term`). The theory itself
 (spelling, intervals, scales, key signatures, triads, rhythm) is in
 `src/theory/lib/theory.ts`, with tests. Sound is chords' sampled piano, one
-instance for the whole book (`src/theory/lib/audio.tsx`).
+instance for the whole book (`src/theory/lib/audio.ts`).
+
+Anything with its own state, such as an explorer, a player that lights keys as it
+plays, or the check at the end, is a figure: `figure()` in
+`src/theory/app/define.ts` gives it a name, its args and state as Schemas, and a
+view whose handlers return what to do (`set`, `start`, `stop`). Each use renders
+as its own `Figure` component, so two on one page share nothing. Only one figure
+plays at a time.
 
 Progress (chapters read, checks passed, where you were) syncs to an account as
 `theory.book`.
 
 #### The daily email
 
-Signed in, the book's home page has a switch for one card a day by email. A cron
+Signed in, the book's home page has a switch for one card a day by email
+(`/api/theory/email`, in `src/theory/email/api.ts`). A cron
 (`0 7-23 * * *`, in `alchemy.run.ts`, prod only) runs `sendDaily` in
 `src/theory/email/daily.ts`: each subscriber gets the first card in reading order
 they haven't had, so cards from new chapters join the queue wherever they fall;
@@ -135,16 +147,17 @@ its release tags.
 
 ## Accounts
 
-Sign-in is [Clerk](https://dashboard.clerk.com), application "music". The root
-route wraps every section in one `ClerkProvider`, and `src/start.ts` runs
-`clerkMiddleware()` on every request so server functions can call `auth()`.
-Each section has a Sign in button (`src/account/AccountButton.tsx`).
+Sign-in is [Clerk](https://dashboard.clerk.com), application "music". Pages load
+Clerk's browser SDK and UI directly (`src/islands/clerk.ts`), as Clerk's React SDK
+does. This relies on Clerk's `__internal_ClerkUICtor` global, which a Clerk update
+could rename. The Worker checks the session with `@clerk/backend` (`userOf` in
+`src/account/api.ts`), so pages render signed in.
 
 Signed in, chords' pasted songs (`chords.songs`), Production's settings and
 progress (`production.course`) and Theory's progress (`theory.book`) are also kept in the D1 database `music`, one JSON
-value per person and key (`migrations/0001_saved.sql`). `src/account/saved.ts`
-has the two server functions, which only ever touch the signed-in person's rows.
-`useAccountSync` (`src/account/sync.ts`) merges this browser's copy into the
+value per person and key (`migrations/0001_saved.sql`). `GET` and `POST
+/api/saved` (`src/account/api.ts`) only ever touch the signed-in person's rows.
+`AccountSync` (`src/account/account-sync.ts`) merges this browser's copy into the
 account's once per sign-in, then saves every change:
 
 - Songs: both lists, nothing dropped; the same sheet pasted twice is one song.
@@ -158,8 +171,8 @@ read from the environment at deploy time. Locally they go in `.dev.vars`
 (git-ignored), using the development instance's keys. Development has "Challenge suspicious sign-ups" turned off under Protect,
 because its check fails on localhost.
 
-To add a synced value, add its key to `SYNC_KEYS` and call `useAccountSync` where
-the section keeps it.
+To add a synced value, add its key to `SYNC_KEYS` and connect it with
+`createAccountSync` (`src/islands/sync.ts`) in the section's client entry.
 
 ## Develop
 

@@ -36,7 +36,17 @@ export declare namespace JSX {
   interface IntrinsicAttributes {
     key?: string | number | undefined
   }
+  /**
+   * Handlers return a message for the component that renders the content; anything else is ignored.
+   * Payloads are Effect UI's: `{ value }` for a change, `{ key }` for a key.
+   */
+  type Handlers = {
+    onClick?: ((payload: {}) => unknown) | undefined
+    onPointerDown?: ((payload: {}) => unknown) | undefined
+    onChange?: ((payload: { value: string }) => unknown) | undefined
+    onKeyDown?: ((payload: { key: string }) => unknown) | undefined
+  }
   interface IntrinsicElements {
-    [tag: string]: Record<string, unknown> & { children?: Node }
+    [tag: string]: Record<string, unknown> & Handlers & { children?: Node }
   }
 }

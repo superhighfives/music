@@ -125,3 +125,9 @@ export const Privacy = component('Privacy').make({
     SiteFooter(h, { current: 'privacy' }),
   ),
 })
+
+export const NotFound = component('NotFound').make({
+  init: () => ({}),
+  update: ($) => $.model,
+  view: (h) => h.main.children(Back(h), h.h1.children('Not found'), h.p.children('There’s no page here.'), SiteFooter(h, {})),
+})

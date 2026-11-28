@@ -8,7 +8,7 @@ export type ClerkBrowser = {
   unmountUserButton(node: HTMLDivElement): void
 }
 
-// Clerk's scripts set these globals. They're untyped outside Clerk's React SDK, so this is the one place
+// Clerk's scripts set these globals. Clerk publishes no types for them, so this is the one place
 // that reads them, as the shapes above.
 const globals = globalThis as unknown as { Clerk?: ClerkBrowser; __internal_ClerkUICtor?: unknown }
 

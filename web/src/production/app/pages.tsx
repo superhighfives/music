@@ -78,7 +78,6 @@ function Crumbs({ section }: { section: string }) {
 
 /** Edition log, newest first. Add a line when a theme or recipe lands. */
 const LOG: [string, string, string][] = [
-  ["2026-11-28", "Edition 8.", "Rebuilt on Effect UI: every page renders on the server, with no React."],
   ["2026-11-27", "Edition 7.", "Every tool in the studio, with exercises and links back to these lessons, at music.charliegleason.com/tools."],
   ["2026-11-26", "Edition 6.", "sounds is now Production, at music.charliegleason.com/production."],
   ["2026-11-26", "Edition 5.", "Fog & Pulse is now just sounds, with the same footer as the rest of music."],

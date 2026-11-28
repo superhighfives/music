@@ -1,12 +1,16 @@
+/** @jsxImportSource ~/content */
 import { Keyboard, type Mark } from '~/theory/components/Keyboard'
 import { IntervalExplorer } from '~/theory/components/explorers'
 import { Aside, Big, PlayButton, Section, Term, Try } from '~/theory/components/ui'
 import type { Chapter } from '~/theory/content/types'
-import { usePlayer } from '~/theory/lib/audio'
+import { figure, NoState } from '~/theory/app/define'
 
 /** Every key from C4 to C5, one half step at a time, lit as it plays. */
-function Chromatic() {
-  const player = usePlayer()
+const Chromatic = figure('steps.Chromatic', {
+  args: NoState,
+  state: NoState,
+  init: () => ({}),
+  view: (_args, _state, player) => {
   const notes = Array.from({ length: 13 }, (_, i) => 60 + i)
   const marks: Record<number, Mark> = {}
   if (player.current !== null) marks[notes[player.current]] = { tone: 'lit' }
@@ -22,7 +26,8 @@ function Chromatic() {
       <Keyboard from={60} to={72} names="all" marks={marks} label="One octave, C4 to C5, played key by key" caption="Twelve half steps take you from C up to the next C." />
     </Try>
   )
-}
+  },
+})
 
 export const steps: Chapter = {
   id: 'steps',

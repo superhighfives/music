@@ -1,31 +1,34 @@
-import { type ReactNode, useId } from 'react'
-import { usePlayer } from '~/theory/lib/audio'
+/** @jsxImportSource ~/content */
+import { Schema } from 'effect'
+import { figure, NoState } from '~/theory/app/define'
 import { beatsOf, parseRhythm, type RhythmEvent } from '~/theory/lib/theory'
 import { PlayButton } from './ui'
 
-interface Props {
+const Args = Schema.Struct({
   /** Shorthand: w h q e s for whole to sixteenth, "." for a dot, "r" before for a rest. "q q e e h". */
-  rhythm: string
+  rhythm: Schema.String,
   /** Beats in a bar, for barlines, counting and the metronome's accent. */
-  beats?: number
-  bpm?: number
+  beats: Schema.optionalKey(Schema.Number),
+  bpm: Schema.optionalKey(Schema.Number),
   /** The note it plays, as MIDI. */
-  pitch?: number
+  pitch: Schema.optionalKey(Schema.Number),
   /** Count each note under it: 1 & 2 &. */
-  counts?: boolean
+  counts: Schema.optionalKey(Schema.Boolean),
   /** Show the time signature, as [beats, note value]. */
-  time?: [number, number]
-  caption?: ReactNode
-  label: string
-}
+  time: Schema.optionalKey(Schema.Tuple([Schema.Number, Schema.Number])),
+  caption: Schema.optionalKey(Schema.String),
+  label: Schema.String,
+})
 
 const LINE = 58
 const STEM = 30
 
 /** One line of rhythm, played on a note with a metronome. Each note lights up as it sounds. */
-export function Rhythm({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true, time, caption, label }: Props) {
-  const player = usePlayer()
-  const titleId = useId()
+export const Rhythm = figure('Rhythm', {
+  args: Args,
+  state: NoState,
+  init: () => ({}),
+  view: ({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true, time, caption, label }, _state, player) => {
   const events = parseRhythm(rhythm)
   const starts: number[] = []
   events.reduce((t, e) => (starts.push(t), t + beatsOf(e)), 0)
@@ -58,7 +61,7 @@ export function Rhythm({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true,
   beamOf.forEach((g, i) => g >= 0 && groups.set(g, [...(groups.get(g) ?? []), i]))
   const beamed = (i: number) => (groups.get(beamOf[i])?.length ?? 0) > 1
 
-  const toggle = () =>
+    const toggle = () =>
     player.playing
       ? player.stop()
       : player.start(
@@ -72,8 +75,8 @@ export function Rhythm({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true,
         <PlayButton playing={player.playing} onClick={toggle} />
         <span className="lab">{bpm} bpm</span>
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={titleId} style={{ maxWidth: width * 1.2 }}>
-        <title id={titleId}>{label}</title>
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} style={{ maxWidth: width * 1.2 }}>
+        <title>{label}</title>
         <line className="line" x1={4} x2={width - 4} y1={LINE} y2={LINE} />
         {time ? (
           <g className="time">
@@ -86,10 +89,10 @@ export function Rhythm({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true,
           </g>
         ) : null}
         {barX.map((bx, b) => (
-          <line key={b} className="line" x1={bx} x2={bx} y1={LINE - 14} y2={LINE + 14} />
+          <line className="line" x1={bx} x2={bx} y1={LINE - 14} y2={LINE + 14} />
         ))}
         {events.map((e, i) => (
-          <EventMark key={i} e={e} x={evX[i] + 10} lit={player.current === i} flag={!beamed(i)} />
+          <EventMark e={e} x={evX[i] + 10} lit={player.current === i} flag={!beamed(i)} />
         ))}
         {[...groups.values()]
           .filter((g) => g.length > 1)
@@ -106,17 +109,17 @@ export function Rhythm({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true,
               return [j + 1 < g.length ? [stem(i), stem(i) + 9] : [stem(i) - 9, stem(i)]]
             })
             return (
-              <g key={g[0]} className="beam">
+              <g className="beam">
                 <rect x={a - 0.8} y={LINE - STEM - 1} width={b - a + 1.6} height={5} />
                 {second.map(([x1, x2]) => (
-                  <rect key={x1} x={x1 - 0.8} y={LINE - STEM + 7} width={x2 - x1 + 1.6} height={5} />
+                  <rect x={x1 - 0.8} y={LINE - STEM + 7} width={x2 - x1 + 1.6} height={5} />
                 ))}
               </g>
             )
           })}
         {counts
           ? events.map((e, i) => (
-              <text key={i} className={player.current === i ? 'count now' : 'count'} x={evX[i] + 10} y={LINE + 34} textAnchor="middle">
+              <text className={player.current === i ? 'count now' : 'count'} x={evX[i] + 10} y={LINE + 34} textAnchor="middle">
                 {e.rest ? `(${countAt(starts[i], beats)})` : countAt(starts[i], beats)}
               </text>
             ))
@@ -125,7 +128,8 @@ export function Rhythm({ rhythm, beats = 4, bpm = 84, pitch = 72, counts = true,
       {caption ? <figcaption>{caption}</figcaption> : null}
     </figure>
   )
-}
+  },
+})
 
 const DURATIONS_BEAMED = new Set(['eighth', 'sixteenth'])
 

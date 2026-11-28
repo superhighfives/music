@@ -1,37 +1,37 @@
-import { createServerEntry, createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
+import type { WebsiteEnv } from '../alchemy.run'
 import { savedApi } from './account/api'
 import { chordsPage } from './chords/app/page'
-import { sitePage } from './pages/pages'
-import { productionPage } from './production/app/page'
 import { EXTENSIONS } from './extensions'
+import { notFoundPage, sitePage } from './pages/pages'
+import { productionPage } from './production/app/page'
 import { newestAblx } from './releases'
-import { type DailyEnv, sendDaily, unsubscribe } from './theory/email/daily'
-
-const handler = createStartHandler(defaultStreamHandler)
+import { emailApi } from './theory/email/api'
+import { theoryPage } from './theory/app/page'
+import { sendDaily, unsubscribe } from './theory/email/daily'
 
 const RELEASES = 'https://github.com/superhighfives/music/releases'
 const EXTENSION_IDS = new Set(EXTENSIONS.map((x) => x.id))
 
-const entry = createServerEntry({
-  async fetch(request) {
-    const url = new URL(request.url)
-    const ablx = /^\/ableton\/([a-z-]+)\.ablx$/.exec(url.pathname)
-    if (ablx && EXTENSION_IDS.has(ablx[1])) return latestRelease(ablx[1])
-    if (url.pathname === '/theory/unsubscribe') return unsubscribePage(request, url)
-    // Sections moved to Effect UI render here; the rest are TanStack Start's.
-    if (url.pathname === '/chords' || url.pathname === '/chords/') return chordsPage(request, (await import('cloudflare:workers')).env)
-    if (url.pathname === '/production' || url.pathname.startsWith('/production/')) return productionPage(request, (await import('cloudflare:workers')).env)
-    const site = await sitePage(request, (await import('cloudflare:workers')).env, url.pathname)
-    if (site) return site
-    if (url.pathname === '/api/saved') return savedApi(request, (await import('cloudflare:workers')).env)
-    return handler(request)
-  },
-})
+/** `/a` and everything under `/a/`. */
+const under = (path: string, section: string) => path === section || path.startsWith(`${section}/`)
 
+/** The Worker. Static files are served before it runs; every page renders here with Effect UI. */
 export default {
-  ...entry,
+  async fetch(request: Request, env: WebsiteEnv): Promise<Response> {
+    const url = new URL(request.url)
+    const path = url.pathname
+    const ablx = /^\/ableton\/([a-z-]+)\.ablx$/.exec(path)
+    if (ablx?.[1] && EXTENSION_IDS.has(ablx[1])) return latestRelease(ablx[1])
+    if (path === '/api/saved') return savedApi(request, env)
+    if (under(path, '/api/theory/email')) return emailApi(request, env, path)
+    if (path === '/theory/unsubscribe') return unsubscribePage(request, url, env)
+    if (path === '/chords' || path === '/chords/') return chordsPage(request, env)
+    if (under(path, '/production')) return productionPage(request, env)
+    if (under(path, '/theory')) return theoryPage(request, env)
+    return (await sitePage(request, env, path)) ?? notFoundPage()
+  },
   // The cron in alchemy.run.ts: the theory book's daily email.
-  scheduled(_controller: unknown, env: DailyEnv, ctx: { waitUntil(p: Promise<unknown>): void }) {
+  scheduled(_controller: unknown, env: WebsiteEnv, ctx: { waitUntil(p: Promise<unknown>): void }) {
     ctx.waitUntil(sendDaily(env))
   },
 }
@@ -40,7 +40,7 @@ export default {
  * The daily email's unsubscribe link. Opening it shows a button, so a mail scanner following links
  * can't unsubscribe anyone; the button, and mail apps' one-click unsubscribe, POST here.
  */
-async function unsubscribePage(request: Request, url: URL): Promise<Response> {
+async function unsubscribePage(request: Request, url: URL, env: WebsiteEnv): Promise<Response> {
   const token = url.searchParams.get('t') ?? ''
   const page = (body: string, status = 200) =>
     new Response(
@@ -49,7 +49,6 @@ async function unsubscribePage(request: Request, url: URL): Promise<Response> {
     )
   if (!token) return page('<p>This unsubscribe link is missing its code. Turn the email off from <a href="/theory">the book</a> instead.</p>', 400)
   if (request.method === 'POST') {
-    const { env } = await import('cloudflare:workers')
     const ok = await unsubscribe(env, token)
     return ok
       ? page('<h1>Unsubscribed</h1><p>No more daily emails. You can turn them back on from <a href="/theory">the book</a>.</p>')

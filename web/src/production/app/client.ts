@@ -6,15 +6,12 @@ import { HtmlHydrate } from '@effect/ui/html'
 import { Effect } from 'effect'
 import { connectClerk } from '../../islands/auth'
 import { createAccountSync } from '../../islands/sync'
+import { isDarkPage } from '../../islands/theme'
 import { mergeSaved, parseSaved, type Saved } from '../lib/saved'
 import { Production, ProductionMessage, ProductionProps, setReportSaved, type ProductionModel } from './Production'
 
 /** Clerk's dialog and menu follow the course's light or dark theme, in its type. */
-const appearance = () => {
-  const chosen = document.documentElement.getAttribute('data-theme')
-  const isDark = chosen ? chosen === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
-  return isDark ? { theme: dark, variables: { fontFamily: 'var(--sans)' } } : { variables: { fontFamily: 'var(--sans)' } }
-}
+const appearance = () => (isDarkPage() ? { theme: dark, variables: { fontFamily: 'var(--sans)' } } : { variables: { fontFamily: 'var(--sans)' } })
 
 const container = document.getElementById('app')
 const stateText = document.getElementById('state')?.textContent

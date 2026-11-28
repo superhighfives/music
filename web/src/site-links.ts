@@ -1,4 +1,4 @@
-/** The site's sections, in footer order. Plain data, so the React sections and Effect UI's Chords share it. */
+/** The site's sections, in footer order. Plain data, shared by every page's footer. */
 export type Section = 'home' | 'chords' | 'production' | 'theory' | 'ableton' | 'tools' | 'privacy'
 
 export const SITE_LINKS: ReadonlyArray<{ id: Section; href: string; label: string }> = [

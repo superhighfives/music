@@ -1,17 +1,21 @@
+/** @jsxImportSource ~/content */
 import { Keyboard, type Mark } from '~/theory/components/Keyboard'
 import { ScaleExplorer } from '~/theory/components/explorers'
 import { Staff } from '~/theory/components/Staff'
 import { Aside, Big, PlayButton, Section, Term, Try } from '~/theory/components/ui'
 import type { Chapter } from '~/theory/content/types'
-import { usePlayer } from '~/theory/lib/audio'
+import { figure, NoState } from '~/theory/app/define'
 
 const C_MAJOR = [60, 62, 64, 65, 67, 69, 71, 72]
 const NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C']
 const STEPS = ['W', 'W', 'H', 'W', 'W', 'W', 'H']
 
 /** C major on the white keys, with each step's size drawn above. */
-function CMajor() {
-  const player = usePlayer()
+const CMajor = figure('major-scale.CMajor', {
+  args: NoState,
+  state: NoState,
+  init: () => ({}),
+  view: (_args, _state, player) => {
   const marks: Record<number, Mark> = {}
   C_MAJOR.forEach((m, i) => (marks[m] = { tone: player.current === i ? 'lit' : i === 0 || i === 7 ? 'cool' : 'soft', label: NAMES[i] }))
   const arcs = STEPS.map((s, i) => ({ from: C_MAJOR[i], to: C_MAJOR[i + 1], label: s, tone: s === 'H' ? ('lit' as const) : undefined }))
@@ -35,11 +39,15 @@ function CMajor() {
       />
     </Try>
   )
-}
+  },
+})
 
 /** The scale climbing, then the last note left hanging, then resolved home. */
-function Home() {
-  const player = usePlayer()
+const Home = figure('major-scale.Home', {
+  args: NoState,
+  state: NoState,
+  init: () => ({}),
+  view: (_args, _state, player) => {
   const hang = [60, 62, 64, 65, 67, 69, 71]
   return (
     <div className="figbar">
@@ -55,7 +63,8 @@ function Home() {
       />
     </div>
   )
-}
+  },
+})
 
 export const majorScale: Chapter = {
   id: 'major-scale',

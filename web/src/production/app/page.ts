@@ -2,18 +2,17 @@ import { HtmlServer } from '@effect/ui/html'
 import { Effect } from 'effect'
 import { userOf } from '../../account/api'
 import { page } from '../../islands/document'
+import { themeScript } from '../../islands/theme'
 import { Production } from './Production'
 import { routeOf, titleOf } from './pages'
 
 type Env = { DB: D1Database; CLERK_SECRET_KEY: string; CLERK_PUBLISHABLE_KEY: string }
 
-// Applies a saved light/dark choice before first paint, so there's no flash.
-const THEME_SCRIPT = `try{var t=localStorage.getItem("production.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`
 
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-    <script>${THEME_SCRIPT}</script>`
+    ${themeScript('production.theme')}`
 
 /** Every page under /production, rendered on the server and hydrated by client.ts. */
 export async function productionPage(request: Request, env: Env): Promise<Response> {

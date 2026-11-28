@@ -1,5 +1,6 @@
-import { type ReactNode, useId } from 'react'
-import { useAudio } from '~/theory/lib/audio'
+/** @jsxImportSource ~/content */
+import type { Node } from '~/content/jsx-runtime'
+import { play } from '~/theory/app/define'
 import { isBlackKey, pitchName, spell } from '~/theory/lib/theory'
 
 export type Tone = 'lit' | 'cool' | 'good' | 'bad' | 'soft'
@@ -17,13 +18,16 @@ interface Props {
   names?: 'none' | 'c' | 'white' | 'all'
   /** Spell black keys with sharps or flats. */
   prefer?: 'sharp' | 'flat'
-  /** Called on a key press, after it plays. */
-  onKey?: (midi: number) => void
-  /** Keys don't sound when false. */
+  /**
+   * What a key press sends: by default it plays the key. A figure that reacts to presses sends its own
+   * message, and plays the key with it.
+   */
+  onKey?: (midi: number) => unknown
+  /** Keys don't sound or respond when false. */
   sound?: boolean
   /** Arcs drawn between keys, such as steps in a scale, each with a label. Pass [] to keep room for arcs to come. */
-  arcs?: { from: number; to: number; label: string; tone?: Tone }[]
-  caption?: ReactNode
+  arcs?: { from: number; to: number; label: string; tone?: Tone | undefined }[]
+  caption?: Node
   /** Describes what's marked, for screen readers. */
   label: string
 }
@@ -36,8 +40,6 @@ const ARC_SPACE = 34
 
 /** A playable piano keyboard. Press a key to hear it. */
 export function Keyboard({ from = 60, to = 83, marks = {}, names = 'c', prefer = 'sharp', onKey, sound = true, arcs, caption, label }: Props) {
-  const audio = useAudio()
-  const titleId = useId()
   const whites: number[] = []
   for (let m = from; m <= to; m++) if (!isBlackKey(m)) whites.push(m)
   // Space for arcs is kept whenever arcs are passed, even none yet, so the keyboard doesn't jump when the first appears.
@@ -49,10 +51,7 @@ export function Keyboard({ from = 60, to = 83, marks = {}, names = 'c', prefer =
   }
   const centre = (midi: number) => x(midi) + (isBlackKey(midi) ? BW / 2 : W / 2)
 
-  const press = (midi: number) => {
-    if (sound) audio.play([midi])
-    onKey?.(midi)
-  }
+  const press = (midi: number) => (onKey ? onKey(midi) : sound ? play([midi]) : undefined)
 
   const key = (midi: number) => {
     const black = isBlackKey(midi)
@@ -63,21 +62,12 @@ export function Keyboard({ from = 60, to = 83, marks = {}, names = 'c', prefer =
     const cls = ['key', black ? 'black' : 'white', mark?.tone ?? ''].filter(Boolean).join(' ')
     return (
       <g
-        key={midi}
         className={cls}
         role="button"
         tabIndex={0}
         aria-label={`${pitchName(spell(midi, prefer))}${spell(midi, prefer).octave}`}
-        onPointerDown={(e) => {
-          e.preventDefault()
-          press(midi)
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            press(midi)
-          }
-        }}
+        onPointerDown={() => press(midi)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ' ? press(midi) : undefined)}
       >
         <rect x={x(midi)} y={top} width={w} height={h} rx={black ? 2.5 : 4} />
         {name ? (
@@ -91,14 +81,14 @@ export function Keyboard({ from = 60, to = 83, marks = {}, names = 'c', prefer =
 
   return (
     <figure className="fig keyboard">
-      <svg viewBox={`-1 -1 ${width + 2} ${top + H + 2}`} role="group" aria-labelledby={titleId} style={{ maxWidth: width * 1.25 }}>
-        <title id={titleId}>{label}</title>
+      <svg viewBox={`-1 -1 ${width + 2} ${top + H + 2}`} role="group" aria-label={label} style={{ maxWidth: width * 1.25 }}>
+        <title>{label}</title>
         {arcs?.map((a, i) => {
           const x1 = centre(a.from)
           const x2 = centre(a.to)
           const mid = (x1 + x2) / 2
           return (
-            <g key={i} className={`arc ${a.tone ?? ''}`}>
+            <g className={`arc ${a.tone ?? ''}`}>
               <path d={`M${x1},${top - 4} Q${mid},${top - 26} ${x2},${top - 4}`} />
               <text x={mid} y={top - 18} textAnchor="middle">
                 {a.label}

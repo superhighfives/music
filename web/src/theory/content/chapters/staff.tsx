@@ -1,3 +1,4 @@
+/** @jsxImportSource ~/content */
 import { NoteNamer } from '~/theory/components/explorers'
 import { Staff } from '~/theory/components/Staff'
 import { Aside, Big, Section, Term, Try } from '~/theory/components/ui'

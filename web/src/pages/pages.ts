@@ -1,7 +1,7 @@
 import { userOf } from '../account/api'
 import { renderPage } from '../islands/render'
 import { Home } from './Home'
-import { Ableton, Privacy, Tools } from './Static'
+import { Ableton, NotFound, Privacy, Tools } from './Static'
 
 type Env = { DB: D1Database; CLERK_SECRET_KEY: string; CLERK_PUBLISHABLE_KEY: string }
 
@@ -29,4 +29,10 @@ export async function sitePage(request: Request, env: Env, path: string): Promis
   if (path === '/privacy')
     return renderPage(Privacy, {}, { island: 'static', script: false, title: 'Privacy · music', description: 'What music.charliegleason.com stores, and why.' })
   return null
+}
+
+/** Any path nothing else serves. */
+export async function notFoundPage(): Promise<Response> {
+  const response = await renderPage(NotFound, {}, { island: 'static', script: false, title: 'Not found · music', description: 'There’s no page here.' })
+  return new Response(response.body, { status: 404, headers: response.headers })
 }
