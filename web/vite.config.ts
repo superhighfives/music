@@ -1,12 +1,15 @@
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
+import { cp } from 'node:fs/promises'
+import { join } from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
 
 /**
- * Builds the client entry of each Effect UI page into the client bundle, and tells the Worker its built
- * file names through `virtual:islands`. TanStack Start builds the client before the server, so the names
- * are known by the time the Worker's build reads them. In dev, Vite serves the source paths.
+ * Builds the client entry of each Effect UI page and tells the Worker its built file names through
+ * `virtual:islands`. TanStack Start's client build allows one entry, so while it still serves the other
+ * pages the islands build as their own environment, into `.islands`, and are copied into the client
+ * output before the Worker builds. In dev, Vite serves the source paths.
  */
 function islands(entries: Record<string, string>): Plugin {
   const built: Record<string, { js: string; css: string[] }> = {}
@@ -14,19 +17,31 @@ function islands(entries: Record<string, string>): Plugin {
   return {
     name: 'islands',
     sharedDuringBuild: true,
-    configResolved(config) {
-      command = config.command
+    config(_, env) {
+      command = env.command
+      if (env.command !== 'build') return
+      return {
+        environments: {
+          islands: { consumer: 'client', build: { outDir: '.islands', emptyOutDir: true, rollupOptions: { input: entries } } },
+        },
+      }
     },
-    buildStart() {
-      if (command !== 'build' || this.environment.name !== 'client') return
-      for (const [name, id] of Object.entries(entries)) this.emitFile({ type: 'chunk', id, name: `island-${name}` })
+    buildApp: {
+      order: 'pre',
+      async handler(builder) {
+        const { client, islands } = builder.environments
+        if (!client || !islands) return
+        // The client build empties its folder, so it goes first; then the islands join it.
+        if (!client.isBuilt) await builder.build(client)
+        await builder.build(islands)
+        await cp(join(islands.config.root, '.islands'), client.config.build.outDir, { recursive: true })
+      },
     },
     generateBundle(_, bundle) {
-      if (this.environment.name !== 'client') return
+      if (this.environment.name !== 'islands') return
       for (const chunk of Object.values(bundle)) {
-        if (chunk.type !== 'chunk' || !chunk.isEntry || !chunk.facadeModuleId) continue
-        const name = Object.entries(entries).find(([, id]) => chunk.facadeModuleId?.endsWith(id))?.[0]
-        if (name) built[name] = { js: `/${chunk.fileName}`, css: [...(chunk.viteMetadata?.importedCss ?? [])].map((f) => `/${f}`) }
+        if (chunk.type !== 'chunk' || !chunk.isEntry) continue
+        built[chunk.name] = { js: `/${chunk.fileName}`, css: [...(chunk.viteMetadata?.importedCss ?? [])].map((f) => `/${f}`) }
       }
     },
     resolveId(id) {
@@ -34,7 +49,7 @@ function islands(entries: Record<string, string>): Plugin {
     },
     load(id) {
       if (id !== '\0virtual:islands') return
-      const value = command === 'serve' ? Object.fromEntries(Object.entries(entries).map(([name, path]) => [name, { js: path, css: [] }])) : built
+      const value = command === 'serve' ? Object.fromEntries(Object.entries(entries).map(([name, path]) => [name, { js: `/${path}`, css: [] }])) : built
       return `export default ${JSON.stringify(value)}`
     },
   }
@@ -43,5 +58,5 @@ function islands(entries: Record<string, string>): Plugin {
 // Alchemy adds its own Cloudflare plugin when it runs Vite (alchemy dev, alchemy deploy).
 export default defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [islands({ chords: '/src/chords/app/client.ts' }), tailwindcss(), tanstackStart(), react()],
+  plugins: [islands({ chords: 'src/chords/app/client.ts' }), tailwindcss(), tanstackStart(), react()],
 })
