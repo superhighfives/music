@@ -69,7 +69,7 @@ function Tools() {
                       ))}
                     </ol>
                     {links.length > 0 ? (
-                      <p className="src meta">
+                      <p className="src">
                         See:{' '}
                         {links.map((l, i) => (
                           <span key={l.href}>
