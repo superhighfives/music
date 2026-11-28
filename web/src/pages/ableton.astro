@@ -1,0 +1,66 @@
+---
+import '~/site.css'
+import Masthead from '~/components/Masthead.astro'
+import PadMark from '~/components/PadMark.astro'
+import SiteFooter from '~/components/SiteFooter.astro'
+import Page from '~/layouts/Page.astro'
+import { EXTENSIONS } from '~/extensions'
+---
+
+<Page title="Ableton Extensions · music" description="Ableton Live 12 Extensions for chords, progressions and ambient soundscapes.">
+  <div class="page" data-section="ableton">
+    <Masthead>
+      <a slot="brand" class="brand" href="/ableton"><PadMark lit={3} />Extensions</a>
+    </Masthead>
+    <section class="hero">
+      <PadMark lit={3} big />
+      <h1>Extensions</h1>
+      <p class="lede">
+        Tools that read and rewrite a Live Set, run from right-click menus inside Live. They need Live 12.4.5 Suite (public beta) or later.
+      </p>
+    </section>
+    <div class="home">
+      <section class="block">
+        <h2>
+          Extensions <span class="dim">Download one, then install it below.</span>
+        </h2>
+        <ul class="cards">
+          {EXTENSIONS.map((x) => (
+            <li class="card">
+              <span class="name">{x.id}</span>
+              <span class="blurb">{x.about}</span>
+              <span class="src">{x.how}</span>
+              <span class="meta">
+                <a class="btn primary" href={`/ableton/${x.id}.ablx`}>
+                  Download
+                </a>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section class="block">
+        <h2>Install</h2>
+        <ol class="steps">
+          <li>
+            <span>
+              Download the <code>.ablx</code> for an extension.
+            </span>
+          </li>
+          <li>
+            <span>In Live, open Settings → Extensions.</span>
+          </li>
+          <li>
+            <span>
+              Drag the <code>.ablx</code> onto the Extensions page, then turn it on. Restart Live if it asks.
+            </span>
+          </li>
+        </ol>
+        <p class="dim">
+          Source, older versions and release notes are on <a href="https://github.com/superhighfives/music/releases">GitHub</a>.
+        </p>
+      </section>
+    </div>
+    <SiteFooter current="ableton" />
+  </div>
+</Page>

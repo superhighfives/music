@@ -1,6 +1,8 @@
 import { Command, Component, Mount } from '@effect/ui'
 import { Duration, Effect, Queue, Schema, Stream } from 'effect'
-import { AccountSync, type SyncIO } from '../../account/account-sync'
+import { $authStore } from '@clerk/astro/client'
+import { AccountSync } from '../../account/account-sync'
+import { accountIO } from '../../islands/sync'
 import { createMove, type MoveEvent } from '../lib/move'
 import { createPiano } from '../lib/piano'
 import { mergeSheets, parseSheets } from '../lib/sheets'
@@ -35,6 +37,8 @@ const noop = <A>(f: () => A) => Effect.sync(f).pipe(Effect.as(Component.noop))
  */
 export const ReadStorage = Command.make('ReadStorage', {}, () =>
   Effect.sync(() => {
+    // The page is running: start loading the piano's samples, so the first chord plays without a wait.
+    piano.load()
     const saved = Number(localStorage.getItem(SIDEBAR_KEY))
     const hash = /^#import=(.*)$/s.exec(location.hash)?.[1]
     let imported: Sheet | null = null
@@ -68,6 +72,23 @@ export const StopNote = Command.make('StopNote', { args: { id: Schema.String } }
 export const SetSustain = Command.make('SetSustain', { args: { on: Schema.Boolean } }, ({ on }) => noop(() => piano.setSustain(on)))
 
 export const ConnectMove = Command.make('ConnectMove', {}, () => noop(() => void move.connect()))
+
+/**
+ * Who is signed in, from Clerk's store, now and on every change. Nothing until Clerk has loaded, so the
+ * server's answer stands until then.
+ */
+export const signedInUser = Stream.callback<ChordsMessage>(
+  Effect.fnUntraced(function* (queue) {
+    yield* Effect.acquireRelease(
+      Effect.sync(() =>
+        $authStore.subscribe(({ userId }) => {
+          if (userId !== undefined) Queue.offerUnsafe(queue, ChordsMessage.ChangedUser({ userId }))
+        }),
+      ),
+      (unsubscribe) => Effect.sync(unsubscribe),
+    )
+  }),
+)
 
 /** Keeps the URL in step with the view, without a history entry per change, as the React version did. */
 export const ReplaceUrl = Command.make('ReplaceUrl', { args: { query: Schema.String } }, ({ query }) =>
@@ -128,15 +149,8 @@ export const every = (ms: number, message: ChordsMessage) =>
     }),
   )
 
-/*
- * The account's copy of the pasted songs. The client entry hands over the /api/saved calls, so this file
- * never makes requests itself and its tests need no network.
- */
-let accountIO: SyncIO | null = null
+/** The account's copy of the pasted songs, through the Worker's /api/saved. */
 let sync: AccountSync<ReadonlyArray<Sheet>> | null = null
-export const setAccountIO = (io: SyncIO) => {
-  accountIO = io
-}
 
 const failed = (what: string) => (e: unknown) =>
   Effect.sync(() => {
@@ -150,8 +164,7 @@ export const JoinAccount = Command.make(
   { args: { userId: Schema.String, local: Schema.Array(Sheet) } },
   ({ userId, local }) =>
     Effect.tryPromise(() => {
-      if (!accountIO) throw new Error('No account connection')
-      const s = new AccountSync<ReadonlyArray<Sheet>>(accountIO, {
+      const s = new AccountSync<ReadonlyArray<Sheet>>(accountIO('chords.songs'), {
         parse: parseSheets,
         merge: (l, a) => mergeSheets([...l], [...a]),
       })
@@ -280,4 +293,3 @@ export const SetBookmarklet = Mount.make('SetBookmarklet', {}, (node: HTMLAnchor
   }).pipe(Effect.as(Component.noop)),
 )
 
-export { OpenSignIn, ShowUserButton, setAuthUI, type AuthUI } from '../../islands/auth'

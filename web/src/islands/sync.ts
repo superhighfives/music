@@ -1,4 +1,4 @@
-import { AccountSync, type SyncRules } from '../account/account-sync'
+import { AccountSync, type SyncIO, type SyncRules } from '../account/account-sync'
 import type { AccountCopy, SaveResult, SyncKey } from '../account/store'
 
 /** Wait this long after a change before saving it, so dragging a tempo doesn't write every step. */
@@ -20,12 +20,15 @@ async function call<T>(response: Promise<Response>): Promise<T> {
  * Signed out, nothing happens. On sign-in it merges this browser's copy into the account's, then saves
  * every change. A tab coming back into view picks up what other devices saved meanwhile.
  */
+/** The account's copy of one value, through the Worker's /api/saved. */
+export const accountIO = (key: SyncKey): SyncIO => ({
+  load: () => call<AccountCopy | null>(fetch(`/api/saved?key=${key}`)),
+  store: (value, base) =>
+    call<SaveResult>(fetch('/api/saved', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, value, base }) })),
+})
+
 export function createAccountSync<T>(key: SyncKey, rules: SyncRules<T>, apply: (value: T) => void) {
-  const io = {
-    load: () => call<AccountCopy | null>(fetch(`/api/saved?key=${key}`)),
-    store: (value: string, base: number | null) =>
-      call<SaveResult>(fetch('/api/saved', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, value, base }) })),
-  }
+  const io = accountIO(key)
   let userId: string | null = null
   let latest: T | null = null
   let sync: AccountSync<T> | null = null

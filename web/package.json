@@ -10,12 +10,18 @@
     "deploy": "alchemy deploy --stage prod"
   },
   "dependencies": {
+    "@astrojs/mdx": "8.1.6",
+    "@astrojs/preact": "6.1.6",
+    "@clerk/astro": "4.1.33",
     "@clerk/backend": "3.33.1",
     "@clerk/ui": "^1.46.0",
     "@effect/ui": "file:vendor/effect-ui-22128c6.tgz",
     "@paper-design/shaders": "0.0.82",
+    "@preact/signals": "^2.11.4",
+    "astro": "7.4.13",
     "effect": "4.1.7",
-    "lucide": "^1.82.0"
+    "lucide": "^1.82.0",
+    "preact": "11.2.0"
   },
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.87",

@@ -1,0 +1,56 @@
+---
+import { CardView, Mark } from '~/theory/components/ui'
+import { BOOK_SUBTITLE, BOOK_TITLE, cardOfTheDay, LOG } from '~/theory/content/book'
+import { Cover, DailyEmail, Toc } from '~/theory/islands/Home'
+import TheoryPage from '~/theory/TheoryPage.astro'
+
+const today = cardOfTheDay()
+const date = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+---
+
+<TheoryPage
+  title={`${BOOK_TITLE} · ${BOOK_SUBTITLE}`}
+  description="An illustrated, interactive music theory book: reading music, scales, chords and harmony, and theory for songwriting, from the first note to advanced harmony."
+>
+  <section class="hero">
+    <Mark big />
+    <h1>{BOOK_TITLE}</h1>
+    <p class="subtitle">{BOOK_SUBTITLE}</p>
+    <p class="lede">
+      A music theory book you can play. It starts at the first note and works up to advanced harmony: reading music, scales and keys, chords, and the
+      patterns behind songs. Every idea is drawn, and almost every drawing makes a sound.
+    </p>
+    <Cover client:load />
+  </section>
+  <div class="home">
+    <div class="homegrid">
+      {
+        today && (
+          <section class="today" aria-labelledby="today-h">
+            <h2 id="today-h" class="lab">Today's idea</h2>
+            <CardView card={today} />
+            <a class="more" href={`/theory/${today.chapter.id}#card-${today.id}`}>From {today.chapter.title} →</a>
+          </section>
+        )
+      }
+      <DailyEmail client:load />
+    </div>
+    <section class="block" id="contents" aria-labelledby="contents-h">
+      <h2 id="contents-h">Contents</h2>
+      <Toc client:load />
+    </section>
+    <section class="block" aria-labelledby="log-h">
+      <h2 id="log-h">Edition log</h2>
+      <div class="log">
+        {
+          LOG.map(([d, text]) => (
+            <div>
+              <time datetime={d}>{date(d)}</time>
+              <span>{text}</span>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</TheoryPage>

@@ -1,0 +1,17 @@
+---
+/** A spec sheet: a headed grid of labelled cells. `sub` is a short note beside the heading, as text or a `sub` slot. */
+interface Props {
+  head: string
+  sub?: string
+}
+const { head, sub } = Astro.props
+const hasSub = sub !== undefined || Astro.slots.has('sub')
+---
+
+<div class="gf">
+  <div class="gf-h">
+    {head}
+    {hasSub && <span>{sub}<slot name="sub" /></span>}
+  </div>
+  <slot />
+</div>

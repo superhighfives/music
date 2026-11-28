@@ -1,0 +1,46 @@
+import Section from '~/theory/mdx/Section.astro'
+import Big from '~/theory/mdx/Big.astro'
+import Aside from '~/theory/mdx/Aside.astro'
+import Try from '~/theory/mdx/Try.astro'
+import Term from '~/theory/mdx/Term.astro'
+import { Staff } from '~/theory/components/Staff'
+import { ScaleExplorer } from '~/theory/components/explorers'
+import { CMajor, Home } from '~/theory/content/chapters/major-scale'
+
+<p class="lede">Sing “do re mi fa so la ti do” and you've sung a major scale. It's the backbone of most of the music you know, from nursery rhymes to pop choruses. Better still, it's one simple pattern of steps, and once you know it you can build it from any note.</p>
+
+<Section id="ladder" title="A scale is a ladder">
+  <p>A <Term>scale</Term> is a set of notes climbing in order from one note up to the same note an octave higher, like rungs on a ladder. The note it starts and ends on gives the scale its name. Play the white keys from C to the next C and you've played the{' '} <b>C major scale</b>.</p>
+  <CMajor client:visible />
+  <p>The rungs aren't evenly spaced. Most of the steps are <b>whole steps</b> (two keys apart, with a black key between). But between E and F, and between B and C, there's no black key, so those steps are <b>half steps</b>.</p>
+</Section>
+
+<Section id="pattern" title="The pattern: W W H W W W H">
+  <p>Write the steps out in order and you get the recipe for every major scale:</p>
+  <Big>Whole, whole, half, whole, whole, whole, half.</Big>
+  <p>The half steps always fall between notes <b>3 and 4</b> and between <b>7 and 8</b>. That's what makes a major scale sound major. Some people remember it as two groups: W W H, then a whole step, then W W H again.</p>
+  <Staff client:visible items="C4 D4 E4 F4 G4 A4 B4 C5" names label="The C major scale on the treble staff, from C4 to C5" caption="C major on the staff: no sharps or flats needed." />
+</Section>
+
+<Section id="other-keys" title="Starting somewhere else">
+  <p>C major is the only major scale that fits on the white keys alone. Start on G, follow the pattern, and something has to give. G to A is whole, A to B whole, B to C half. So far so good. Then C, D, E, each a whole step. But the next step must be <i>whole</i>, and E to F is only a half step. So we raise F to <b>F♯</b>, and F♯ to G is the final half step.</p>
+  <Try>
+    <ScaleExplorer client:visible initial="G" />
+  </Try>
+  <p>Start on F and the opposite happens: A to B is a whole step, but the pattern needs a half step there, so B comes down to <b>B♭</b>. Pick other roots above and watch which keys turn black.</p>
+  <Aside label="One of each letter">A major scale uses every letter once, in order. That's why G major has F♯ rather than G♭: G is already taken, and F still needs a place. The same rule decides whether a scale is spelled with sharps or flats.</Aside>
+  <p>Because each major key always needs the same sharps or flats, music writes them once at the start of each line, in a{' '} <Term>key signature</Term>. Here's G major with its one sharp:</p>
+  <Staff client:visible keySig={1} items="G4 A4 B4 C5 D5 E5 F#5 G5" names label="G major scale with a key signature of one sharp, F sharp" caption="The ♯ on the top line means every F is F♯." />
+</Section>
+
+<Section id="degrees" title="Scale degrees">
+  <p>Musicians number the notes of a scale from <b>1 to 7</b> (8 is 1 again). These numbers are <Term>scale degrees</Term>, and they work the same in every key: in C, degree 5 is G; in G, it's D. Thinking in numbers is how songwriters talk about melodies and chords without caring which key they're in.</p>
+  <p>A few degrees have names you'll meet again. <b>1</b> is the <b>tonic</b>, home. <b>5</b> is the <b>dominant</b>, the strongest pull back home. <b>4</b> is the <b>subdominant</b>. And <b>7</b>, a half step below the tonic, is the <b>leading tone</b>, because it leads so strongly up to 1. Singers know them as do re mi fa so la ti.</p>
+</Section>
+
+<Section id="home" title="Why it sounds like home">
+  <p>Play the scale but stop on 7. It sounds unfinished, like a question. That half step up to 1 is the tug you feel. The tonic is where melodies want to rest, and much of music is the art of leaving home and coming back.</p>
+  <Try title="Hear the pull">
+    <Home client:visible />
+  </Try>
+</Section>

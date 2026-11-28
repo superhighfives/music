@@ -1,0 +1,16 @@
+---
+import '~/site-footer.css'
+import { SITE_LINKS, type Section } from '~/site-links'
+
+interface Props {
+  current?: Section
+  class?: string
+}
+const { current, class: extra } = Astro.props
+---
+
+<footer class:list={['sitefoot', extra]}>
+  <nav aria-label="music">
+    {SITE_LINKS.map((l) => <a href={l.href} aria-current={l.id === current ? 'page' : undefined}>{l.label}</a>)}
+  </nav>
+</footer>

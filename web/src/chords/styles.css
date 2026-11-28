@@ -3,6 +3,7 @@
 @import 'tailwindcss' source(none);
 @import '../site.css' layer(base);
 @source './';
+@source '../pages/chords.astro';
 
 /* Tailwind's colours, mapped onto the shared tokens. Inline, so each utility reads the token where it is used:
    the neutrals follow light and dark, and led is the section's accent (cyan, from [data-section='chords']).

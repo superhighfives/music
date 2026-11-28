@@ -18,11 +18,7 @@ import {
 import { eventLabel, type Result } from '../lib/practice'
 import { SONGS, chordLabel, unknownChords, type Song, type SongEvent } from '../lib/songs'
 import { TUTORIALS, type Tutorial } from '../lib/tutorials'
-import { Schema } from 'effect'
-import { jsx } from '../../content/jsx-runtime'
-import { render } from '../../content/render'
-import { Masthead, PadMark } from '../../islands/masthead'
-import { SiteFooter, mastheadIslands } from '../../islands/views'
+import { SITE_LINKS } from '../../site-links'
 import { CenterInBox, SetBookmarklet, ShowOnMove } from './effects'
 import { ChordsMessage, type SearchPatch } from './messages'
 import { EXERCISES, SIDEBAR_DEFAULT, SIDEBAR_MAX, SIDEBAR_MIN, TABS, moveView, type ChordsModel, type Derived, type Tab } from './state'
@@ -194,7 +190,13 @@ function PadGrid(
   )
 }
 
-const Footer = (h: H, extra: string) => SiteFooter(h, { current: 'chords', className: `chordsfoot ${extra}`.trim() })
+/** The site footer, as every section has it (src/components/SiteFooter.astro). Chords draws its own, inside the app's scroll area. */
+const Footer = (h: H, extra: string) =>
+  h.footer.class(`sitefoot chordsfoot ${extra}`.trim()).children(
+    h.nav.attr('aria-label', 'music').children(
+      SITE_LINKS.map((l) => h.a.key(l.id).attr('href', l.href).attr('aria-current', l.id === 'chords' ? 'page' : undefined).children(l.label)),
+    ),
+  )
 
 /** Why connecting failed. Other statuses show no message. */
 const CONNECT_PROBLEM: Partial<Record<MoveStatus, string>> = {
@@ -695,19 +697,8 @@ const LayoutControls = (h: H, d: Derived) => [
     ),
 ]
 
-const isMessage = Schema.is(ChordsMessage)
-
-/** A full-height app under the shared masthead: the sidebar and pads fill what's left of the screen. */
+/** The app under the page's masthead: the sidebar and pads fill what's left of the screen. */
 export function ChordsView(h: H, model: ChordsModel, d: Derived) {
-  const masthead = Masthead({ brand: jsx('a', { className: 'brand', href: '/chords', children: [PadMark({ lit: 5 }), 'Chords'] }) })
-  const islands = mastheadIslands(h, { userId: model.account.userId, theme: ChordsMessage.ClickedThemeToggle(), signIn: ChordsMessage.ClickedSignIn() })
-  return h.div
-    .attr('data-section', 'chords')
-    .class('flex h-dvh flex-col text-base text-neutral-200')
-    .children(h.div.class('shrink-0 px-4 lg:px-6').children(render(h, masthead, islands, isMessage)), ChordsApp(h, model, d))
-}
-
-function ChordsApp(h: H, model: ChordsModel, d: Derived) {
   // Until Move is connected, the page is the way to connect, or to look up chords without it.
   // Learn, Songs and Practice check what you play on Move, so looking up chords leaves them.
   if (!d.connected && !model.browsing)

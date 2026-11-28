@@ -1,0 +1,20 @@
+---
+title: "Loudness and the bounce"
+---
+
+<p>Streaming services turn loud tracks down, so crushing a master buys nothing. Aim for a healthy level with dynamics intact, and never clip.</p>
+<Sheet head="Targets">
+  <Row>
+    <Cell l="Pop" num tone="lit">−10 to −8 LUFS</Cell>
+    <Cell l="Ambient" num tone="lit">−16 to −14 LUFS</Cell>
+    <Cell l="Ceiling" num>−1 dBTP</Cell>
+    <Cell l="Master file" num>WAV · 24-bit · 48 kHz</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Measure integrated loudness</b> across the whole song with a loudness meter. Ozone Elements has one, and the free Youlean Loudness Meter works well.</div></li>
+  <li><div><b>Limit last.</b> A limiter at the end of the master, ceiling −1 dBTP, pushing only a few dB.</div></li>
+  <li><div><b>Export with File → Export Audio/Video:</b> WAV, 24-bit, 48 kHz, Normalize off. Dither only when exporting to 16-bit.</div></li>
+  <li><div><b>Compare against your references</b> at matched loudness one last time.</div></li>
+</Steps>
+<Task>Bounce the fog vignette at 24-bit, 48 kHz. Measure its integrated loudness and true peak, and write both down.</Task>
