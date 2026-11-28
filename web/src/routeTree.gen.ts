@@ -9,29 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProductionRouteRouteImport } from './routes/production/route'
 import { Route as TheoryRouteRouteImport } from './routes/theory/route'
-import { Route as ProductionIndexRouteImport } from './routes/production/index'
 import { Route as TheoryIndexRouteImport } from './routes/theory/index'
 import { Route as TheoryChapterIdRouteImport } from './routes/theory/$chapterId'
-import { Route as ProductionRecipesRecipeIdRouteImport } from './routes/production/recipes.$recipeId'
-import { Route as ProductionThemesThemeIdIndexRouteImport } from './routes/production/themes.$themeId.index'
-import { Route as ProductionThemesThemeIdLessonIdRouteImport } from './routes/production/themes.$themeId.$lessonId'
 
-const ProductionRouteRoute = ProductionRouteRouteImport.update({
-  id: '/production',
-  path: '/production',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TheoryRouteRoute = TheoryRouteRouteImport.update({
   id: '/theory',
   path: '/theory',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ProductionIndexRoute = ProductionIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProductionRouteRoute,
 } as any)
 const TheoryIndexRoute = TheoryIndexRouteImport.update({
   id: '/',
@@ -43,112 +28,42 @@ const TheoryChapterIdRoute = TheoryChapterIdRouteImport.update({
   path: '/$chapterId',
   getParentRoute: () => TheoryRouteRoute,
 } as any)
-const ProductionRecipesRecipeIdRoute =
-  ProductionRecipesRecipeIdRouteImport.update({
-    id: '/recipes/$recipeId',
-    path: '/recipes/$recipeId',
-    getParentRoute: () => ProductionRouteRoute,
-  } as any)
-const ProductionThemesThemeIdIndexRoute =
-  ProductionThemesThemeIdIndexRouteImport.update({
-    id: '/themes/$themeId/',
-    path: '/themes/$themeId/',
-    getParentRoute: () => ProductionRouteRoute,
-  } as any)
-const ProductionThemesThemeIdLessonIdRoute =
-  ProductionThemesThemeIdLessonIdRouteImport.update({
-    id: '/themes/$themeId/$lessonId',
-    path: '/themes/$themeId/$lessonId',
-    getParentRoute: () => ProductionRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
-  '/production': typeof ProductionRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
   '/theory/$chapterId': typeof TheoryChapterIdRoute
-  '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
-  '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
-  '/production/themes/$themeId/$lessonId': typeof ProductionThemesThemeIdLessonIdRoute
-  '/production/themes/$themeId/': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/theory/$chapterId': typeof TheoryChapterIdRoute
-  '/production': typeof ProductionIndexRoute
   '/theory': typeof TheoryIndexRoute
-  '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
-  '/production/themes/$themeId/$lessonId': typeof ProductionThemesThemeIdLessonIdRoute
-  '/production/themes/$themeId': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/production': typeof ProductionRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
   '/theory/$chapterId': typeof TheoryChapterIdRoute
-  '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
-  '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
-  '/production/themes/$themeId/$lessonId': typeof ProductionThemesThemeIdLessonIdRoute
-  '/production/themes/$themeId/': typeof ProductionThemesThemeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/production'
-    | '/theory'
-    | '/theory/$chapterId'
-    | '/production/'
-    | '/theory/'
-    | '/production/recipes/$recipeId'
-    | '/production/themes/$themeId/$lessonId'
-    | '/production/themes/$themeId/'
+  fullPaths: '/theory' | '/theory/$chapterId' | '/theory/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/theory/$chapterId'
-    | '/production'
-    | '/theory'
-    | '/production/recipes/$recipeId'
-    | '/production/themes/$themeId/$lessonId'
-    | '/production/themes/$themeId'
-  id:
-    | '__root__'
-    | '/production'
-    | '/theory'
-    | '/theory/$chapterId'
-    | '/production/'
-    | '/theory/'
-    | '/production/recipes/$recipeId'
-    | '/production/themes/$themeId/$lessonId'
-    | '/production/themes/$themeId/'
+  to: '/theory/$chapterId' | '/theory'
+  id: '__root__' | '/theory' | '/theory/$chapterId' | '/theory/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  ProductionRouteRoute: typeof ProductionRouteRouteWithChildren
   TheoryRouteRoute: typeof TheoryRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/production': {
-      id: '/production'
-      path: '/production'
-      fullPath: '/production'
-      preLoaderRoute: typeof ProductionRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/theory': {
       id: '/theory'
       path: '/theory'
       fullPath: '/theory'
       preLoaderRoute: typeof TheoryRouteRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/production/': {
-      id: '/production/'
-      path: '/'
-      fullPath: '/production/'
-      preLoaderRoute: typeof ProductionIndexRouteImport
-      parentRoute: typeof ProductionRouteRoute
     }
     '/theory/': {
       id: '/theory/'
@@ -164,47 +79,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TheoryChapterIdRouteImport
       parentRoute: typeof TheoryRouteRoute
     }
-    '/production/recipes/$recipeId': {
-      id: '/production/recipes/$recipeId'
-      path: '/recipes/$recipeId'
-      fullPath: '/production/recipes/$recipeId'
-      preLoaderRoute: typeof ProductionRecipesRecipeIdRouteImport
-      parentRoute: typeof ProductionRouteRoute
-    }
-    '/production/themes/$themeId/': {
-      id: '/production/themes/$themeId/'
-      path: '/themes/$themeId'
-      fullPath: '/production/themes/$themeId/'
-      preLoaderRoute: typeof ProductionThemesThemeIdIndexRouteImport
-      parentRoute: typeof ProductionRouteRoute
-    }
-    '/production/themes/$themeId/$lessonId': {
-      id: '/production/themes/$themeId/$lessonId'
-      path: '/themes/$themeId/$lessonId'
-      fullPath: '/production/themes/$themeId/$lessonId'
-      preLoaderRoute: typeof ProductionThemesThemeIdLessonIdRouteImport
-      parentRoute: typeof ProductionRouteRoute
-    }
   }
 }
-
-interface ProductionRouteRouteChildren {
-  ProductionIndexRoute: typeof ProductionIndexRoute
-  ProductionRecipesRecipeIdRoute: typeof ProductionRecipesRecipeIdRoute
-  ProductionThemesThemeIdLessonIdRoute: typeof ProductionThemesThemeIdLessonIdRoute
-  ProductionThemesThemeIdIndexRoute: typeof ProductionThemesThemeIdIndexRoute
-}
-
-const ProductionRouteRouteChildren: ProductionRouteRouteChildren = {
-  ProductionIndexRoute: ProductionIndexRoute,
-  ProductionRecipesRecipeIdRoute: ProductionRecipesRecipeIdRoute,
-  ProductionThemesThemeIdLessonIdRoute: ProductionThemesThemeIdLessonIdRoute,
-  ProductionThemesThemeIdIndexRoute: ProductionThemesThemeIdIndexRoute,
-}
-
-const ProductionRouteRouteWithChildren = ProductionRouteRoute._addFileChildren(
-  ProductionRouteRouteChildren,
-)
 
 interface TheoryRouteRouteChildren {
   TheoryChapterIdRoute: typeof TheoryChapterIdRoute
@@ -221,7 +97,6 @@ const TheoryRouteRouteWithChildren = TheoryRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  ProductionRouteRoute: ProductionRouteRouteWithChildren,
   TheoryRouteRoute: TheoryRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport

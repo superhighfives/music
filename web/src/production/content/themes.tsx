@@ -1,12 +1,16 @@
-import type { ComponentType } from "react";
+/** @jsxImportSource ~/content */
+import type { Node } from "~/content/jsx-runtime";
+import type { Derived } from "~/production/lib/music";
 import { Arrangement, EqChart, Rack, SignalMap } from "~/production/components/diagrams";
-import { CHORDS_URL, Cell, KeyBox, Note, Row, Sheet, Steps, Task } from "~/production/components/ui";
-import { useValues } from "~/production/lib/store";
+import { CHORDS_URL, Cell, KeyBox, Note, Row, Sheet, Steps, Task } from "~/production/content/kit";
+
+/** What a lesson's body can read: the values that follow the chosen key and tempo. */
+export type LessonContext = { values: Derived };
 
 export interface Lesson {
   id: string;
   title: string;
-  Body: ComponentType;
+  Body: (lesson: LessonContext) => Node;
 }
 
 export interface Theme {
@@ -17,7 +21,7 @@ export interface Theme {
   /** Lessons outlined but not written yet. */
   planned: string[];
   /** Shown on a theme with no lessons yet. */
-  Extra?: ComponentType;
+  Extra?: () => Node;
 }
 
 // To add a lesson: add an entry to a theme's `lessons`, and remove it from `planned`.
@@ -169,8 +173,8 @@ const sound: Theme = {
     {
       id: "space",
       title: "Space: reverb and delay",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <p>Put reverb and delay on return tracks, not on each track, so every sound shares one room. That shared room is most of what makes a mix feel glued.</p>
@@ -331,8 +335,8 @@ const scapes: Theme = {
     {
       id: "textures",
       title: "Textures as instruments",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <p>A generated file becomes useful when you can play it. Each use needs the file made differently.</p>
@@ -371,8 +375,8 @@ const scapes: Theme = {
     {
       id: "bass",
       title: "Low end",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <p>Felt more than heard. It holds the root, moves rarely, and steps aside for the kick.</p>
@@ -395,8 +399,8 @@ const scapes: Theme = {
     {
       id: "live",
       title: "Playing it live",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <p>The same layers as a Push 3 rig: launch the weather, play the harmony, tap through the chords.</p>
@@ -438,8 +442,8 @@ const drums: Theme = {
     {
       id: "kick",
       title: "A kick in the key",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <p>At slow tempos a kick rings for a whole beat, so a wrong pitch clashes with the bass for that long. Tune it.</p>
@@ -470,8 +474,8 @@ const drums: Theme = {
     {
       id: "grain",
       title: "Snares and hats from noise",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <p>Stock hats sit on top of a mix. Slices of your own textures sound like they belong to the record.</p>
@@ -503,8 +507,8 @@ const drums: Theme = {
     {
       id: "glue",
       title: "Glue the kit",
-      Body: () => {
-        const v = useValues();
+      Body: ({ values: v }) => {
+        // v: the values that follow the chosen key and tempo.
         return (
           <>
             <Sheet head="Drum group" sub="After the rack">

@@ -3,6 +3,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 import { cp } from 'node:fs/promises'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 
 /**
@@ -57,6 +58,7 @@ function islands(entries: Record<string, string>): Plugin {
 
 // Alchemy adds its own Cloudflare plugin when it runs Vite (alchemy dev, alchemy deploy).
 export default defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [islands({ chords: 'src/chords/app/client.ts', home: 'src/pages/home.client.ts', static: 'src/islands/static.ts' }), tailwindcss(), tanstackStart(), react()],
+  // An alias, not tsconfig paths: those apply only to files tsconfig.json includes, and the Effect UI code is in tsconfig.chords.json.
+  resolve: { alias: { '~': fileURLToPath(new URL('./src', import.meta.url)) } },
+  plugins: [islands({ chords: 'src/chords/app/client.ts', home: 'src/pages/home.client.ts', static: 'src/islands/static.ts', production: 'src/production/app/client.ts' }), tailwindcss(), tanstackStart(), react({ exclude: [/\/src\/content\//, /\/src\/production\//] })],
 })

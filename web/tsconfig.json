@@ -29,6 +29,8 @@
     }
   },
   "exclude": [
-    "src/chords/app"
+    "src/chords/app",
+    "src/content",
+    "src/production"
   ]
 }

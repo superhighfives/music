@@ -1,8 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { lessonLink, TOOL_GROUPS } from './tools'
-
-// The course's store syncs to accounts through the Worker runtime, which tests don't have. Lesson titles don't need it.
-vi.mock('~/production/lib/store', () => ({}))
 
 describe('TOOL_GROUPS', () => {
   it('links every tool only to Production lessons and recipes that exist', () => {

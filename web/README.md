@@ -7,7 +7,7 @@ app on Cloudflare Workers, deployed with [Alchemy](https://alchemy.run).
 | --- | --- | --- |
 | `/` | Home | `src/routes/index.tsx` |
 | `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/routes/chords/`, `src/chords/` |
-| `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/routes/production/`, `src/production/` |
+| `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/production/` |
 | `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/routes/theory/`, `src/theory/` |
 | `/ableton` | The Ableton Live Extensions, with downloads | `src/routes/ableton.tsx` |
 | `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/routes/tools.tsx`, `src/tools.ts` |
@@ -62,13 +62,18 @@ The course is plain data in `src/production/content/`:
 - **`recipes.tsx`**: short tutorials that rebuild one sound from a real record.
   Cite where any claim about the record comes from.
 
-Lessons build from the components in `src/production/components/ui.tsx` (`Sheet`,
-`Row`, `Cell`, `Steps`, `Task`, `Note`, `KeyBox`) and the diagrams in
-`src/production/components/diagrams.tsx`. Anything that depends on the key or tempo
-reads `useValues()`, so it follows the controls in the header.
+Lessons are JSX, but not React: `src/content/jsx-runtime.ts` builds a plain tree,
+and `src/content/render.ts` turns it into an Effect UI view, so every page renders
+on the server. Each content file starts with `/** @jsxImportSource ~/content */`.
+Lessons build from the parts in `src/production/content/kit.tsx` (`Sheet`, `Row`,
+`Cell`, `Steps`, `Task`, `Note`, `KeyBox`) and the diagrams in
+`src/production/components/diagrams.tsx`. A lesson's `Body` gets `{ values }`, the
+values that follow the key and tempo in the header. Content has no event handlers:
+anything that follows settings or responds to clicks is an island, which
+`src/production/app/Production.ts` fills in.
 
 When a theme or recipe lands, add a line to the edition log in
-`src/routes/production/index.tsx`.
+`src/production/app/pages.tsx`.
 
 ### Theory
 

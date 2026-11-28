@@ -2,6 +2,7 @@ import { createServerEntry, createStartHandler, defaultStreamHandler } from '@ta
 import { savedApi } from './account/api'
 import { chordsPage } from './chords/app/page'
 import { sitePage } from './pages/pages'
+import { productionPage } from './production/app/page'
 import { EXTENSIONS } from './extensions'
 import { newestAblx } from './releases'
 import { type DailyEnv, sendDaily, unsubscribe } from './theory/email/daily'
@@ -19,6 +20,7 @@ const entry = createServerEntry({
     if (url.pathname === '/theory/unsubscribe') return unsubscribePage(request, url)
     // Sections moved to Effect UI render here; the rest are TanStack Start's.
     if (url.pathname === '/chords' || url.pathname === '/chords/') return chordsPage(request, (await import('cloudflare:workers')).env)
+    if (url.pathname === '/production' || url.pathname.startsWith('/production/')) return productionPage(request, (await import('cloudflare:workers')).env)
     const site = await sitePage(request, (await import('cloudflare:workers')).env, url.pathname)
     if (site) return site
     if (url.pathname === '/api/saved') return savedApi(request, (await import('cloudflare:workers')).env)

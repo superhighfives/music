@@ -1,6 +1,8 @@
-import type { ComponentType } from "react";
+/** @jsxImportSource ~/content */
+import type { Node } from "~/content/jsx-runtime";
+import type { LessonContext } from "~/production/content/themes";
 import { VocoderFlow } from "~/production/components/diagrams";
-import { CHORDS_URL, Cell, KeyBox, Row, Sheet, Steps, Task } from "~/production/components/ui";
+import { CHORDS_URL, Cell, KeyBox, Row, Sheet, Steps, Task } from "~/production/content/kit";
 
 export interface Recipe {
   id: string;
@@ -9,7 +11,7 @@ export interface Recipe {
   track: string;
   album: string;
   summary: string;
-  Body: ComponentType;
+  Body: (lesson: LessonContext) => Node;
 }
 
 // To add a recipe: add an entry here. Cite where any claim about the record comes from.

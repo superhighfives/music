@@ -27,7 +27,7 @@ if (container && stateText) {
       }),
     ).pipe(Effect.catch((e) => Effect.sync(() => console.error("Home couldn't start", e)))),
   )
-  connectClerk(appearance, (userId) => {
+  connectClerk(() => appearance, (userId) => {
     if (!root || !props || props.userId === userId) return
     props = { ...props, userId }
     root.setProps(props)

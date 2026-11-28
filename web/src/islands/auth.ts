@@ -34,16 +34,17 @@ export const ShowUserButton = Mount.makeStream('ShowUserButton', {}, (node: HTML
 
 /**
  * Loads Clerk after the page is running, so sign-in never holds up the page, and reports the signed-in
- * user now and on every change. The publishable key comes from the page's `data-clerk-key`.
+ * user now and on every change. The publishable key comes from the page's `data-clerk-key`. `appearance` is
+ * read each time Clerk draws, so a page that switches light and dark gets a matching dialog.
  */
-export function connectClerk(appearance: unknown, onUser: (userId: string | null) => void) {
+export function connectClerk(appearance: () => unknown, onUser: (userId: string | null) => void) {
   const publishableKey = document.body.dataset.clerkKey
   if (!publishableKey) return
-  loadClerk(publishableKey, appearance)
+  loadClerk(publishableKey, appearance())
     .then((clerk) => {
       setAuthUI({
-        openSignIn: () => clerk.openSignIn({ appearance }),
-        mountUserButton: (node) => clerk.mountUserButton(node, { appearance }),
+        openSignIn: () => clerk.openSignIn({ appearance: appearance() }),
+        mountUserButton: (node) => clerk.mountUserButton(node, { appearance: appearance() }),
         unmountUserButton: (node) => clerk.unmountUserButton(node),
       })
       onUser(clerk.user?.id ?? null)

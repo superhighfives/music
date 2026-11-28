@@ -59,4 +59,4 @@ Effect.runFork(
   ).pipe(Effect.catch((e) => Effect.sync(() => console.error("Chords couldn't start", e)))),
 )
 
-connectClerk(appearance, setUser)
+connectClerk(() => appearance, setUser)
