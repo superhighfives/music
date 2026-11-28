@@ -37,17 +37,32 @@ const hasBrand = Astro.slots.has('brand')
 </header>
 
 <script>
+  import { $clerkStore, updateClerkOptions } from '@clerk/astro/client'
+  import { dark } from '@clerk/ui/themes'
+
+  const system = matchMedia('(prefers-color-scheme: dark)')
+  const isDark = () => {
+    const chosen = document.documentElement.getAttribute('data-theme')
+    return chosen ? chosen === 'dark' : system.matches
+  }
+
+  // Clerk's dialog and menu follow the page's light or dark theme, in its type. Clerk takes options only once it has loaded.
+  const followTheme = () => {
+    if ($clerkStore.get()) updateClerkOptions({ appearance: { theme: isDark() ? dark : undefined, variables: { fontFamily: 'var(--sans)' } } })
+  }
+  $clerkStore.subscribe(followTheme)
+  system.addEventListener('change', followTheme)
+
   // Switches between light and dark, and remembers the choice. Without a choice the page follows the system.
   for (const button of document.querySelectorAll('[data-theme-toggle]'))
     button.addEventListener('click', () => {
-      const root = document.documentElement
-      const current = root.getAttribute('data-theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      const next = current === 'dark' ? 'light' : 'dark'
-      root.setAttribute('data-theme', next)
+      const next = isDark() ? 'light' : 'dark'
+      document.documentElement.setAttribute('data-theme', next)
       try {
         localStorage.setItem('music.theme', next)
       } catch {
         // Not remembered, but the switch still applies.
       }
+      followTheme()
     })
 </script>
