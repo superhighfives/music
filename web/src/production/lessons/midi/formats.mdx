@@ -1,0 +1,30 @@
+---
+title: "Bit rate and file formats"
+---
+
+<p>Bit rate is how much data a second of audio takes. For uncompressed audio it's just arithmetic: sample rate × bit depth × channels. Compression shrinks that, either without losing anything (lossless) or by throwing away what you're least likely to notice (lossy).</p>
+<Sheet head="Uncompressed bit rates" sub="Stereo">
+  <Row>
+    <Cell l="44.1 kHz · 16-bit · CD" num>1,411 kbps</Cell>
+    <Cell l="48 kHz · 24-bit" num tone="lit">2,304 kbps · about 17 MB a minute</Cell>
+    <Cell l="96 kHz · 24-bit" num>4,608 kbps</Cell>
+  </Row>
+</Sheet>
+<Sheet head="Formats">
+  <Row>
+    <Cell l="WAV, AIFF" span={2} tone="lit">Uncompressed. Record, edit and master in these.</Cell>
+    <Cell l="FLAC, ALAC" span={2}>Lossless: smaller, and decode to the identical audio.</Cell>
+  </Row>
+  <Row>
+    <Cell l="MP3, AAC, Ogg, Opus" span={2}>Lossy: much smaller, with detail removed. For listening, never as a source.</Cell>
+    <Cell l="Lossy bit rates" span={2} num>128–320 kbps</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Work in WAV at 48 kHz, 24-bit.</b> Record, bounce stems and master in it. Every lossy step is permanent, and lossy files decoded and encoded again get worse each time.</div></li>
+  <li><div><b>Never sample from an MP3 if you can help it.</b> Pitch it down and the artefacts the encoder hid come back into hearing range.</div></li>
+  <li><div><b>Leave room for the encoder.</b> When a master becomes MP3 or AAC, peaks can grow. A true-peak ceiling around −1 dBTP on the limiter keeps the lossy version from clipping.</div></li>
+  <li><div><b>Hear what lossy removes.</b> Put the WAV and an MP3 of the same bounce on two tracks, line them up exactly, and flip the polarity of one with Utility. What's left is the part the MP3 threw away. Encoders add a little silence at the start, so you may need to nudge it into line.</div></li>
+</Steps>
+<Note label="Rule of thumb:">Masters and anything you'll keep working on: WAV. Sending a demo to a phone: a 320 kbps MP3 or AAC is fine.</Note>
+<Task>Export the same eight bars as WAV, FLAC and MP3 and compare the file sizes. Then do the polarity test above and listen to what the MP3 removed.</Task>

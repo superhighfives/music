@@ -1,0 +1,28 @@
+---
+title: "How digital audio works"
+---
+
+<p>Sound is air pressure going up and down. A microphone turns it into a voltage that does the same, and an interface like the Scarlett measures that voltage thousands of times a second. Each measurement is a sample: a number. How often it measures is the sample rate; how precisely it records each number is the bit depth.</p>
+<Sheet head="Sample rate" sub="Measurements a second">
+  <Row>
+    <Cell l="44.1 kHz" num>Up to 22.05 kHz · CD</Cell>
+    <Cell l="48 kHz" num tone="lit">Up to 24 kHz · video, and this course</Cell>
+    <Cell l="96 kHz" num>Up to 48 kHz · twice the files</Cell>
+  </Row>
+</Sheet>
+<Sheet head="Bit depth" sub="About 6 dB per bit">
+  <Row>
+    <Cell l="16-bit" num>About 96 dB of range</Cell>
+    <Cell l="24-bit" num tone="lit">About 144 dB in theory</Cell>
+    <Cell l="32-bit float" num>Effectively can't clip inside the file</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>The highest pitch is half the sample rate.</b> That's the Nyquist limit. Hearing tops out around 20 kHz, so 44.1 and 48 kHz already cover it. Higher rates mostly help plugins that distort or pitch-shift, at the cost of CPU and disk.</div></li>
+  <li><div><b>Bits are headroom.</b> Each bit adds about 6 dB between the quietest and loudest sound a file can hold. At 24-bit you can record with plenty of space above the peaks and still sit far above the noise; real converters reach about 106 dB, as the Scarlett's spec says.</div></li>
+  <li><div><b>Set it once in Live.</b> Settings → Audio: sample rate 48 kHz. Settings → Record, Warp &amp; Launch: bit depth 24. Inside, Live mixes in 32-bit float either way.</div></li>
+  <li><div><b>Know what 32-bit float buys you.</b> The Tascam DR-40XP can record 32-bit float files, so a take that would have clipped can be turned down afterwards with nothing lost. The microphone and preamp in front of it can still distort, so keep the gain sensible.</div></li>
+  <li><div><b>Dither when you drop bits.</b> Going from 24 to 16 bits for a CD or a 16-bit file? Add dither when you export. It trades harsh distortion in quiet tails for a little smooth noise.</div></li>
+</Steps>
+<Note label="Why it matters:">Clipping is the one thing digital can't fix: past 0 dBFS, the waveform's tops are cut off. Record with headroom and 24 bits makes the quiet parts clean anyway.</Note>
+<Task>Record the same sung phrase twice, once peaking near −18 dBFS and once near −3 dBFS. Normalise the quiet one and compare: at 24-bit you shouldn't hear a difference in noise.</Task>

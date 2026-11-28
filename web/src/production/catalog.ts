@@ -32,6 +32,39 @@ export interface Recipe {
 
 export const THEMES: Theme[] = [
   {
+    "id": "midi",
+    "name": "MIDI & audio",
+    "blurb": "How music gets into the computer: what MIDI messages are made of, channels and MIDI 2.0, how sound becomes numbers, file formats, and why there’s a delay.",
+    "lessons": [
+      {
+        "id": "what",
+        "title": "What MIDI is"
+      },
+      {
+        "id": "messages",
+        "title": "Inside a MIDI message"
+      },
+      {
+        "id": "channels",
+        "title": "Channels, ports, MPE and MIDI 2.0"
+      },
+      {
+        "id": "digital",
+        "title": "How digital audio works"
+      },
+      {
+        "id": "formats",
+        "title": "Bit rate and file formats"
+      },
+      {
+        "id": "latency",
+        "title": "Buffers and latency"
+      }
+    ],
+    "planned": [],
+    "keyBox": false
+  },
+  {
     "id": "sound",
     "name": "Sound quality",
     "blurb": "Gain, listening, EQ, compression, saturation, space and loudness: the habits behind audio that sounds expensive.",
@@ -69,19 +102,20 @@ export const THEMES: Theme[] = [
     "keyBox": false
   },
   {
-    "id": "melody",
-    "name": "Melody & harmony",
-    "blurb": "Music theory in practice: scales, chords, voice leading and hooks. Pairs with Chords.",
-    "planned": [
-      "Scales and modes, by ear",
-      "Diatonic chords and Roman numerals",
-      "Voice leading for pads and vocoders",
-      "Writing a melody: contour, motif, repetition",
-      "Pop hooks: rhythm first, then pitch",
-      "Borrowed chords and colour"
-    ],
+    "id": "recording",
+    "name": "Recording",
+    "blurb": "Getting the best sound in: the Scarlett, the Tascam and the mics, gain at the source, the room, vocals, and Melodyne.",
     "lessons": [],
-    "keyBox": true
+    "planned": [
+      "Your signal chain: mic, Scarlett, Live, and the Tascam away from the desk",
+      "Gain at the source: headroom before anything in Live",
+      "The AT2020: phantom power, pattern and placement",
+      "The Golden Age mic",
+      "The room: reflections, a treated corner and noise",
+      "Recording vocals: distance, pop filter, takes and comping",
+      "Tuning and timing in Melodyne"
+    ],
+    "keyBox": false
   },
   {
     "id": "songs",
@@ -92,7 +126,9 @@ export const THEMES: Theme[] = [
       "Contrast: what changes between sections",
       "Builds and drops without drums",
       "Writing toplines over loops",
-      "Finishing: from loop to song"
+      "Finishing: from loop to song",
+      "Voice leading for pads and vocoders",
+      "Pop hooks: rhythm first, then pitch"
     ],
     "lessons": [
       {

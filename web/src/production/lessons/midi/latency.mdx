@@ -1,0 +1,23 @@
+---
+title: "Buffers and latency"
+---
+
+<p>A computer can't process audio one sample at a time: it works in blocks, a buffer at a time, so it has slack if something else needs the CPU. You hear the result one buffer late, and a recording passes through an input buffer and an output buffer. That delay is latency. Smaller buffers mean less delay and more risk of clicks; larger ones, the opposite.</p>
+<Sheet head="One buffer of delay" sub="At 48 kHz">
+  <Row>
+    <Cell l="64 samples" num>1.3 ms</Cell>
+    <Cell l="128 samples" num tone="lit">2.7 ms · recording</Cell>
+    <Cell l="256 samples" num>5.3 ms</Cell>
+    <Cell l="512 samples" num>10.7 ms</Cell>
+    <Cell l="1024 samples" num tone="cool">21.3 ms · mixing</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Small buffer to record, large to mix.</b> Settings → Audio → Buffer Size. Live shows the Overall Latency underneath, which is the full round trip, more than one buffer.</div></li>
+  <li><div><b>Or skip the round trip with direct monitoring.</b> The Scarlett's Direct Monitor sends its inputs straight to its headphone and main outputs, so you hear yourself with no delay while Live records. Set the track's Monitor to Off at the same time, or you'll hear yourself twice, the second time late.</div></li>
+  <li><div><b>Watch out for plugins with lookahead.</b> Limiters and linear-phase EQs delay the sound to see what's coming. Live lines everything up on playback, but monitoring through them while recording adds their delay. Options → Reduced Latency When Monitoring helps; so does bypassing them while you record.</div></li>
+  <li><div><b>Clicks and dropouts mean the CPU is late.</b> Raise the buffer, or freeze heavy tracks: right-click → Freeze Track turns them into audio until you need them again.</div></li>
+  <li><div><b>Don't record with Bluetooth headphones.</b> They add far more delay than any buffer setting. Use wired headphones in the Scarlett.</div></li>
+</Steps>
+<Note label="The arithmetic:">Latency in milliseconds is buffer size ÷ sample rate × 1,000. 128 ÷ 48,000 × 1,000 = 2.7 ms. Around 10 ms of total delay starts to feel sluggish when you play.</Note>
+<Task>Sing along to a click with the buffer at 1024 and monitoring through Live, then at 128, then with Direct Monitor on. Notice where the delay stops bothering you.</Task>

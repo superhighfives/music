@@ -1,0 +1,20 @@
+---
+title: "Channels, ports, MPE and MIDI 2.0"
+---
+
+<p>Four bits of the status byte name the channel, and four bits count sixteen things. So one MIDI 1.0 connection carries sixteen separate channels: one keyboard can play a bass on channel 1 and a pad on channel 2 at the same time. Each connection is a port, and a device can have several.</p>
+<Sheet head="How many channels">
+  <Row>
+    <Cell l="MIDI 1.0, per port" num tone="lit">16</Cell>
+    <Cell l="MIDI 2.0, per connection" num>16 groups × 16 = 256</Cell>
+    <Cell l="MPE, per zone" num>Up to 15 notes, a channel each</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Choose a track's input and channel.</b> In a MIDI track's In/Out section, set MIDI From to a device and a channel. All Channels listens to everything; Ch. 1 listens only to channel 1.</div></li>
+  <li><div><b>Split one keyboard across two instruments.</b> Set the keyboard to send on channel 1 for its lower half and channel 2 for its upper half, if it can. Point a bass track at channel 1 and a pad at channel 2, and arm both.</div></li>
+  <li><div><b>Turn on what each port is for.</b> Settings → Link, Tempo &amp; MIDI lists every port. Track takes notes onto tracks; Remote lets knobs map to controls; Sync sends or follows tempo.</div></li>
+  <li><div><b>Know MPE when you see it.</b> MIDI Polyphonic Expression gives each sounding note its own channel, so every note can bend and swell on its own. Live edits MPE in the clip's Note Expression tab, with instruments like Drift and Wavetable that respond to it.</div></li>
+</Steps>
+<Note label="MIDI 2.0:">It keeps sixteen channels but groups them, sixteen groups per connection, which is where 256 comes from. It also raises resolution: velocity gets 16 bits instead of 7, and controllers 32. Devices fall back to MIDI 1.0 when the other end doesn't speak 2.0, so it changes little day to day yet.</Note>
+<Task>Play one keyboard into two armed tracks on different channels, a bass and a pad. Then send a third track's notes to the pad's channel and hear both parts come out of one instrument.</Task>

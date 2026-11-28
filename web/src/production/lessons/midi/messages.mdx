@@ -1,0 +1,36 @@
+---
+title: "Inside a MIDI message"
+---
+
+<p>A MIDI message is a few bytes. Each byte is eight bits, and the first bit tells the instrument what kind of byte it is: 1 for a status byte, which says what's happening, and 0 for a data byte, which says how much. Only seven bits are left for a value, so MIDI 1.0 values run from 0 to 127.</p>
+<Sheet head="Middle C, played medium-hard, on channel 1" sub="Three bytes">
+  <Row>
+    <Cell l="Status: Note On, channel 1" num>1001 0000 · 144</Cell>
+    <Cell l="Data: note number" num tone="lit">0011 1100 · 60</Cell>
+    <Cell l="Data: velocity" num>0110 0100 · 100</Cell>
+  </Row>
+</Sheet>
+<Sheet head="The messages you'll meet">
+  <Row>
+    <Cell l="Note On / Note Off" span={2}>Note 0–127, velocity 1–127</Cell>
+    <Cell l="Control Change" span={2}>Controller 0–127, value 0–127</Cell>
+  </Row>
+  <Row>
+    <Cell l="Pitch Bend" span={2}>Two data bytes: 16,384 steps, centre 8,192</Cell>
+    <Cell l="Program Change" span={2}>Pick a preset, 0–127</Cell>
+  </Row>
+  <Row>
+    <Cell l="CC 1">Mod wheel</Cell>
+    <Cell l="CC 7">Volume</Cell>
+    <Cell l="CC 64">Sustain: 64 and up is down</Cell>
+    <Cell l="CC 11">Expression</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>Read the status byte in two halves.</b> The first four bits say what kind of message it is (1001 is Note On, 1000 Note Off, 1011 Control Change). The last four say which channel, 0000 to 1111, which Live shows as channels 1 to 16.</div></li>
+  <li><div><b>A Note On with velocity 0 means Note Off.</b> Many keyboards send that instead of a real Note Off, so don't be surprised to see it.</div></li>
+  <li><div><b>Watch it happen.</b> Install MIDI Monitor (free, by Snoize), play a key on Move and move a knob. Each line is one message: status, then data.</div></li>
+  <li><div><b>Mind the octave names.</b> Note 60 is middle C. Live calls it C3; the Theory book, and most of the world, calls it C4. Same note, two naming schemes.</div></li>
+</Steps>
+<Note label="Why 127:">Values are seven bits because the eighth marks the byte as data. Pitch bend needs finer steps, so it joins two data bytes into 14 bits. On the original five-pin cable MIDI ran at 31,250 bits a second, so a three-byte message took about a millisecond; over USB it's far faster.</Note>
+<Task>Write out the three bytes, in binary and in decimal, for the D above middle C at velocity 64 on channel 2. Then check your answer in MIDI Monitor by playing it.</Task>

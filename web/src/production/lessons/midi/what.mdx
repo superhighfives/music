@@ -1,0 +1,26 @@
+---
+title: "What MIDI is"
+---
+
+<p>MIDI (Musical Instrument Digital Interface, from 1983) doesn't carry sound. It carries a performance: which note started, how hard, when it stopped, and which knob moved where. An instrument turns those instructions into sound, so the same MIDI part can play a piano today and a pad tomorrow.</p>
+<Sheet head="MIDI or audio">
+  <Row>
+    <Cell l="A MIDI clip holds" span={2}>Notes, velocities, controller moves</Cell>
+    <Cell l="An audio clip holds" span={2}>The sound itself, as a waveform</Cell>
+  </Row>
+  <Row>
+    <Cell l="Size" num>A few KB a minute</Cell>
+    <Cell l="Change the sound" tone="lit">Swap the instrument</Cell>
+    <Cell l="Size" num>About 17 MB a minute</Cell>
+    <Cell l="Change the sound">Process it, or record again</Cell>
+  </Row>
+</Sheet>
+<Steps>
+  <li><div><b>A MIDI track needs an instrument.</b> Drag Drift or a Simpler onto a MIDI track. Without one, the clip plays notes that nothing turns into sound.</div></li>
+  <li><div><b>Record a phrase from Move or a keyboard.</b> Arm the track and record eight bars. Open the clip: every note is a box you can move, stretch or delete, and the velocity lane shows how hard each was played.</div></li>
+  <li><div><b>Swap the instrument, keep the part.</b> Replace Drift with Electric, then with a pad. The performance stays; only the sound changes. That's the whole point of MIDI.</div></li>
+  <li><div><b>Turn it into audio when you're done choosing.</b> Right-click the track and Freeze, then Flatten. Now it's a waveform you can reverse, slice and process like a recording.</div></li>
+  <li><div><b>Or go the other way.</b> Right-click an audio clip of a sung or played line: Convert Melody to New MIDI Track. Live guesses the notes; expect to tidy them up.</div></li>
+</Steps>
+<Note label="Why it matters:">Keep parts as MIDI while you're still deciding on sounds, and commit to audio once you're sure. Audio frees up CPU and gives you editing MIDI can't do, but you can't change its notes afterwards.</Note>
+<Task>Record eight bars of chords from Move as MIDI. Play them through three instruments, keep the best, then freeze and flatten it and reverse the audio for a swell.</Task>
