@@ -15,7 +15,7 @@ uv). Ableton itself is deliberately kept out of dotfiles.
 
 | What | Version / setting |
 | --- | --- |
-| Live | 12 Suite, beta (Live 12.4.5 or later, for Extensions). Live 13 Suite pre-ordered |
+| Live | 12 Suite, beta (Live 12.4.5 or later, for Extensions) |
 | Audio | 48 kHz; record at 24-bit (Settings → Record, Warp & Launch) |
 | Plug-Ins | VST3 System Folders **on**, VST2 **off**. Prefer VST3 versions in sets |
 | Extensions | Developer Mode on, for `pnpm start` in `ableton/extensions/*` |
@@ -60,20 +60,23 @@ Installers aren't in git: download them from each vendor's account, check the
 signature (`pkgutil --check-signature <pkg>`), then install with
 [`scripts/install-pkgs.sh`](scripts/install-pkgs.sh).
 
-| Plugin | Version | Licence / where to get it |
-| --- | --- | --- |
-| Soundtoys bundle | 5.5.5 (23 plugins, incl. SuperPlate and SpaceBlender) | soundtoys.com account. V5.5 upgrade bought Nov 2026; activate in iLok License Manager |
-| FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | 2.13, 3.10, 3.10, 3.09 | fabfilter.com account; enter each key on first open. Upgraded Nov 2026 |
-| FabFilter Saturn, Timeless 2, Twin 2, Volcano 2 | 1.31, 2.41 (legacy) | Same licence; still installed for older sets. fabfilter.com/support/downloads |
-| Synplant 2 + PhenoType | 2.0.2 | soniccharge.com account; authorise in Sonic Charge Authenticator. Install with [`scripts/install-synplant.sh`](scripts/install-synplant.sh) |
-| Magenta RealTime 2 (AU + standalone) | 0.0.1 | Free, from Google Magenta ([magenta.withgoogle.com/mrt2](https://magenta.withgoogle.com/mrt2)). Move `MRT2 (AU).app`, `MRT2 - Collider.app` and `MRT2 - Jam.app` to /Applications before first open; opening the AU app once registers the plugin. Needs Live at 48 kHz (44.1 kHz distorts or goes silent) and **Use Audio Units v3** on in Plug-Ins settings. No Drums only nudges the model; remove prompts that imply drums (for example "Jazz Piano Trio") and reset. The Mini's base M4 runs the small model; first launch downloads its weights (about 450 MB) |
-| iZotope Ozone 12 Elements | 12.2.0 | Bought Nov 2026. Installed (AU + VST3); authorise through your iZotope / Native Instruments account (Native Access) |
-| iZotope RX 12 Standard | Not installed yet | Bought Nov 2026 as a crossgrade from Ozone 12 Elements; same iZotope / Native Instruments account (Native Access) |
-| Melodyne 5 Editor | Not installed yet | Bought Nov 2026 |
-| ClyphX Pro | 1.3.1 | Isotonik account (order #487061, 2019). Copy `Remote Scripts/*` to User Library → Remote Scripts and `Factory Packs (Lessons)/*` to Factory Packs |
-| Chord-O-Mat 3 | 3.3 | user.soundmanufacture.net (order Jun 2023). `.amxd` files in User Library → Presets → MIDI Effects → Max MIDI Effect |
-| Circle of Fifth | 1.0.2 | user.soundmanufacture.net (same account as Chord-O-Mat). Same Max MIDI Effect folder. The zip holds 1.0.0 and 1.0.1; if the circle draws offset, try the other |
-| Own extensions: ambient, chords, progressive, reverse-midi | 1.0.0 | [Releases](https://github.com/superhighfives/music/releases); drag the `.ablx` onto Settings → Extensions |
+| Plugin | Licence / where to get it |
+| --- | --- |
+| Soundtoys 5.5 bundle (23 plugins, incl. SuperPlate and SpaceBlender) | soundtoys.com account; activate in iLok License Manager |
+| FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | fabfilter.com account; enter each key on first open |
+| FabFilter Saturn, Timeless 2, Twin 2, Volcano 2 (legacy) | Same licence; for older sets. fabfilter.com/support/downloads |
+| Synplant 2 + PhenoType | soniccharge.com account; authorise in Sonic Charge Authenticator. Install with [`scripts/install-synplant.sh`](scripts/install-synplant.sh) |
+| Magenta RealTime 2 (AU + standalone) | Free, from Google Magenta ([magenta.withgoogle.com/mrt2](https://magenta.withgoogle.com/mrt2)). Move `MRT2 (AU).app`, `MRT2 - Collider.app` and `MRT2 - Jam.app` to /Applications before first open; opening the AU app once registers the plugin. Needs Live at 48 kHz (44.1 kHz distorts or goes silent) and **Use Audio Units v3** on in Plug-Ins settings. No Drums only nudges the model; remove prompts that imply drums (for example "Jazz Piano Trio") and reset. The Mini's base M4 runs the small model; first launch downloads its weights (about 450 MB) |
+| Goodhertz LA-210 | Free, from [goodhertz.com/la-210](https://goodhertz.com/la-210); needs a Goodhertz account. Still in beta |
+| iZotope Ozone 12 Elements | iZotope / Native Instruments account; authorise in Native Access |
+| iZotope RX 12 Standard | Same iZotope / Native Instruments account (Native Access) |
+| Melodyne 5 Editor | celemony.com account |
+| AutoTune Advanced | antarestech.com account; authorise through that account |
+| Harmony Engine | antarestech.com account; authorise through that account |
+| ClyphX Pro | Isotonik account. Copy `Remote Scripts/*` to User Library → Remote Scripts and `Factory Packs (Lessons)/*` to Factory Packs |
+| Chord-O-Mat 3 | user.soundmanufacture.net account. `.amxd` files in User Library → Presets → MIDI Effects → Max MIDI Effect |
+| Circle of Fifth | user.soundmanufacture.net (same account as Chord-O-Mat). Same Max MIDI Effect folder. The zip holds 1.0.0 and 1.0.1; if the circle draws offset, try the other |
+| Own extensions: ambient, chords, progressive, reverse-midi | [Releases](https://github.com/superhighfives/music/releases); drag the `.ablx` onto Settings → Extensions |
 
 ### Gotchas
 

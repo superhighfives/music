@@ -28,7 +28,7 @@ export const TOOL_GROUPS: ToolGroup[] = [
     tools: [
       {
         name: 'Ableton Live 12 Suite',
-        what: 'The DAW for everything here: MIDI Tools, stem separation and Max for Live. The Live 13 Suite upgrade is pre-ordered.',
+        what: 'The DAW for everything here: MIDI Tools, stem separation and Max for Live.',
         learn: [
           'Set the format once: 48 kHz in Settings → Audio, 24-bit in Settings → Record, Warp & Launch.',
           'Put Utility first on every track and gain-stage a whole set before you mix.',
@@ -87,6 +87,27 @@ export const TOOL_GROUPS: ToolGroup[] = [
         lessons: ['recipe.the-peace', 'scapes.textures'],
       },
       {
+        name: 'AutoTune Advanced',
+        what: 'Real-time pitch correction for singing live. Live mode keeps plugin latency under 1 ms, and it corrects notes without flattening vibrato.',
+        learn: [
+          'Put it first on the vocal track in Live mode, set the key, and sing through it at your stage buffer size.',
+          'Correct a sustained note with vibrato here, then fix the same note in Melodyne. Compare the two.',
+          'Map MIDI Perform to a controller and change the tuning or vibrato while you sing.',
+        ],
+        lessons: ['scapes.live'],
+      },
+      {
+        name: 'Harmony Engine',
+        what: 'Real-time vocal harmonies: up to four voices from one vocal, set by key and scale or played from MIDI.',
+        learn: [
+          'Put it after AutoTune Advanced on the vocal, and check CPU and latency at your stage buffer size.',
+          'Play chords on a MIDI keyboard and let them set the harmonies while you sing.',
+          'Write the harmony chords as a MIDI clip, so each section of a song gets its own harmonies on stage.',
+        ],
+        lessons: ['scapes.live'],
+        links: [{ label: 'Chords', href: '/chords' }],
+      },
+      {
         name: 'iZotope RX 12 Standard',
         what: 'Audio repair: noise, hum, clicks, clipping and room sound, plus a spectral editor for single sounds.',
         learn: [
@@ -122,6 +143,16 @@ export const TOOL_GROUPS: ToolGroup[] = [
           'Draw a slow filter movement in Volcano 3 across 8 bars of a bed loop.',
         ],
         lessons: ['sound.saturation', 'sound.space'],
+      },
+      {
+        name: 'Goodhertz LA-210',
+        what: 'A free color plugin: opto compression, soft clipping and a cassette tape model in one. Still in beta.',
+        learn: [
+          'Put it on a vocal and use only the opto compression. Aim for 3–6 dB of reduction, then match the level and A/B it.',
+          'Push the soft clipping on a drum bus until the peaks round off, then back off a little.',
+          'Use the tape model on a pad to make it sound older, then compare it with Saturn 2.',
+        ],
+        lessons: ['sound.comp', 'sound.saturation', 'drums.glue'],
       },
       {
         name: 'Synplant 2 and PhenoType',

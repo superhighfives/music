@@ -11,17 +11,20 @@ First written 15 November 2026 as a claude.ai doc; moved here and updated
 
 | What | Where it fits |
 | --- | --- |
-| Live 12 Suite, plus the Live 13 Suite upgrade (pre-ordered) | Everything here: MIDI Tools, stem separation, Max for Live |
+| Live 12 Suite | Everything here: MIDI Tools, stem separation, Max for Live |
 | Synplant 2 with the free PhenoType add-on | Genopatch turns a sample into a patch; PhenoType makes one from a text prompt |
 | Soundtoys 5.5 | All 23 plugins. Crystallizer, EchoBoy, SuperPlate and SpaceBlender give raw AI texture character |
-| FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | Upgraded from the 2013 Creative bundle in Nov 2026. Saturn for warmth and multiband drive, Timeless for delay textures, Volcano for moving filters, Twin for synth layers |
-| iZotope Ozone 12 Elements | Mastering: Master Assistant builds an editable chain to start from. Bought Nov 2026 |
-| iZotope RX 12 Standard | Repair: noise, hum, clicks, clipping and room sound, plus the spectral editor. Bought Nov 2026 as a crossgrade from Ozone |
-| Melodyne 5 Editor | Note-by-note pitch and timing, including notes inside chords. Bought Nov 2026 |
+| FabFilter Saturn 2, Timeless 3, Twin 3, Volcano 3 | Saturn for warmth and multiband drive, Timeless for delay textures, Volcano for moving filters, Twin for synth layers |
+| Goodhertz LA-210 (free, beta) | Color in one plugin: opto compression, soft clipping and a cassette tape model |
+| iZotope Ozone 12 Elements | Mastering: Master Assistant builds an editable chain to start from |
+| iZotope RX 12 Standard | Repair: noise, hum, clicks, clipping and room sound, plus the spectral editor |
+| Melodyne 5 Editor | Note-by-note pitch and timing, including notes inside chords |
+| AutoTune Advanced | Real-time pitch correction for live vocals: under 1 ms in Live mode, keeps vibrato |
+| Harmony Engine | Real-time vocal harmonies, up to four voices, set by key and scale or played from MIDI. For live vocals after AutoTune Advanced |
 | Chord-O-Mat 3 (Max for Live) | Quick chord beds for pads |
 | ClyphX Pro | Macro scripting in Live |
 | Ableton Move | Sketching ideas away from the Mini |
-| Tascam DR-40XP | 32-bit float field recorder: X/Y or A/B mics, 2 XLR inputs, USB-C interface. For acoustic guitar, conversations, ambience and demos. Ordered Nov 2026 |
+| Tascam DR-40XP | 32-bit float field recorder: X/Y or A/B mics, 2 XLR inputs, USB-C interface. For acoustic guitar, conversations, ambience and demos |
 | Your own Live Extensions: ambient, chords, progressive, reverse-midi | In [`ableton/`](../ableton/); ambient's Template tab builds a starting set |
 
 The Sonic Charge Authenticator lists only Synplant 2 and Synplant v1, so
@@ -111,7 +114,7 @@ than any one-click master.
 
 | Option | Good for | Watch out for |
 | --- | --- | --- |
-| [ableton-mcp](https://github.com/ahujasid/ableton-mcp) (installed) | Claude builds tracks, writes MIDI, loads devices, drops in audio clips | No rendering or export; third-party plugins sometimes won't load by name ([guide](https://mcp.directory/blog/ableton-mcp-complete-guide-2026)) |
+| [ableton-mcp](https://github.com/ahujasid/ableton-mcp) | Claude builds tracks, writes MIDI, loads devices, drops in audio clips | No rendering or export; third-party plugins sometimes won't load by name ([guide](https://mcp.directory/blog/ableton-mcp-complete-guide-2026)) |
 | [ableton-mcp-extended](https://github.com/uisato/ableton-mcp-extended) | More device parameter control, ElevenLabs sound effects | Smaller project; automation is buggy |
 | [AbletonOSC](https://www.github.com/ideoforms/AbletonOSC) | Your own scripts talking to Live over OSC | No audio import or browser loading |
 | [Live Extensions SDK](https://ableton.github.io/extensions-sdk) (in use) | Right-click tools inside Live; see [`ableton/`](../ableton/) | Only Live's own devices, no third-party plugins or Max for Live devices |
