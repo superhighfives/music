@@ -12,8 +12,9 @@ export default function effectUi(): AstroIntegration {
       'astro:config:setup': ({ addRenderer }) => {
         addRenderer({
           name: 'effect-ui',
-          serverEntrypoint: new URL('./server.ts', import.meta.url),
-          clientEntrypoint: new URL('./client.ts', import.meta.url),
+          // Package specifiers, as Astro's own renderers use: Astro bundles the client half by its name.
+          serverEntrypoint: 'astro-effect-ui/server',
+          clientEntrypoint: 'astro-effect-ui/client',
         })
       },
     },

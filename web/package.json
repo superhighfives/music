@@ -19,6 +19,7 @@
     "@paper-design/shaders": "0.0.82",
     "@preact/signals": "^2.11.4",
     "astro": "7.4.13",
+    "astro-effect-ui": "link:integrations/effect-ui",
     "effect": "4.1.7",
     "lucide": "^1.82.0",
     "preact": "11.2.0"

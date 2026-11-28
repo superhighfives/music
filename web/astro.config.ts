@@ -4,7 +4,7 @@ import preact from '@astrojs/preact'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 import { fileURLToPath } from 'node:url'
-import effectUi from './integrations/effect-ui'
+import effectUi from 'astro-effect-ui'
 
 // Alchemy adds the Cloudflare adapter when it builds or runs the site (alchemy.run.ts).
 export default defineConfig({
