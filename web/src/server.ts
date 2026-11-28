@@ -1,4 +1,6 @@
 import { createServerEntry, createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
+import { savedApi } from './account/api'
+import { chordsPage } from './chords/app/page'
 import { EXTENSIONS } from './extensions'
 import { newestAblx } from './releases'
 import { type DailyEnv, sendDaily, unsubscribe } from './theory/email/daily'
@@ -14,6 +16,9 @@ const entry = createServerEntry({
     const ablx = /^\/ableton\/([a-z-]+)\.ablx$/.exec(url.pathname)
     if (ablx && EXTENSION_IDS.has(ablx[1])) return latestRelease(ablx[1])
     if (url.pathname === '/theory/unsubscribe') return unsubscribePage(request, url)
+    // Sections moved to Effect UI render here; the rest are TanStack Start's.
+    if (url.pathname === '/chords' || url.pathname === '/chords/') return chordsPage(request, (await import('cloudflare:workers')).env)
+    if (url.pathname === '/api/saved') return savedApi(request, (await import('cloudflare:workers')).env)
     return handler(request)
   },
 })

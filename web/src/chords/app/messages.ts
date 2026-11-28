@@ -39,8 +39,12 @@ export const ChordsMessage = UiSchema.TaggedEnum({
   ReleasedSidebar: {},
   PressedSidebarKey: { key: Schema.String },
   DoubleClickedSidebar: {},
-  // The Ultimate Guitar bookmarklet's sheet, read from the URL when the page opens.
-  ImportedSheet: { id: Schema.String, title: Schema.String, text: Schema.String },
+  // What this browser keeps: pasted songs, the sidebar width, and a sheet the Ultimate Guitar bookmarklet sent.
+  CompletedReadStorage: {
+    sheets: Schema.Array(Sheet),
+    sidebar: Schema.Number,
+    imported: Schema.NullOr(Sheet),
+  },
 
   // Move.
   ChangedMoveStatus: { status: MoveStatus },

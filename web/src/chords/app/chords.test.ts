@@ -7,8 +7,12 @@ import { initialModel, reduce } from './Chords'
 import { ChordsMessage } from './messages'
 import { derive, parseSearch, type ChordsModel } from './state'
 
+/** A page as it starts in the browser: the URL's view, then this browser's storage read. */
 const start = (query = '') =>
-  initialModel({ initialSearch: parseSearch(new URLSearchParams(query)), initialSheets: [], initialSidebar: 392, userId: null })
+  send(
+    initialModel({ initialSearch: parseSearch(new URLSearchParams(query)), userId: null }),
+    ChordsMessage.CompletedReadStorage({ sheets: [], sidebar: 392, imported: null }),
+  ).model
 
 /** Sends messages in turn, keeping every Command each one ran. */
 function send(model: ChordsModel, ...messages: ChordsMessage[]) {
@@ -119,6 +123,24 @@ describe('Chords URL and account', () => {
     const { ran } = send(start(), ChordsMessage.PickedView({ patch: { key: 2, root: 2 } }))
     const url = ran.find((r) => r.name === 'ReplaceUrl')?.args as { query: string }
     expect(new URLSearchParams(url.query).get('key')).toBe('2')
+  })
+
+  it('waits for this browser\'s songs before merging with the account', () => {
+    const fresh = initialModel({ initialSearch: parseSearch(new URLSearchParams()), userId: null })
+    const early = send(fresh, ChordsMessage.ChangedUser({ userId: 'u1' }))
+    expect(early.names).not.toContain('JoinAccount')
+    const local = { id: 'my-0', title: 'Local', text: '[G]la' }
+    const loaded = send(early.model, ChordsMessage.CompletedReadStorage({ sheets: [local], sidebar: 392, imported: null }))
+    expect(loaded.ran).toContainEqual({ name: 'JoinAccount', args: { userId: 'u1', local: [local] } })
+  })
+
+  it('opens a sheet the bookmarklet sent, once storage is read', () => {
+    const imported = { id: 'my-9', title: 'Sent', text: '[C]la [G]la' }
+    const fresh = initialModel({ initialSearch: parseSearch(new URLSearchParams()), userId: null })
+    const { model, names } = send(fresh, ChordsMessage.CompletedReadStorage({ sheets: [], sidebar: 392, imported }))
+    expect(model.sheets).toEqual([imported])
+    expect(model.search.song).toBe('my-9')
+    expect(names).toContain('StoreSheets')
   })
 
   it('merges with the account on sign-in, saves the result, and forgets the account on sign-out', () => {

@@ -11,6 +11,7 @@ import {
   JoinAccount,
   PlayNotes,
   ReadPracticeClock,
+  ReadStorage,
   RefreshAccount,
   ReplaceUrl,
   SaveToAccount,
@@ -30,7 +31,6 @@ import {
   ChordsModel,
   SIDEBAR_DEFAULT,
   Search,
-  Sheet,
   clampSidebar,
   derive,
   initialPractice,
@@ -41,10 +41,9 @@ import {
 import { ChordsView } from './view'
 
 export const ChordsProps = Schema.Struct({
+  /** The view the URL asks for. */
   initialSearch: Search,
-  initialSheets: Schema.Array(Sheet),
-  initialSidebar: Schema.Number,
-  /** The page's signed-in user, kept current by the route. */
+  /** The page's signed-in user, kept current once Clerk has loaded. */
   userId: Schema.NullOr(Schema.String),
 })
 export type ChordsProps = typeof ChordsProps.Type
@@ -71,6 +70,7 @@ type Commands = Array<
   | ReturnType<typeof RefreshAccount.make>
   | ReturnType<typeof WaitToRetry.make>
   | ReturnType<typeof OpenSignIn.make>
+  | ReturnType<typeof ReadStorage.make>
 >
 type Next = { model: ChordsModel; run: Commands }
 const done = (model: ChordsModel, ...run: Commands): Next => ({ model, run })
@@ -216,11 +216,14 @@ function handle(model: ChordsModel, message: ChordsMessage): Next {
       return done({ ...model, sidebarWidth: width }, StoreSidebar.make({ width }))
     },
     DoubleClickedSidebar: () => done({ ...model, sidebarWidth: SIDEBAR_DEFAULT }, StoreSidebar.make({ width: SIDEBAR_DEFAULT })),
-    ImportedSheet: ({ id, title, text }) => {
-      // The same text saved again keeps its first id.
-      const existing = model.sheets.find((s) => s.text === text)
-      const sheets = existing ? model.sheets : [...model.sheets, { id, title, text }]
-      return done(goToSong({ ...model, sheets, tab: 'songs' }, existing?.id ?? id, 0))
+    CompletedReadStorage: ({ sheets, sidebar, imported }) => {
+      // The same text imported again keeps its first id.
+      const existing = imported && sheets.find((s) => s.text === imported.text)
+      const all = imported && !existing ? [...sheets, imported] : sheets
+      const loaded = { ...model, sheets: all, sidebarWidth: sidebar, storageReady: true }
+      const next = imported ? goToSong({ ...loaded, tab: 'songs' }, existing?.id ?? imported.id, 0) : loaded
+      const { userId } = model.account
+      return userId !== null && !joined(model) ? done(next, JoinAccount.make({ userId, local: all })) : done(next)
     },
 
     ChangedMoveStatus: ({ status }) =>
@@ -279,7 +282,10 @@ function handle(model: ChordsModel, message: ChordsMessage): Next {
       // Signing out keeps what's in this browser, and the next sign-in merges again.
       const account = userId === null ? { userId, joinedFor: null, lastSaved: null, failures: 0 } : { ...model.account, userId }
       const next = { ...model, account }
-      return userId !== null && account.joinedFor !== userId ? done(next, JoinAccount.make({ userId, local: model.sheets })) : done(next)
+      // The merge waits for this browser's songs, so it never merges an empty list over them.
+      return userId !== null && account.joinedFor !== userId && model.storageReady
+        ? done(next, JoinAccount.make({ userId, local: model.sheets }))
+        : done(next)
     },
     SucceededJoinAccount: ({ userId, merged }) =>
       done(model.account.userId !== userId ? model : { ...model, sheets: merged, account: { ...model.account, joinedFor: userId, lastSaved: null, failures: 0 } }),
@@ -293,6 +299,7 @@ function handle(model: ChordsModel, message: ChordsMessage): Next {
     RetriedAccount: () => {
       const { userId } = model.account
       if (userId === null) return done(model)
+      if (!model.storageReady) return done(model)
       if (!joined(model)) return done(model, JoinAccount.make({ userId, local: model.sheets }))
       return JSON.stringify(model.sheets) === model.account.lastSaved ? done(model) : done(model, SaveToAccount.make({ sheets: model.sheets }))
     },
@@ -344,7 +351,7 @@ export const initialModel = (props: ChordsProps): ChordsModel => ({
   search: tutorialView(props.initialSearch),
   tab: 'learn',
   browsing: false,
-  sidebarWidth: props.initialSidebar,
+  sidebarWidth: SIDEBAR_DEFAULT,
   sidebarGrab: null,
   sustainLatched: false,
   pedal: false,
@@ -354,7 +361,8 @@ export const initialModel = (props: ChordsProps): ChordsModel => ({
   completed: null,
   freePlayStarted: false,
   frame: 0,
-  sheets: props.initialSheets,
+  sheets: [],
+  storageReady: false,
   practice: initialPractice,
   account: { userId: null, joinedFor: null, lastSaved: null, failures: 0 },
 })
@@ -363,7 +371,7 @@ export const initialModel = (props: ChordsProps): ChordsModel => ({
 export const reduce = (model: ChordsModel, message: ChordsMessage): Next => settle(model, handle(model, message))
 
 export const Chords = Html.component({ name: 'Chords', props: ChordsProps, model: ChordsModel, message: ChordsMessage }).make({
-  init: ({ props }) => initialModel(props),
+  init: ($) => $.set(initialModel($.props)).run(ReadStorage.make({})),
   update: ($, message) => {
     const next = reduce($.model, message)
     return $.set(next.model).run(...next.run)

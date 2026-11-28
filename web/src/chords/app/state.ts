@@ -170,6 +170,8 @@ export const ChordsModel = Schema.Struct({
   frame: Schema.Number,
   /** Pasted songs, kept in this browser and, signed in, in the account. */
   sheets: Schema.Array(Sheet),
+  /** False until this browser's storage has been read, so an empty first render never merges over saved songs. */
+  storageReady: Schema.Boolean,
   practice: Practice,
   account: Account,
 })

@@ -15,7 +15,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProductionRouteRouteImport } from './routes/production/route'
 import { Route as TheoryRouteRouteImport } from './routes/theory/route'
 import { Route as ToolsRouteImport } from './routes/tools'
-import { Route as ChordsIndexRouteImport } from './routes/chords/index'
 import { Route as ProductionIndexRouteImport } from './routes/production/index'
 import { Route as TheoryIndexRouteImport } from './routes/theory/index'
 import { Route as TheoryChapterIdRouteImport } from './routes/theory/$chapterId'
@@ -51,11 +50,6 @@ const TheoryRouteRoute = TheoryRouteRouteImport.update({
 const ToolsRoute = ToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChordsIndexRoute = ChordsIndexRouteImport.update({
-  id: '/chords/',
-  path: '/chords/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductionIndexRoute = ProductionIndexRouteImport.update({
@@ -100,7 +94,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
-  '/chords/': typeof ChordsIndexRoute
   '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
   '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
@@ -113,7 +106,6 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
-  '/chords': typeof ChordsIndexRoute
   '/production': typeof ProductionIndexRoute
   '/theory': typeof TheoryIndexRoute
   '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
@@ -129,7 +121,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/tools': typeof ToolsRoute
   '/theory/$chapterId': typeof TheoryChapterIdRoute
-  '/chords/': typeof ChordsIndexRoute
   '/production/': typeof ProductionIndexRoute
   '/theory/': typeof TheoryIndexRoute
   '/production/recipes/$recipeId': typeof ProductionRecipesRecipeIdRoute
@@ -146,7 +137,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/tools'
     | '/theory/$chapterId'
-    | '/chords/'
     | '/production/'
     | '/theory/'
     | '/production/recipes/$recipeId'
@@ -159,7 +149,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/tools'
     | '/theory/$chapterId'
-    | '/chords'
     | '/production'
     | '/theory'
     | '/production/recipes/$recipeId'
@@ -174,7 +163,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/tools'
     | '/theory/$chapterId'
-    | '/chords/'
     | '/production/'
     | '/theory/'
     | '/production/recipes/$recipeId'
@@ -189,7 +177,6 @@ export interface RootRouteChildren {
   AbletonRoute: typeof AbletonRoute
   PrivacyRoute: typeof PrivacyRoute
   ToolsRoute: typeof ToolsRoute
-  ChordsIndexRoute: typeof ChordsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -234,13 +221,6 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/tools'
       preLoaderRoute: typeof ToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chords/': {
-      id: '/chords/'
-      path: '/chords'
-      fullPath: '/chords/'
-      preLoaderRoute: typeof ChordsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/production/': {
@@ -327,7 +307,6 @@ const rootRouteChildren: RootRouteChildren = {
   AbletonRoute: AbletonRoute,
   PrivacyRoute: PrivacyRoute,
   ToolsRoute: ToolsRoute,
-  ChordsIndexRoute: ChordsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -4,8 +4,9 @@ import { AccountSync, type SyncIO } from '../../account/account-sync'
 import { createMove, type MoveEvent } from '../lib/move'
 import { createPiano } from '../lib/piano'
 import { mergeSheets, parseSheets } from '../lib/sheets'
+import { parseSheet } from '../lib/songs'
 import { ChordsMessage } from './messages'
-import { Sheet, withFades, type MoveView } from './state'
+import { SIDEBAR_DEFAULT, SIDEBAR_MAX, SIDEBAR_MIN, Sheet, withFades, type MoveView } from './state'
 
 /*
  * The page's one piano and one Move connection. They hold browser resources (an AudioContext and a MIDI
@@ -18,7 +19,7 @@ const SAVED_SONGS = 'movechords:songs'
 const SIDEBAR_KEY = 'movechords:sidebar'
 
 /** Pasted songs kept in this browser. Bad JSON in storage reads as no songs. */
-export function readSheets(): ReadonlyArray<Sheet> {
+function readSheets(): ReadonlyArray<Sheet> {
   try {
     return parseSheets(JSON.parse(localStorage.getItem(SAVED_SONGS) ?? '[]')) ?? []
   } catch {
@@ -26,12 +27,29 @@ export function readSheets(): ReadonlyArray<Sheet> {
   }
 }
 
-export const readSidebar = (fallback: number, min: number, max: number) => {
-  const saved = Number(localStorage.getItem(SIDEBAR_KEY))
-  return saved >= min && saved <= max ? saved : fallback
-}
-
 const noop = <A>(f: () => A) => Effect.sync(f).pipe(Effect.as(Component.noop))
+
+/**
+ * Reads what this browser keeps, once the page is running in it. The Ultimate Guitar bookmarklet opens
+ * "/chords#import=<sheet>": the sheet comes along here, and the hash leaves the URL.
+ */
+export const ReadStorage = Command.make('ReadStorage', {}, () =>
+  Effect.sync(() => {
+    const saved = Number(localStorage.getItem(SIDEBAR_KEY))
+    const hash = /^#import=(.*)$/s.exec(location.hash)?.[1]
+    let imported: Sheet | null = null
+    if (hash !== undefined) {
+      history.replaceState(history.state, '', location.pathname + location.search)
+      const text = decodeURIComponent(hash)
+      imported = { id: `my-${Date.now().toString(36)}`, title: parseSheet(text).title, text }
+    }
+    return ChordsMessage.CompletedReadStorage({
+      sheets: readSheets(),
+      sidebar: saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX ? saved : SIDEBAR_DEFAULT,
+      imported,
+    })
+  }),
+)
 
 export const PlayNotes = Command.make(
   'PlayNotes',
