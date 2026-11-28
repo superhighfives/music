@@ -2,9 +2,9 @@ import { Command, Component, Mount, UiSchema } from '@effect/ui'
 import { Html } from '@effect/ui/html'
 import { Effect, Schema } from 'effect'
 import { render } from '../../content/render'
-import { OpenSignIn, ShowUserButton, absurd } from '../../islands/auth'
+import { OpenSignIn } from '../../islands/auth'
 import { ToggleTheme } from '../../islands/theme'
-import { SiteFooter } from '../../islands/views'
+import { SiteFooter, mastheadIslands } from '../../islands/views'
 import { ArrangementView } from '../components/diagrams'
 import { KeyBoxView } from '../content/kit'
 import { DEFAULT_SETTINGS, FLAT, MODES, SHARP, derived, type ModeId } from '../lib/music'
@@ -98,7 +98,7 @@ export const Production = Html.component({ name: 'Production', props: Production
         else done[key] = true
         return save({ ...$.model.saved, done })
       },
-      ClickedThemeToggle: () => $.set($.model).run(ToggleTheme.make({ storageKey: 'production.theme' })),
+      ClickedThemeToggle: () => $.set($.model).run(ToggleTheme.make({})),
       ClickedSignIn: () => $.set($.model).run(OpenSignIn.make({})),
       CompletedReadStorage: ({ saved }) => {
         // A lesson page is where you were, for Continue on the course home.
@@ -160,22 +160,7 @@ export const Production = Html.component({ name: 'Production', props: Production
             ),
           ),
         ),
-      ThemeToggle: () =>
-        h.button
-          .attr('type', 'button')
-          .class('iconbtn')
-          .attr('aria-label', 'Switch light or dark theme')
-          .on('click', ProductionMessage.ClickedThemeToggle())
-          .children(
-            h.svg.attr('width', '20').attr('height', '20').attr('viewBox', '0 0 24 24').attr('fill', 'none').attr('stroke', 'currentColor').attr('stroke-width', '1.6').attr('stroke-linecap', 'round').attr('aria-hidden', 'true').children(
-              h.circle.attr('cx', '12').attr('cy', '12').attr('r', '4'),
-              h.path.attr('d', 'M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4'),
-            ),
-          ),
-      Account: () =>
-        h.props.userId === null
-          ? h.button.attr('type', 'button').class('btn').on('click', ProductionMessage.ClickedSignIn()).children('Sign in')
-          : h.div.onMount(ShowUserButton().pipe(Mount.map(absurd))),
+      ...mastheadIslands(h, { userId: h.props.userId, theme: ProductionMessage.ClickedThemeToggle(), signIn: ProductionMessage.ClickedSignIn() }),
       DoneButton: (_: unknown, props: Readonly<Record<string, unknown>>) => {
         const key = String(props.key)
         return h.button
@@ -185,6 +170,6 @@ export const Production = Html.component({ name: 'Production', props: Production
           .children(done[key] ? '✓ Done' : String(props.label))
       },
     }
-    return h.div.class('page').children(...render(h, Masthead(), islands, isMessage), ...render(h, page, islands, isMessage), SiteFooter(h, { current: 'production' }))
+    return h.div.class('page').attr('data-section', 'production').children(...render(h, Masthead(), islands, isMessage), ...render(h, page, islands, isMessage), SiteFooter(h, { current: 'production' }))
   },
 })

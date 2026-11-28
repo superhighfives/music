@@ -2,17 +2,14 @@ import { HtmlServer } from '@effect/ui/html'
 import { Effect } from 'effect'
 import { userOf } from '~/account/api'
 import { page } from '~/islands/document'
-import { themeScript } from '~/islands/theme'
 import { BOOK_SUBTITLE, BOOK_TITLE } from '~/theory/content/book'
 import { routeOf } from './pages'
 import { Theory } from './Theory'
 
 type Env = { DB: D1Database; CLERK_SECRET_KEY: string; CLERK_PUBLISHABLE_KEY: string }
 
-const HEAD = `<link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..700&family=Instrument+Sans:wght@400..700&family=Noto+Music&display=swap">
-    ${themeScript('theory.theme')}`
+// Noto Music draws the book's clefs, accidentals and rests; the shared fonts come with every page.
+const HEAD = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap">'
 
 /** Every page under /theory, rendered on the server and hydrated by client.ts. */
 export async function theoryPage(request: Request, env: Env): Promise<Response> {

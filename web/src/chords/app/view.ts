@@ -18,8 +18,12 @@ import {
 import { eventLabel, type Result } from '../lib/practice'
 import { SONGS, chordLabel, unknownChords, type Song, type SongEvent } from '../lib/songs'
 import { TUTORIALS, type Tutorial } from '../lib/tutorials'
-import { CenterInBox, SetBookmarklet, ShowOnMove, ShowUserButton } from './effects'
-import { SiteFooter } from '../../islands/views'
+import { Schema } from 'effect'
+import { jsx } from '../../content/jsx-runtime'
+import { render } from '../../content/render'
+import { Masthead, PadMark } from '../../islands/masthead'
+import { SiteFooter, mastheadIslands } from '../../islands/views'
+import { CenterInBox, SetBookmarklet, ShowOnMove } from './effects'
 import { ChordsMessage, type SearchPatch } from './messages'
 import { EXERCISES, SIDEBAR_DEFAULT, SIDEBAR_MAX, SIDEBAR_MIN, TABS, moveView, type ChordsModel, type Derived, type Tab } from './state'
 
@@ -68,12 +72,12 @@ const Chip = (
 
 const Group = <A extends View.Input<ChordsMessage>>(h: H, label: string, action: A) =>
   h.div.class('flex flex-col gap-1.5').children(
-    h.div.class('flex items-center justify-between text-[10px] font-medium tracking-wider text-neutral-500 uppercase').children(label, action),
+    h.div.class('flex items-center justify-between font-mono text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase').children(label, action),
   )
 
 const Field = (h: H, label: string, o: { inline?: boolean; className?: string } = {}) =>
   h.label.class(
-    cx('flex gap-1 text-[10px] font-medium tracking-wider text-neutral-500 uppercase', o.inline ? 'items-center gap-2' : 'flex-col', o.className),
+    cx('flex gap-1 font-mono text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase', o.inline ? 'items-center gap-2' : 'flex-col', o.className),
   ).children(label)
 
 const selectClass =
@@ -157,12 +161,12 @@ function PadGrid(
           o.compact ? 'text-[clamp(6px,2.4cqw,11px)]' : 'text-[clamp(9px,2.4cqmin,14px)]',
           hit
             ? hit.interval === 0
-              ? `${ring} bg-led text-neutral-950 shadow-[0_0_24px_-4px_var(--color-led)]`
+              ? `${ring} bg-led text-on-led shadow-[0_0_24px_-4px_var(--color-led)]`
               : hit.optional
                 ? 'bg-neutral-800 text-white outline-2 -outline-offset-2 outline-white/70 outline-dashed'
                 : `${ring} bg-white text-neutral-950 shadow-[0_0_20px_-6px_white]`
             : isKeyRoot
-              ? 'bg-led/25 text-led'
+              ? 'bg-led/25 text-led-ink'
               : lit
                 ? 'bg-neutral-700/70 text-neutral-300'
                 : 'bg-neutral-950 text-neutral-600',
@@ -212,7 +216,7 @@ const ConnectButton = (h: H, status: MoveStatus, className: string) =>
 
 function ConnectScreen(h: H, status: MoveStatus) {
   const problem = CONNECT_PROBLEM[status]
-  return h.main.class('flex min-h-dvh items-center justify-center px-6 py-12').children(
+  return h.main.class('flex flex-1 items-center justify-center overflow-y-auto px-6 py-12').children(
     h.div.class('flex w-full max-w-md flex-col items-center gap-8 text-center').children(
       h.div.attr('aria-hidden', 'true').class('grid grid-cols-8 gap-1.5').children(
         [3, 2, 1, 0].flatMap((row) =>
@@ -220,11 +224,11 @@ function ConnectScreen(h: H, status: MoveStatus) {
         ),
       ),
       h.div.class('flex flex-col gap-2').children(
-        h.h1.class('text-4xl font-semibold tracking-tight text-white').children('chords'),
+        h.h1.class('text-4xl font-medium tracking-tight text-white').children('Chords'),
         h.p.class('text-neutral-400').children('Learn chords and play along with songs on Ableton Move.'),
       ),
       h.div.class('flex flex-col items-center gap-3').children(
-        ConnectButton(h, status, 'min-h-11 rounded-xl bg-led px-6 text-base font-medium text-neutral-950 disabled:opacity-40'),
+        ConnectButton(h, status, 'min-h-11 rounded-xl bg-led px-6 text-base font-medium text-on-led disabled:opacity-40'),
         problem && h.p.class('text-sm text-amber-300').children(problem),
         h.button
           .attr('type', 'button')
@@ -248,7 +252,7 @@ function OfflineBar(h: H, status: MoveStatus) {
   return h.div.class('flex flex-col gap-1.5 rounded-lg border border-neutral-800 px-3 py-2').children(
     h.div.class('flex items-center gap-3').children(
       h.p.class('mr-auto text-xs text-neutral-400').children('Connect Move for Learn, Songs and Practice.'),
-      ConnectButton(h, status, 'min-h-9 shrink-0 rounded-md bg-led px-3 text-sm font-medium text-neutral-950 disabled:opacity-40'),
+      ConnectButton(h, status, 'min-h-9 shrink-0 rounded-md bg-led px-3 text-sm font-medium text-on-led disabled:opacity-40'),
     ),
     problem && h.p.class('text-xs text-amber-300').children(problem),
   )
@@ -295,7 +299,7 @@ function TutorialCard(h: H, d: Derived, tutorial: Tutorial) {
           ),
         )
         .children(
-          h.span.class('shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400').children('Your turn'),
+          h.span.class('shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400').children('Your turn'),
           h.span.class(prompt.tone).children(prompt.text),
         ),
       h.div.class('flex shrink-0 gap-2').children(
@@ -334,12 +338,12 @@ function LyricLine(
         : !current
           ? st === 'done'
             ? 'text-neutral-600'
-            : 'text-led/60'
+            : 'text-led-ink/60'
           : st === 'now'
-            ? 'rounded bg-led px-1 text-neutral-950'
+            ? 'rounded bg-led px-1 text-on-led'
             : st === 'done'
               ? 'text-emerald-400'
-              : 'text-led'
+              : 'text-led-ink'
       const label = h.span.class(`mr-2 text-sm font-semibold ${chordClass}`).children(c.parsed ? chordLabel(c.parsed) : c.name)
       const parts = split(text)
       return parts.length === 0 ? [word('', `c${j}`, label)] : parts.map((w, k) => word(w, `c${j}-${k}`, k === 0 ? label : null))
@@ -415,7 +419,7 @@ function SongCard(h: H, d: Derived, song: Song) {
     h.div
       .class(cx('flex min-w-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm ring-1', finished ? 'bg-emerald-950/60 ring-emerald-700' : 'bg-neutral-800/60 ring-neutral-700'))
       .children(
-        h.span.class('shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400').children('Your turn'),
+        h.span.class('shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400').children('Your turn'),
         h.span.class(prompt.tone).children(prompt.text),
       ),
     h.div.class('flex flex-wrap items-center gap-2').children(
@@ -516,7 +520,7 @@ function PracticeCard(h: H, model: ChordsModel, d: Derived) {
       h.button
         .attr('type', 'button')
         .on('click', p.running ? ChordsMessage.ClickedStopPractice() : ChordsMessage.ClickedStartPractice())
-        .class(cx('min-h-9 rounded-lg px-4 font-medium', p.running ? 'bg-white text-neutral-950' : 'bg-led text-neutral-950'))
+        .class(cx('min-h-9 rounded-lg px-4 font-medium', p.running ? 'bg-white text-neutral-950' : 'bg-led text-on-led'))
         .children(p.running ? 'Stop' : 'Start'),
       h.span.class('text-xs text-neutral-500').children('or press Play on Move'),
       h.div.class('ml-auto flex flex-wrap items-center gap-2').children(
@@ -639,7 +643,7 @@ function TabPanel(h: H, model: ChordsModel, d: Derived, tab: Tab) {
             .attr('type', 'button')
             .attr('aria-pressed', String(search.sevenths))
             .on('click', pick({ sevenths: !search.sevenths }))
-            .class(cx('rounded-full border px-2 py-px text-[11px] tracking-normal normal-case', search.sevenths ? 'border-led text-led' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'))
+            .class(cx('rounded-full border px-2 py-px text-[11px] tracking-normal normal-case', search.sevenths ? 'border-led text-led-ink' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'))
             .children(`7ths ${search.sevenths ? 'on' : 'off'}`),
         ).children(
           h.div.class('grid grid-cols-4 gap-1').children(
@@ -669,7 +673,7 @@ function TabPanel(h: H, model: ChordsModel, d: Derived, tab: Tab) {
   const chords = h.div.class('flex flex-col gap-1.5').children(
     CHORD_FAMILIES.map((family) =>
       h.div.key(family.name).class('grid grid-cols-[3.25rem_1fr] items-start gap-2').children(
-        h.div.class('pt-1.5 text-[10px] font-medium tracking-wider text-neutral-500 uppercase').children(family.name),
+        h.div.class('pt-1.5 font-mono text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase').children(family.name),
         h.div.class('grid grid-cols-5 gap-1').children(
           family.ids.map((id) => Chip(h, { active: search.chord === id, onClick: pick({ chord: id }) }).key(id).children(chordType(id).name)),
         ),
@@ -691,35 +695,41 @@ const LayoutControls = (h: H, d: Derived) => [
     ),
 ]
 
+const isMessage = Schema.is(ChordsMessage)
+
+/** A full-height app under the shared masthead: the sidebar and pads fill what's left of the screen. */
 export function ChordsView(h: H, model: ChordsModel, d: Derived) {
+  const masthead = Masthead({ brand: jsx('a', { className: 'brand', href: '/chords', children: [PadMark({ lit: 5 }), 'Chords'] }) })
+  const islands = mastheadIslands(h, { userId: model.account.userId, theme: ChordsMessage.ClickedThemeToggle(), signIn: ChordsMessage.ClickedSignIn() })
+  return h.div
+    .attr('data-section', 'chords')
+    .class('flex h-dvh flex-col text-base text-neutral-200')
+    .children(h.div.class('shrink-0 px-4 lg:px-6').children(render(h, masthead, islands, isMessage)), ChordsApp(h, model, d))
+}
+
+function ChordsApp(h: H, model: ChordsModel, d: Derived) {
   // Until Move is connected, the page is the way to connect, or to look up chords without it.
   // Learn, Songs and Practice check what you play on Move, so looking up chords leaves them.
-  if (!d.connected && !model.browsing) return h.div.onMount(ShowOnMove({ view: moveView(model, d) }).pipe(Mount.map(absurd))).children(ConnectScreen(h, model.moveStatus))
+  if (!d.connected && !model.browsing)
+    return h.div
+      .class('flex min-h-0 flex-1 flex-col')
+      .onMount(ShowOnMove({ view: moveView(model, d) }).pipe(Mount.map(absurd)))
+      .children(ConnectScreen(h, model.moveStatus))
   const { search, voicing, exercise, tutorial } = d
   const tab = d.connected ? model.tab : 'play'
   const tabs = d.connected ? Segmented(h, TABS, model.tab, (t) => ChordsMessage.SelectedTab({ tab: t })) : OfflineBar(h, model.moveStatus)
   const showAll = search.all
 
   return h.main
-    .class('flex h-dvh flex-col overflow-hidden lg:flex-row')
+    .class('flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row')
     .onMount(ShowOnMove({ view: moveView(model, d) }).pipe(Mount.map(absurd)))
     .children(
       h.aside
         .style({ '--sidebar': `${model.sidebarWidth}px` })
         .class('flex shrink-0 flex-col gap-3 px-4 pt-4 lg:w-[var(--sidebar,392px)] lg:gap-4 lg:overflow-y-auto lg:px-6 lg:py-5')
         .children(
-          h.div.class('flex items-center gap-2').children(
-            h.h1.class('mr-auto text-lg font-semibold tracking-tight text-white').children('chords'),
-            model.account.userId === null
-              ? h.button
-                  .attr('type', 'button')
-                  .on('click', ChordsMessage.ClickedSignIn())
-                  .class('min-h-9 rounded-md border border-neutral-700 px-2.5 text-sm text-neutral-300 hover:border-neutral-500')
-                  .children('Sign in')
-              : h.div.class('flex').onMount(ShowUserButton().pipe(Mount.map(absurd))),
-            // Phone: key and scale sit beside the title to save height.
-            h.div.class('flex gap-2 lg:hidden').children(KeySelect(h, search.key), ScaleSelect(h, d.scale.id)),
-          ),
+          // Phone: key and scale sit at the top to save height.
+          h.div.class('flex gap-2 lg:hidden').children(KeySelect(h, search.key), ScaleSelect(h, d.scale.id)),
           // Phone: the layout stays at the top. The pickers are in tabs below the pads.
           h.div.class('flex flex-col gap-3 lg:hidden').children(LayoutControls(h, d)),
           h.div.class('hidden flex-col gap-4 lg:flex').children(
@@ -762,7 +772,7 @@ export function ChordsView(h: H, model: ChordsModel, d: Derived) {
           showAll
             ? h.div.class('min-w-0').children(
                 h.div.class('text-xs text-neutral-500').children(`${search.sevenths ? 'Sevenths' : 'Triads'} in key`),
-                h.h2.class('text-3xl font-semibold tracking-tight text-white lg:text-4xl').children(`${NOTE_NAMES[search.key]} ${d.scale.name}`),
+                h.h2.class('text-3xl font-medium tracking-tight text-white lg:text-4xl').children(`${NOTE_NAMES[search.key]} ${d.scale.name}`),
                 h.p.class('text-sm text-neutral-400').children('Select a chord to open it.'),
               )
             : h.div.class('min-w-0').children(
@@ -770,7 +780,7 @@ export function ChordsView(h: H, model: ChordsModel, d: Derived) {
                   d.practiceEvent?.kind !== 'note' &&
                   h.div.class('text-xs text-neutral-500').children(`${d.current.numeral}${search.sevenths ? '7' : ''} in ${NOTE_NAMES[search.key]} ${d.scale.name}`),
                 h.h2
-                  .class('text-3xl font-semibold tracking-tight text-white lg:text-4xl')
+                  .class('text-3xl font-medium tracking-tight text-white lg:text-4xl')
                   .children(d.practiceEvent?.kind === 'note' ? noteWithOctave(d.practiceEvent.midi) : chordSymbol(search.root, d.type.id, d.type.name)),
                 h.p.class('text-sm text-neutral-400').children(d.practiceEvent?.kind === 'note' ? 'Next note' : d.chordPcs.map((p) => NOTE_NAMES[p]).join(' · ')),
               ),
@@ -795,7 +805,7 @@ export function ChordsView(h: H, model: ChordsModel, d: Derived) {
                 .attr('type', 'button')
                 .disabled(!voicing)
                 .on('click', ChordsMessage.ClickedPlayChord())
-                .class('min-h-11 rounded-lg bg-led px-4 font-medium text-neutral-950 disabled:opacity-40 lg:min-h-9')
+                .class('min-h-11 rounded-lg bg-led px-4 font-medium text-on-led disabled:opacity-40 lg:min-h-9')
                 .children('Play'),
           ),
         ),
@@ -816,7 +826,7 @@ export function ChordsView(h: H, model: ChordsModel, d: Derived) {
                       .children(
                         h.span.class('flex h-5 items-baseline gap-2 text-sm').children(
                           h.span.class('text-xs text-neutral-500').children(c.numeral),
-                          h.span.class(selected ? 'font-semibold text-led' : 'font-medium text-white').children(chordSymbol(c.rootPc, c.type.id, c.type.name)),
+                          h.span.class(selected ? 'font-semibold text-led-ink' : 'font-medium text-white').children(chordSymbol(c.rootPc, c.type.id, c.type.name)),
                           h.span.class('truncate text-xs text-neutral-500').children(c.type.tones.map((t) => NOTE_NAMES[mod(c.rootPc + t.interval, 12)]).join(' · ')),
                         ),
                         PadGrid(h, {

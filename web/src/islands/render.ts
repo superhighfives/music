@@ -7,8 +7,8 @@ import { page } from './document'
 type PageOptions = Omit<Parameters<typeof page>[0], 'html' | 'head' | 'state'>
 
 /**
- * Renders an Effect UI component on the Worker into a whole page. Pages with a client entry hydrate from
- * the state; `script: false` pages are plain HTML.
+ * Renders an Effect UI component on the Worker into a whole page, which its client entry hydrates from the
+ * state.
  */
 export async function renderPage<Name extends string, Props, Model, Msg, Events, V extends View.Elements>(
   component: Component.Members<Name, Props, Model, Msg, Events, never, V, any> & BrowserHost.HtmlRoot<V>,

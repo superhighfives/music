@@ -1,6 +1,5 @@
 import '../styles.css'
 import '../../site-footer.css'
-import { dark } from '@clerk/ui/themes'
 import type { Renderer } from '@effect/ui'
 import { HtmlHydrate } from '@effect/ui/html'
 import { Effect } from 'effect'
@@ -11,12 +10,6 @@ import { Chords, ChordsProps } from './Chords'
 import { piano, setAccountIO } from './effects'
 import type { ChordsMessage } from './messages'
 import type { ChordsModel } from './state'
-
-/** chords is always dark, with its cyan for buttons and links. */
-const appearance = {
-  theme: dark,
-  variables: { colorPrimary: 'oklch(0.78 0.16 195)', colorPrimaryForeground: '#0a0a0a', colorBackground: '#171717' },
-}
 
 async function call<T>(response: Promise<Response>): Promise<T> {
   const r = await response
@@ -59,4 +52,4 @@ Effect.runFork(
   ).pipe(Effect.catch((e) => Effect.sync(() => console.error("Chords couldn't start", e)))),
 )
 
-connectClerk(() => appearance, setUser)
+connectClerk(setUser)

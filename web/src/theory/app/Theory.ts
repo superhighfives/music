@@ -2,13 +2,13 @@ import { Command, Component, Mount, Subscription, UiSchema } from '@effect/ui'
 import { Html } from '@effect/ui/html'
 import { Effect, Queue, Schema, Stream } from 'effect'
 import { render } from '~/content/render'
-import { OpenSignIn, ShowUserButton, absurd } from '~/islands/auth'
+import { OpenSignIn } from '~/islands/auth'
 import { ToggleTheme } from '~/islands/theme'
-import { SiteFooter } from '~/islands/views'
+import { SiteFooter, mastheadIslands } from '~/islands/views'
 import { EMPTY, parseSaved, type Saved } from '~/theory/lib/saved'
 import type { EmailStatus, PreviewResult } from '~/theory/email/api'
 import { Figure, PlayNotes } from './Figure'
-import { ChapterPage, HomePage, Masthead, NotFoundPage, routeOf, sectionsOf } from './pages'
+import { ChapterPage, chapterSections, HomePage, Masthead, NotFoundPage, routeOf } from './pages'
 
 export const TheoryProps = Schema.Struct({
   /** The page's path, such as /theory/keyboard. */
@@ -169,7 +169,7 @@ export const Theory = Html.component({ name: 'Theory', props: TheoryProps, model
       // Getting a check right through also counts the chapter as read.
       PassedCheck: ({ chapterId }) =>
         saved.checks[chapterId] ? $.model : save({ ...saved, checks: { ...saved.checks, [chapterId]: true }, read: { ...saved.read, [chapterId]: true } }),
-      ClickedThemeToggle: () => $.set($.model).run(ToggleTheme.make({ storageKey: 'theory.theme' })),
+      ClickedThemeToggle: () => $.set($.model).run(ToggleTheme.make({})),
       ClickedSignIn: () => $.set($.model).run(OpenSignIn.make({})),
       CompletedReadStorage: ({ saved: stored }) => {
         // A chapter page is where you were, for Continue on the book's home.
@@ -194,7 +194,7 @@ export const Theory = Html.component({ name: 'Theory', props: TheoryProps, model
     return [
       Subscription.make('user', props.userId ?? '', () => Stream.make(TheoryMessage.ChangedUser({ userId: props.userId }))),
       route._tag === 'Chapter' &&
-        Subscription.make('sections', route.chapter.id, () => scrolling(sectionsOf(route.chapter.Body()).map((s) => s.id))),
+        Subscription.make('sections', route.chapter.id, () => scrolling(chapterSections(route.chapter).map((s) => s.id))),
     ]
   },
   view: (h, model) => {
@@ -216,22 +216,7 @@ export const Theory = Html.component({ name: 'Theory', props: TheoryProps, model
             Emitted: ({ event }) => (event === 'passed' && route._tag === 'Chapter' ? TheoryMessage.PassedCheck({ chapterId: route.chapter.id }) : undefined),
           },
         }),
-      ThemeToggle: () =>
-        h.button
-          .attr('type', 'button')
-          .class('iconbtn')
-          .attr('aria-label', 'Switch light or dark theme')
-          .on('click', TheoryMessage.ClickedThemeToggle())
-          .children(
-            h.svg.attr('width', '20').attr('height', '20').attr('viewBox', '0 0 24 24').attr('fill', 'none').attr('stroke', 'currentColor').attr('stroke-width', '1.6').attr('stroke-linecap', 'round').attr('aria-hidden', 'true').children(
-              h.circle.attr('cx', '12').attr('cy', '12').attr('r', '4'),
-              h.path.attr('d', 'M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4'),
-            ),
-          ),
-      Account: () =>
-        h.props.userId === null
-          ? h.button.attr('type', 'button').class('btn').on('click', TheoryMessage.ClickedSignIn()).children('Sign in')
-          : h.div.onMount(ShowUserButton().pipe(Mount.map(absurd))),
+      ...mastheadIslands(h, { userId: h.props.userId, theme: TheoryMessage.ClickedThemeToggle(), signIn: TheoryMessage.ClickedSignIn() }),
       ReadButton: (_: unknown, props: Readonly<Record<string, unknown>>) => {
         const chapterId = String(props.chapterId)
         const read = !!saved.read[chapterId]
@@ -271,7 +256,7 @@ export const Theory = Html.component({ name: 'Theory', props: TheoryProps, model
           email.note ? h.p.class('small').attr('role', 'status').children(email.note) : false,
         ),
     }
-    return h.div.class('book').children(
+    return h.div.class('page').attr('data-section', 'theory').children(
       ...render(h, Masthead({ saved, ready }), islands, isMessage),
       ...render(h, page, islands, isMessage),
       SiteFooter(h, { current: 'theory' }),

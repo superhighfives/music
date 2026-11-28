@@ -14,7 +14,8 @@
     "@clerk/ui": "^1.46.0",
     "@effect/ui": "file:vendor/effect-ui-22128c6.tgz",
     "@paper-design/shaders": "0.0.82",
-    "effect": "4.1.7"
+    "effect": "4.1.7",
+    "lucide": "^1.82.0"
   },
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.87",

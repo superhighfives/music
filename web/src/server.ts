@@ -28,7 +28,7 @@ export default {
     if (path === '/chords' || path === '/chords/') return chordsPage(request, env)
     if (under(path, '/production')) return productionPage(request, env)
     if (under(path, '/theory')) return theoryPage(request, env)
-    return (await sitePage(request, env, path)) ?? notFoundPage()
+    return (await sitePage(request, env, path)) ?? notFoundPage(request, env)
   },
   // The cron in alchemy.run.ts: the theory book's daily email.
   scheduled(_controller: unknown, env: WebsiteEnv, ctx: { waitUntil(p: Promise<unknown>): void }) {

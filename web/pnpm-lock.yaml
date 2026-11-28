@@ -26,6 +26,9 @@ importers:
       effect:
         specifier: 4.1.7
         version: 4.1.7
+      lucide:
+        specifier: ^1.82.0
+        version: 1.82.0
     devDependencies:
       '@alchemy.run/cloudflare':
         specifier: 2.0.0-beta.87
@@ -1675,6 +1678,9 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
+  lucide@1.82.0:
+    resolution: {integrity: sha512-c4S0RMNDjGQ5Qu791zF+jIlQkNLlSZUCPFqVnYuuBDVP59kSkcHw8230E9Xwo9HR++JDXyIALNFW/Kc6t3zHlg==}
+
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
@@ -3320,6 +3326,8 @@ snapshots:
       lightningcss-win32-x64-msvc: 1.33.0
 
   lines-and-columns@1.2.4: {}
+
+  lucide@1.82.0: {}
 
   magic-string@0.30.21:
     dependencies:

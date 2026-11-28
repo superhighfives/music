@@ -35,6 +35,9 @@ const cssText = (style: object) =>
     })
     .join(';')
 
+/** For content with no handlers: it sends nothing. */
+export const noMessages = (_: unknown): _ is never => false
+
 // Array.isArray doesn't narrow a readonly array.
 const isList = (n: Node): n is ReadonlyArray<Node> => Array.isArray(n)
 

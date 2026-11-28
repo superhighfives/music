@@ -1,6 +1,7 @@
 import { Command, Component, Mount } from '@effect/ui'
 import { Effect, Stream } from 'effect'
 import { loadClerk } from './clerk'
+import { clerkAppearance } from './theme'
 
 /**
  * Clerk's sign-in dialog and account menu, for every Effect UI section. A page's client entry connects
@@ -34,17 +35,17 @@ export const ShowUserButton = Mount.makeStream('ShowUserButton', {}, (node: HTML
 
 /**
  * Loads Clerk after the page is running, so sign-in never holds up the page, and reports the signed-in
- * user now and on every change. The publishable key comes from the page's `data-clerk-key`. `appearance` is
- * read each time Clerk draws, so a page that switches light and dark gets a matching dialog.
+ * user now and on every change. The publishable key comes from the page's `data-clerk-key`. The
+ * appearance is read each time Clerk draws, so its dialog matches the page's light or dark theme.
  */
-export function connectClerk(appearance: () => unknown, onUser: (userId: string | null) => void) {
+export function connectClerk(onUser: (userId: string | null) => void) {
   const publishableKey = document.body.dataset.clerkKey
   if (!publishableKey) return
-  loadClerk(publishableKey, appearance())
+  loadClerk(publishableKey, clerkAppearance())
     .then((clerk) => {
       setAuthUI({
-        openSignIn: () => clerk.openSignIn({ appearance: appearance() }),
-        mountUserButton: (node) => clerk.mountUserButton(node, { appearance: appearance() }),
+        openSignIn: () => clerk.openSignIn({ appearance: clerkAppearance() }),
+        mountUserButton: (node) => clerk.mountUserButton(node, { appearance: clerkAppearance() }),
         unmountUserButton: (node) => clerk.unmountUserButton(node),
       })
       onUser(clerk.user?.id ?? null)

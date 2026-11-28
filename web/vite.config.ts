@@ -48,8 +48,7 @@ export default defineConfig({
   resolve: { alias: { '~': fileURLToPath(new URL('./src', import.meta.url)) } },
   plugins: [
     islands({
-      home: 'src/pages/home.client.ts',
-      static: 'src/islands/static.ts',
+      site: 'src/pages/site.client.ts',
       chords: 'src/chords/app/client.ts',
       production: 'src/production/app/client.ts',
       theory: 'src/theory/app/client.ts',

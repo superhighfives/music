@@ -77,16 +77,6 @@ export function Note({ label, children }: { label: string; children?: Node }) {
   );
 }
 
-export function Logo({ big }: { big?: boolean }) {
-  return (
-    <span className={big ? "logo big" : "logo"} aria-hidden="true">
-      {Array.from({ length: 16 }, (_, i) => (
-        <i className={i === 12 ? "on" : undefined} />
-      ))}
-    </span>
-  );
-}
-
 /** The current key's scale and diatonic triads. The page fills it in from its settings. */
 export const KeyBox = () => island("KeyBox");
 

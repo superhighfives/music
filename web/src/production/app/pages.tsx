@@ -1,12 +1,13 @@
 /** @jsxImportSource ~/content */
 import { island, type Node } from "~/content/jsx-runtime";
-import { CHORDS_URL, KeyBox, Logo } from "~/production/content/kit";
+import { Masthead as SiteMasthead, PadMark } from "~/islands/masthead";
+import { CHORDS_URL, KeyBox } from "~/production/content/kit";
 import { RECIPES, findRecipe, type Recipe } from "~/production/content/recipes";
 import { THEMES, findTheme, lessonKey, type LessonContext, type Theme } from "~/production/content/themes";
 
 /*
  * Production's pages, as content: markup that follows the course's progress. The controls are islands
- * the Production component fills in: key, mode and tempo, the light or dark switch, sign-in, and the
+ * the Production component fills in: key, mode and tempo, the masthead's theme toggle and sign-in, and the
  * button that marks a lesson done. Links between pages are plain links, so each page renders on the server.
  */
 
@@ -54,15 +55,16 @@ const themeHref = (theme: Theme, lessonId?: string) => `/production/themes/${the
 
 export function Masthead() {
   return (
-    <header className="mast">
-      <a className="brand" href="/production">
-        <Logo />
-        Production
-      </a>
+    <SiteMasthead
+      brand={
+        <a className="brand" href="/production">
+          <PadMark lit={12} />
+          Production
+        </a>
+      }
+    >
       {island("Controls")}
-      {island("ThemeToggle")}
-      {island("Account")}
-    </header>
+    </SiteMasthead>
   );
 }
 
@@ -130,7 +132,7 @@ export function HomePage({ done, last }: { done: Done; last: string | null }) {
   return (
     <>
       <section className="hero">
-        <Logo big />
+        <PadMark lit={12} big />
         <h1>Production</h1>
         <p className="lede">
           A step-by-step course in music production with Ableton Live 12: high-quality audio, soundscapes, melody and pop songwriting. Big themes you work through in order, and short recipes that rebuild one sound from a real record.

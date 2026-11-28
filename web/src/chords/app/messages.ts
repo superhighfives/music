@@ -30,6 +30,7 @@ export const ChordsMessage = UiSchema.TaggedEnum({
   ClickedBrowse: {},
   ClickedConnect: {},
   ClickedSignIn: {},
+  ClickedThemeToggle: {},
   ToggledSustain: {},
   ClickedPlayChord: {},
   ClickedPad: { midi: Schema.Number },

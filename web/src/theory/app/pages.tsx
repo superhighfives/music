@@ -1,5 +1,6 @@
 /** @jsxImportSource ~/content */
 import { island, type Node } from '~/content/jsx-runtime'
+import { Masthead as SiteMasthead } from '~/islands/masthead'
 import { CardView, Mark } from '~/theory/components/ui'
 import { BOOK_SUBTITLE, BOOK_TITLE, CARDS, CHAPTERS, CONTENTS, chapterNumber, type Entry, findChapter, LOG, PARTS, partOf } from '~/theory/content/book'
 import type { Chapter } from '~/theory/content/types'
@@ -32,6 +33,13 @@ export function sectionsOf(node: Node): { id: string; title: string }[] {
   return [...here, ...sectionsOf(node.children)]
 }
 
+/** Everything the chapter's contents list: its text's sections, then its key ideas and its check. */
+export const chapterSections = (chapter: Chapter, body: Node = chapter.Body()) => [
+  ...sectionsOf(body),
+  { id: 'key-ideas', title: 'Key ideas' },
+  ...(chapter.check.length ? [{ id: 'check', title: 'Check yourself' }] : []),
+]
+
 const chapterHref = (id: string) => `/theory/${id}`
 
 type Progress = { saved: Saved; ready: boolean }
@@ -39,11 +47,14 @@ type Progress = { saved: Saved; ready: boolean }
 export function Masthead({ saved, ready }: Progress) {
   const done = CHAPTERS.filter((c) => saved.read[c.id]).length
   return (
-    <header className="mast">
-      <a className="brand" href="/theory">
-        <Mark />
-        {BOOK_TITLE}
-      </a>
+    <SiteMasthead
+      brand={
+        <a className="brand" href="/theory">
+          <Mark />
+          {BOOK_TITLE}
+        </a>
+      }
+    >
       {ready && done > 0 ? (
         <span className="mastprog" title={`${done} of ${CHAPTERS.length} chapters read`}>
           <span className="bar">
@@ -52,9 +63,7 @@ export function Masthead({ saved, ready }: Progress) {
           {done}/{CHAPTERS.length}
         </span>
       ) : null}
-      {island('ThemeToggle')}
-      {island('Account')}
-    </header>
+    </SiteMasthead>
   )
 }
 
@@ -112,7 +121,7 @@ export function ChapterPage({ chapter, active, saved, ready }: Progress & { chap
   const next = CHAPTERS[index + 1]
   const part = partOf(chapter)
   const body = chapter.Body()
-  const sections = sectionsOf(body)
+  const sections = chapterSections(chapter, body)
   const progress = { saved, ready }
   return (
     <>
@@ -185,8 +194,8 @@ export function HomePage({ saved, ready, day }: Progress & { day: number }) {
   const today = CARDS[day % CARDS.length]
   const done = CHAPTERS.filter((c) => saved.read[c.id]).length
   return (
-    <div className="home">
-      <section className="cover">
+    <>
+      <section className="hero">
         <Mark big />
         <h1>{BOOK_TITLE}</h1>
         <p className="subtitle">{BOOK_SUBTITLE}</p>
@@ -214,71 +223,75 @@ export function HomePage({ saved, ready, day }: Progress & { day: number }) {
           </p>
         ) : null}
       </section>
-      <div className="homegrid">
-        {today ? (
-          <section className="today" aria-labelledby="today-h">
-            <h2 id="today-h" className="lab">
-              Today's idea
-            </h2>
-            <CardView card={today} />
-            <a className="more" href={`${chapterHref(today.chapter.id)}#card-${today.id}`}>
-              From {today.chapter.title} →
-            </a>
-          </section>
-        ) : null}
-        {island('DailyEmail')}
-      </div>
-      <section className="toc" id="contents" aria-labelledby="contents-h">
-        <h2 id="contents-h">Contents</h2>
-        {PARTS.map((part, pi) => (
-          <div className="tocpart">
-            <div className="tochead">
-              <span className="lab">
-                Part {pi + 1} · {part.level}
-              </span>
-              <h3>{part.title}</h3>
-              <p>{part.blurb}</p>
-            </div>
-            <ol className="toclist">
-              {CONTENTS.filter((e) => e.part === part).map((e) =>
-                'chapter' in e ? (
-                  <li>
-                    <a href={chapterHref(e.chapter.id)} className={ready && saved.read[e.chapter.id] ? 'done' : undefined}>
+      <div className="home">
+        <div className="homegrid">
+          {today ? (
+            <section className="today" aria-labelledby="today-h">
+              <h2 id="today-h" className="lab">
+                Today's idea
+              </h2>
+              <CardView card={today} />
+              <a className="more" href={`${chapterHref(today.chapter.id)}#card-${today.id}`}>
+                From {today.chapter.title} →
+              </a>
+            </section>
+          ) : null}
+          {island('DailyEmail')}
+        </div>
+        <section className="block" id="contents" aria-labelledby="contents-h">
+          <h2 id="contents-h">Contents</h2>
+          {PARTS.map((part, pi) => (
+            <div className="tocpart">
+              <div className="tochead">
+                <span className="lab">
+                  Part {pi + 1} · {part.level}
+                </span>
+                <h3>{part.title}</h3>
+                <p>{part.blurb}</p>
+              </div>
+              <ol className="toclist">
+                {CONTENTS.filter((e) => e.part === part).map((e) =>
+                  'chapter' in e ? (
+                    <li>
+                      <a href={chapterHref(e.chapter.id)} className={ready && saved.read[e.chapter.id] ? 'done' : undefined}>
+                        <span className="n">{String(e.n).padStart(2, '0')}</span>
+                        <span className="t">
+                          <b>{e.chapter.title}</b>
+                          <span>{e.chapter.summary}</span>
+                        </span>
+                        <span className="st">
+                          {ready && saved.checks[e.chapter.id] ? 'Passed' : ready && saved.read[e.chapter.id] ? 'Read' : `${e.chapter.minutes} min`}
+                        </span>
+                      </a>
+                    </li>
+                  ) : (
+                    <li className="planned">
                       <span className="n">{String(e.n).padStart(2, '0')}</span>
                       <span className="t">
-                        <b>{e.chapter.title}</b>
-                        <span>{e.chapter.summary}</span>
+                        <b>{e.planned.title}</b>
+                        <span>{e.planned.summary}</span>
                       </span>
-                      <span className="st">
-                        {ready && saved.checks[e.chapter.id] ? 'Passed' : ready && saved.read[e.chapter.id] ? 'Read' : `${e.chapter.minutes} min`}
-                      </span>
-                    </a>
-                  </li>
-                ) : (
-                  <li className="planned">
-                    <span className="n">{String(e.n).padStart(2, '0')}</span>
-                    <span className="t">
-                      <b>{e.planned.title}</b>
-                      <span>{e.planned.summary}</span>
-                    </span>
-                    <span className="st">Soon</span>
-                  </li>
-                ),
-              )}
-            </ol>
+                      <span className="st">Soon</span>
+                    </li>
+                  ),
+                )}
+              </ol>
+            </div>
+          ))}
+        </section>
+        <section className="block" aria-labelledby="log-h">
+          <h2 id="log-h">Edition log</h2>
+          <div className="log">
+            {LOG.map(([date, text]) => (
+              <div>
+                <time dateTime={date}>{new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}</time>
+                <span>{text}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
-      <section className="log" aria-labelledby="log-h">
-        <h2 id="log-h">Edition log</h2>
-        {LOG.map(([date, text]) => (
-          <div>
-            <time dateTime={date}>{new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}</time>
-            <span>{text}</span>
-          </div>
-        ))}
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   )
 }
 

@@ -6,12 +6,12 @@ deployed with [Alchemy](https://alchemy.run).
 
 | Path | What it is | Code |
 | --- | --- | --- |
-| `/` | Home | `src/pages/Home.ts` |
+| `/` | Home | `src/pages/content.tsx`, `src/pages/Site.ts` |
 | `/chords` | chords: chord shapes on the Ableton Move pad grid | `src/chords/` |
 | `/production` | Production: a step-by-step course in music production with Ableton Live 12 | `src/production/` |
 | `/theory` | Theory: an illustrated, playable music theory book, with a daily email | `src/theory/` |
-| `/ableton` | The Ableton Live Extensions, with downloads | `src/pages/Static.ts` |
-| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/pages/Static.ts`, `src/tools.ts` |
+| `/ableton` | The Ableton Live Extensions, with downloads | `src/pages/content.tsx` |
+| `/tools` | The studio setup, with exercises for each tool and links to Production lessons | `src/pages/content.tsx`, `src/tools.ts` |
 
 ## Sections
 
@@ -19,17 +19,19 @@ deployed with [Alchemy](https://alchemy.run).
 server with `HtmlServer.renderToHtml`, and its client entry hydrates it in the
 browser (`src/islands/document.ts` writes the page). Vite builds each section's
 client entry; the `islands` plugin in `vite.config.ts` tells the Worker the built
-file names. `/ableton`, `/tools` and `/privacy` send no script at all.
+file names. Home, `/ableton`, `/tools`, `/privacy` and the 404 page are one
+component, `Site` (`src/pages/`).
 
-Each section brings only its own styles, so they never meet:
-chords uses Tailwind (`src/chords/styles.css`, which scans only chords' files),
-Production uses its own CSS (`src/production/styles/app.css`), theory uses its own
-(`src/theory/styles/theory.css`), and home, `/ableton`, `/tools` and
-`/privacy` share `src/site.css`. chords is always dark, like Move. Production and Theory have
-a light/dark toggle, and the other pages follow the system setting. Clerk's
-sign-in dialog and account menu follow each section (the `appearance` each client
-entry passes to `connectClerk`). Links between sections are
-plain `<a>`s, so each one is a full page load with only its own styles.
+Every section shares one look, `src/site.css`: its tokens, the masthead, cards
+and lists, with one accent per section (`data-section`). Each section's
+stylesheet imports it and adds its own parts: chords uses Tailwind
+(`src/chords/styles.css`, which scans only chords' files and maps its colours
+onto the shared tokens), Production `src/production/styles/app.css`, and Theory
+`src/theory/styles/theory.css`. Every page has the same masthead
+(`src/islands/masthead.tsx`): home, the section's mark and name, its controls,
+the light/dark toggle and sign-in. The toggle's choice (`music.theme`) covers
+every section, and Clerk's dialog and menu follow it. Links between sections
+are plain `<a>`s, so each one is a full page load with only its own styles.
 
 Settings, saved songs and course progress live in each visitor's browser
 (localStorage). Signing in also keeps them in an account (see Accounts).

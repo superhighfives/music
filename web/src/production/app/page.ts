@@ -2,17 +2,11 @@ import { HtmlServer } from '@effect/ui/html'
 import { Effect } from 'effect'
 import { userOf } from '../../account/api'
 import { page } from '../../islands/document'
-import { themeScript } from '../../islands/theme'
 import { Production } from './Production'
 import { routeOf, titleOf } from './pages'
 
 type Env = { DB: D1Database; CLERK_SECRET_KEY: string; CLERK_PUBLISHABLE_KEY: string }
 
-
-const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-    ${themeScript('production.theme')}`
 
 /** Every page under /production, rendered on the server and hydrated by client.ts. */
 export async function productionPage(request: Request, env: Env): Promise<Response> {
@@ -26,7 +20,7 @@ export async function productionPage(request: Request, env: Env): Promise<Respon
     title: titleOf(route),
     description: 'A step-by-step course in music production with Ableton Live 12: sound quality, soundscapes, melody, songwriting, drums and mixing.',
     html: rendered.html,
-    head: `${FONTS}\n    ${rendered.head}`,
+    head: rendered.head,
     state: HtmlServer.serializeState(rendered.state),
     data: { 'clerk-key': env.CLERK_PUBLISHABLE_KEY },
   })

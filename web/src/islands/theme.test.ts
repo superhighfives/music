@@ -1,10 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
-
-// Masthead imports Clerk's React components through AccountButton, which this test doesn't need.
-vi.mock('@clerk/tanstack-react-start', () => ({ Show: () => null, SignInButton: () => null, UserButton: () => null }))
-vi.mock('@clerk/ui/themes', () => ({ dark: { name: 'dark' } }))
-
-const { THEME_SCRIPT } = await import('./Masthead')
+import { describe, expect, it } from 'vitest'
+import { THEME_SCRIPT } from './theme'
 
 // THEME_SCRIPT is a string the browser runs before first paint, so the typechecker never sees it. Run it here.
 function runThemeScript(stored: string | null | Error) {
