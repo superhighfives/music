@@ -1,5 +1,7 @@
 ---
 import '~/chords/styles.css'
+// Chords draws its own footer, inside the app (chords/app/view.ts), so the footer's styles come in here.
+import '~/site-footer.css'
 import { Chords } from '~/chords/app/Chords'
 import { parseSearch } from '~/chords/app/state'
 import Masthead from '~/components/Masthead.astro'
@@ -12,7 +14,8 @@ const userId = Astro.locals.auth().userId ?? null
 
 <Page title="chords · chord shapes for Ableton Move" description="See chord shapes on the Ableton Move pad grid in any key, scale and layout." icon="/chords/favicon.svg">
   <div data-section="chords" class="flex h-dvh flex-col text-base text-neutral-200">
-    <div class="shrink-0 px-4 lg:px-6">
+    <!-- The masthead sits in the same width as every other section's page (.page in site.css); the app below fills the window. -->
+    <div class="mx-auto w-full max-w-[1180px] shrink-0 px-6">
       <Masthead>
         <a slot="brand" class="brand" href="/chords">Chords</a>
       </Masthead>
