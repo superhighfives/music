@@ -3,7 +3,6 @@ import '~/theory/styles/theory.css'
 import Masthead from '~/components/Masthead.astro'
 import SiteFooter from '~/components/SiteFooter.astro'
 import Page from '~/layouts/Page.astro'
-import { Mark } from '~/theory/components/ui'
 import { BOOK_TITLE } from '~/theory/content/book'
 import { MastProgress } from './islands/Progress'
 
@@ -18,7 +17,7 @@ interface Props {
   <link slot="head" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" />
   <div class="page" data-section="theory">
     <Masthead>
-      <a slot="brand" class="brand" href="/theory"><Mark />{BOOK_TITLE}</a>
+      <a slot="brand" class="brand" href="/theory">{BOOK_TITLE}</a>
       <MastProgress client:load />
     </Masthead>
     <slot />

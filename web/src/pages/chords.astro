@@ -3,7 +3,6 @@ import '~/chords/styles.css'
 import { Chords } from '~/chords/app/Chords'
 import { parseSearch } from '~/chords/app/state'
 import Masthead from '~/components/Masthead.astro'
-import PadMark from '~/components/PadMark.astro'
 import Page from '~/layouts/Page.astro'
 
 // The view the URL asks for, rendered on the server and hydrated in the browser by the Effect UI integration.
@@ -15,7 +14,7 @@ const userId = Astro.locals.auth().userId ?? null
   <div data-section="chords" class="flex h-dvh flex-col text-base text-neutral-200">
     <div class="shrink-0 px-4 lg:px-6">
       <Masthead>
-        <a slot="brand" class="brand" href="/chords"><PadMark lit={5} />Chords</a>
+        <a slot="brand" class="brand" href="/chords">Chords</a>
       </Masthead>
     </div>
     <Chords client:load initialSearch={initialSearch} userId={userId} />

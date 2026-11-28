@@ -72,6 +72,10 @@ button { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; font-size: 18px; }
 .iconbtn { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px; display: grid; place-items: center; }
 .iconbtn:hover { color: var(--ink); }
+/* The account circle: the sign-in icon, or Clerk's avatar, always 32px, so the masthead doesn't shift as Clerk loads. */
+.account { width: 32px; height: 32px; flex: none; border-radius: 50%; background: var(--surface); display: grid; place-items: center; }
+.account .signin { width: 100%; height: 100%; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--muted); cursor: pointer; display: grid; place-items: center; padding: 0; }
+.account .signin:hover { color: var(--ink); border-color: var(--muted); }
 
 /* Marks: a 4×4 pad grid with one pad lit, or Theory's staff, in the same box. */
 .logo, .mark { width: 30px; height: 30px; flex: none; border: 2px solid var(--ink); border-radius: 5px; }

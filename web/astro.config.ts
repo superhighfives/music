@@ -10,7 +10,13 @@ import effectUi from 'astro-effect-ui'
 export default defineConfig({
   output: 'server',
   // Preact renders the .tsx islands. Effect UI renders Chords, whose components are plain .ts.
-  integrations: [preact(), mdx(), clerk(), effectUi()],
+  integrations: [
+    preact(),
+    mdx(),
+    // The avatar fills the masthead's account circle (.account in site.css), the same size as the sign-in icon.
+    clerk({ appearance: { elements: { userButtonAvatarBox: { width: '32px', height: '32px' } } } }),
+    effectUi(),
+  ],
   vite: {
     plugins: [tailwindcss()],
     resolve: { alias: { '~': fileURLToPath(new URL('./src', import.meta.url)) } },

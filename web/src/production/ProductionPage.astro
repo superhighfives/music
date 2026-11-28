@@ -1,7 +1,6 @@
 ---
 import '~/production/styles/app.css'
 import Masthead from '~/components/Masthead.astro'
-import PadMark from '~/components/PadMark.astro'
 import SiteFooter from '~/components/SiteFooter.astro'
 import Page from '~/layouts/Page.astro'
 import Controls from './islands/Controls'
@@ -15,7 +14,7 @@ interface Props {
 <Page title={Astro.props.title} description="A step-by-step course in music production with Ableton Live 12: sound quality, soundscapes, melody, songwriting, drums and mixing.">
   <div class="page" data-section="production">
     <Masthead>
-      <a slot="brand" class="brand" href="/production"><PadMark lit={12} />Production</a>
+      <a slot="brand" class="brand" href="/production">Production</a>
       <Controls client:load />
     </Masthead>
     <slot />
