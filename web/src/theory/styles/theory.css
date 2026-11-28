@@ -128,19 +128,20 @@ p.big { margin: 26px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--li
 .key rect { stroke: var(--line-strong); stroke-width: 1; transition: fill 90ms ease; }
 .key.white rect { fill: var(--key-white); }
 .key.black rect { fill: var(--key-black); stroke: var(--key-black); }
-.key.white:hover rect { fill: var(--surface); }
+/* Keys stay light and dark in both themes, so white keys' states mix from the key colours, not the page's. */
+.key.white:hover rect { fill: color-mix(in oklch, var(--key-white), var(--key-black) 10%); }
 .key.black:hover rect { fill: color-mix(in oklch, var(--key-black), white 18%); }
 .key:active rect { filter: brightness(0.92); }
 .key.lit rect { fill: var(--lit); stroke: var(--lit); }
 .key.cool rect { fill: var(--cool); stroke: var(--cool); }
 .key.good rect { fill: var(--good); stroke: var(--good); }
 .key.bad rect { fill: var(--bad); stroke: var(--bad); }
-.key.white.soft rect { fill: var(--lit-soft); }
+.key.white.soft rect { fill: color-mix(in oklch, var(--key-white), var(--lit) 28%); }
 .key.black.soft rect { fill: color-mix(in oklch, var(--lit), var(--key-black) 45%); }
-.keyname { font: 600 11px var(--sans); fill: var(--muted); pointer-events: none; }
+.keyname { font: 600 11px var(--sans); fill: color-mix(in oklch, var(--key-black), var(--key-white) 35%); pointer-events: none; }
 .key.black .keyname { fill: var(--key-white); font-size: 9.5px; }
 .key.lit .keyname, .key.cool .keyname, .key.good .keyname, .key.bad .keyname { fill: #fff; }
-.key.white.soft .keyname { fill: var(--lit-ink); }
+.key.white.soft .keyname { fill: color-mix(in oklch, var(--lit), var(--key-black) 40%); }
 .arc path { fill: none; stroke: var(--muted); stroke-width: 1.3; }
 .arc text { font: 600 11px var(--sans); fill: var(--muted); }
 .arc.lit path { stroke: var(--lit); }

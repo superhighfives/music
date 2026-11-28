@@ -63,10 +63,11 @@ button { font: inherit; color: inherit; }
 
 .page { max-width: 1180px; margin: 0 auto; padding-inline: 24px; padding-block: 0 96px; }
 
-/* Masthead: 🎵 / mark and section, the section's own controls, then theme and account. */
+/* Masthead: a music note / mark and section, the section's own controls, then theme and account. */
 .mast { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding-block: 22px; border-bottom: 1px solid var(--line); }
 .where { display: flex; align-items: center; gap: 12px; margin-right: auto; }
-.where .home { font-size: 22px; line-height: 1; text-decoration: none; }
+.where .home { display: grid; place-items: center; color: var(--ink); text-decoration: none; }
+.where .home:hover { color: var(--lit-ink); }
 .where .slash { color: var(--muted); font-size: 20px; line-height: 1; }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; font-size: 18px; }
 .iconbtn { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px; display: grid; place-items: center; }
@@ -108,7 +109,10 @@ p { margin: 0; max-width: 38em; text-wrap: pretty; }
 .hero { padding-block: 64px 56px; display: grid; gap: 20px; justify-items: start; }
 .home { display: grid; gap: 72px; }
 .block { display: grid; gap: 20px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+/* Each cell outlines itself into the 1px gap, so a short last row leaves blank page, not a block of line colour. */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--cell); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cards > * { outline: 1px solid var(--line); }
+.cards > a:focus-visible, .cards > * > a:focus-visible { outline: 2px solid var(--lit); outline-offset: -2px; }
 .card { background: var(--cell); padding: 18px 18px 16px; display: grid; gap: 10px; align-content: start; text-decoration: none; min-height: 190px; }
 a.card:hover { background: var(--surface); }
 .card .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
@@ -131,6 +135,9 @@ ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: g
 ol.steps li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; max-width: 40em; }
 ol.steps li::before { content: counter(s, decimal-leading-zero); font: 500 13px/1.9 var(--mono); color: var(--muted); }
 ol.steps b { font-weight: 600; }
+.card ol.steps { gap: 8px; font-size: 15px; line-height: 1.45; }
+.card ol.steps li { grid-template-columns: 28px minmax(0, 1fr); }
+.card ol.steps li::before { font-size: 12px; line-height: 1.8; }
 
 .empty { padding-block: 80px; display: grid; gap: 14px; }
 

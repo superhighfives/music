@@ -1,3 +1,4 @@
+import { Music, Sun } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { AccountButton } from './account/AccountButton'
 
@@ -5,7 +6,7 @@ import { AccountButton } from './account/AccountButton'
 export const THEME_SCRIPT = `try{var t=localStorage.getItem("music.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`
 
 /**
- * The header every section shares: 🎵 back to the home page, then the section's mark and name, then the
+ * The header every section shares: a music note back to the home page, then the section's mark and name, then the
  * section's own controls (children), the theme toggle and the account button. Home passes no brand.
  */
 export function Masthead({ brand, children }: { brand?: ReactNode; children?: ReactNode }) {
@@ -13,7 +14,7 @@ export function Masthead({ brand, children }: { brand?: ReactNode; children?: Re
     <header className="mast">
       <nav className="where" aria-label="Breadcrumb">
         <a className="home" href="/" aria-label="music">
-          🎵
+          <Music size={22} strokeWidth={1.75} aria-hidden="true" />
         </a>
         {brand ? (
           <>
@@ -56,10 +57,7 @@ function ThemeToggle() {
   }
   return (
     <button type="button" className="iconbtn" aria-label="Switch light or dark theme" onClick={toggle}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
-      </svg>
+      <Sun size={20} strokeWidth={1.6} aria-hidden="true" />
     </button>
   )
 }
