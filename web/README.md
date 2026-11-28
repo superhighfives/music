@@ -169,9 +169,13 @@ account's once per sign-in, then saves every change:
 
 Signed out, nothing changes: everything stays in the browser, as before.
 
-Clerk's keys are Worker secrets, read from `CLERK_PUBLISHABLE_KEY` and
-`CLERK_SECRET_KEY` in the environment at deploy time. The publishable key is bound
-as `PUBLIC_CLERK_PUBLISHABLE_KEY`, the name `@clerk/astro` reads. Locally they go in `.dev.vars`
+Clerk's keys are Worker secrets, read from `CLERK_PUBLISHABLE_KEY`,
+`CLERK_SECRET_KEY` and `CLERK_JWT_KEY` in the environment at deploy time. The
+publishable key is bound as `PUBLIC_CLERK_PUBLISHABLE_KEY`, the name `@clerk/astro`
+reads. `CLERK_JWT_KEY` is the instance's public key as PEM (API keys → JWT public
+key): with it, the middleware checks a session without calling Clerk, so a slow or
+hanging Clerk API can't hold up signed-in requests. If Clerk ever rotates that
+key, update the secret, or every session will be treated as signed out. Locally they go in `.dev.vars`
 (git-ignored), using the development instance's keys. Development has "Challenge suspicious sign-ups" turned off under Protect,
 because its check fails on localhost.
 
@@ -228,7 +232,8 @@ by accident. If the state store is ever lost, run the same command again to take
 the resources back over.
 
 CI uses the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
-`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY` and their `_DEV` versions.
+`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `CLERK_JWT_KEY` and their `_DEV`
+versions.
 
 To deploy by hand: `pnpm run deploy` (not `pnpm deploy`, which is a pnpm
 built-in), with the production Clerk keys in the environment.
